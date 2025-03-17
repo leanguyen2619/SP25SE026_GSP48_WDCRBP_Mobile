@@ -25,11 +25,11 @@ const HomeScreen = () => {
             <ScrollView 
                 style={styles.scrollContainer} 
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 120 }} // Ensure footer doesn't hide content
+                contentContainerStyle={{ paddingBottom: 120 }}
             >
                 {/* Header Section */}
                 <View style={styles.headerContainer}>
-                    <Text style={styles.headerTitle}>Explore What{"\n"}Your Home Needs</Text>
+                    <Text style={styles.headerTitle}>Khám phá những gì{"\n"}Ngôi nhà bạn cần</Text>
                     <TouchableOpacity style={styles.notificationButton} onPress={handleNotificationPress}>
                         <Ionicons 
                             name={isNotified ? "notifications" : "notifications-outline"} 
@@ -44,36 +44,36 @@ const HomeScreen = () => {
 
                 {/* Categories Section */}
                 <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Categories</Text>
+                    <Text style={styles.sectionTitle}>Danh mục</Text>
                     <TouchableOpacity>
-                        <Text style={styles.seeAll}>See all →</Text>
+                        <Text style={styles.seeAll}>Xem tất cả →</Text>
                     </TouchableOpacity>
                 </View>
                 <CategoryList />
 
                 {/* Offer Banner */}
                 <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Offer Banner</Text>
+                    <Text style={styles.sectionTitle}>Ưu đãi</Text>
                     <TouchableOpacity>
-                        <Text style={styles.seeAll}>See all →</Text>
+                        <Text style={styles.seeAll}>Xem tất cả →</Text>
                     </TouchableOpacity>
                 </View>
                 <OfferBanner />
 
                 {/* Popular Section */}
                 <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Popular</Text>
+                    <Text style={styles.sectionTitle}>Phổ biến</Text>
                     <TouchableOpacity>
-                        <Text style={styles.seeAll}>See all →</Text>
+                        <Text style={styles.seeAll}>Xem tất cả →</Text>
                     </TouchableOpacity>
                 </View>
                 <PopularList />
 
                 {/* Sale Banner */}
                 <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Sale Banner</Text>
+                    <Text style={styles.sectionTitle}>Khuyến mãi</Text>
                     <TouchableOpacity>
-                        <Text style={styles.seeAll}>See all →</Text>
+                        <Text style={styles.seeAll}>Xem tất cả →</Text>
                     </TouchableOpacity>
                 </View>
                 <SaleBanner />

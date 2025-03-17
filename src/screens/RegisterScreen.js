@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,12 +8,36 @@ import {
   SafeAreaView,
   Image,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { appColorTheme } from '../theme/colors';
 
-const LoginScreen = () => {
+const RegisterScreen = () => {
   const navigation = useNavigation();
+  const [formData, setFormData] = useState({
+    fullName: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+  });
+
+  const handleRegister = () => {
+    // Validate form
+    if (!formData.fullName || !formData.phone || !formData.password || !formData.confirmPassword) {
+      Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin');
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      Alert.alert('Lỗi', 'Mật khẩu xác nhận không khớp');
+      return;
+    }
+
+    // TODO: Add API call for registration
+    console.log('Register data:', formData);
+    navigation.navigate('Login');
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -28,18 +52,30 @@ const LoginScreen = () => {
           <Text style={styles.logoText}>Woodworking platform</Text>
         </View>
 
-        {/* Login Form */}
+        {/* Register Form */}
         <View style={styles.formContainer}>
-          <Text style={styles.title}>Đăng nhập</Text>
+          <Text style={styles.title}>Đăng ký</Text>
           
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email<Text style={styles.required}>*</Text></Text>
+            <Text style={styles.label}>Họ và tên<Text style={styles.required}>*</Text></Text>
             <TextInput
               style={styles.input}
-              placeholder="Nhập email của bạn"
+              placeholder="Nhập họ và tên của bạn"
               placeholderTextColor={appColorTheme.grey_2}
-              keyboardType="email-address"
-              autoCapitalize="none"
+              value={formData.fullName}
+              onChangeText={(text) => setFormData({...formData, fullName: text})}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Số điện thoại<Text style={styles.required}>*</Text></Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Nhập số điện thoại của bạn"
+              placeholderTextColor={appColorTheme.grey_2}
+              keyboardType="phone-pad"
+              value={formData.phone}
+              onChangeText={(text) => setFormData({...formData, phone: text})}
             />
           </View>
 
@@ -50,22 +86,33 @@ const LoginScreen = () => {
               placeholder="Nhập mật khẩu của bạn"
               placeholderTextColor={appColorTheme.grey_2}
               secureTextEntry
+              value={formData.password}
+              onChangeText={(text) => setFormData({...formData, password: text})}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Xác nhận mật khẩu<Text style={styles.required}>*</Text></Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Nhập lại mật khẩu của bạn"
+              placeholderTextColor={appColorTheme.grey_2}
+              secureTextEntry
+              value={formData.confirmPassword}
+              onChangeText={(text) => setFormData({...formData, confirmPassword: text})}
             />
           </View>
 
           <TouchableOpacity 
-            style={styles.loginButton}
-            onPress={() => navigation.navigate('Home')}
+            style={styles.registerButton}
+            onPress={handleRegister}
           >
-            <Text style={styles.loginButtonText}>Đăng nhập</Text>
+            <Text style={styles.registerButtonText}>Đăng ký</Text>
           </TouchableOpacity>
 
           <View style={styles.bottomLinks}>
-            <TouchableOpacity>
-              <Text style={styles.forgotPassword}>Quên mật khẩu</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-              <Text style={styles.register}>Đăng ký</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+              <Text style={styles.loginLink}>Đã có tài khoản? Đăng nhập</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -85,7 +132,7 @@ const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: appColorTheme.brown_0,
+    backgroundColor: appColorTheme.grey_0,
   },
   scrollContent: {
     flexGrow: 1,
@@ -135,28 +182,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: appColorTheme.black_0,
   },
-  loginButton: {
+  registerButton: {
     backgroundColor: appColorTheme.brown_0,
     borderRadius: 4,
     padding: 14,
     alignItems: 'center',
     marginTop: 24,
   },
-  loginButtonText: {
+  registerButtonText: {
     color: appColorTheme.black_0,
     fontSize: 16,
     fontWeight: '500',
   },
   bottomLinks: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'center',
     marginTop: 16,
   },
-  forgotPassword: {
-    color: appColorTheme.white_0,
-    fontSize: 14,
-  },
-  register: {
+  loginLink: {
     color: appColorTheme.white_0,
     fontSize: 14,
   },
@@ -175,4 +217,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginScreen;
+export default RegisterScreen; 
