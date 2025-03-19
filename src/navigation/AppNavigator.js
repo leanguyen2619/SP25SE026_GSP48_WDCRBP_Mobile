@@ -5,6 +5,8 @@ import SearchScreen from '../screens/SearchScreen';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import HomeScreen from '../screens/HomeScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+import PricingScreen from '../screens/PricingScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -12,7 +14,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Home"
+        initialRouteName="Pricing"
         screenOptions={{
           headerShown: false,
         }}
@@ -21,6 +23,8 @@ const AppNavigator = () => {
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Search" component={SearchScreen} />
+        <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="Pricing" component={PricingScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
