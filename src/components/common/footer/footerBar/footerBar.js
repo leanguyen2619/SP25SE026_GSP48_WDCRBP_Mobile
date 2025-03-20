@@ -16,25 +16,25 @@ const FooterBar = ({
     <View style={styles.container}>
       {/* Home Button */}
       <TouchableOpacity onPress={onPressHome} style={styles.iconButton}>
-        <Ionicons name="home-outline" size={iconSize} color={iconColor} />
+        <Ionicons name="home" size={iconSize} color={iconColor} />
         <Text style={[styles.iconText, { fontSize: textSize, color: textColor }]}>Home</Text>
       </TouchableOpacity>
 
       {/* Store Button */}
       <TouchableOpacity onPress={onPressStore} style={styles.iconButton}>
-        <Ionicons name="storefront-outline" size={iconSize} color={iconColor} />
+        <Ionicons name="search" size={iconSize} color="gray" />
         <Text style={[styles.iconText, { fontSize: textSize, color: textColor }]}>Store</Text>
       </TouchableOpacity>
 
       {/* Cart Button */}
       <TouchableOpacity onPress={onPressCart} style={styles.iconButton}>
-        <Ionicons name="cart-outline" size={iconSize} color={iconColor} />
+        <Ionicons name="cart" size={iconSize} color="gray" />
         <Text style={[styles.iconText, { fontSize: textSize, color: textColor }]}>Cart</Text>
       </TouchableOpacity>
 
       {/* Profile Button */}
       <TouchableOpacity onPress={onPressProfile} style={styles.iconButton}>
-        <Ionicons name="person-outline" size={iconSize} color={iconColor} />
+        <Ionicons name="person" size={iconSize} color="gray" />
         <Text style={[styles.iconText, { fontSize: textSize, color: textColor }]}>Profile</Text>
       </TouchableOpacity>
     </View>
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingVertical: 10,
     borderTopWidth: 1,
-    borderTopColor: "#ddd",
+    borderTopColor: "#f0f0f0",
     position: "absolute",
     bottom: 0,
     left: 0,

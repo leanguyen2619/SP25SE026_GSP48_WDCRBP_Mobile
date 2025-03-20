@@ -7,9 +7,11 @@ import OfferBanner from '../components/common/Banner/OfferBanner';
 import SaleBanner from '../components/common/Banner/SaleBanner';
 import PopularList from '../components/common/Populer/PopularList';
 import Footer from '../components/common/footer/footer';
+import { useNavigation } from '@react-navigation/native';
 
 const HomeScreen = () => {
     const [isNotified, setIsNotified] = useState(false);
+    const navigation = useNavigation();
 
     const handleNotificationPress = () => {
         setIsNotified(!isNotified); 
@@ -30,13 +32,18 @@ const HomeScreen = () => {
                 {/* Header Section */}
                 <View style={styles.headerContainer}>
                     <Text style={styles.headerTitle}>Khám phá những gì{"\n"}Ngôi nhà bạn cần</Text>
-                    <TouchableOpacity style={styles.notificationButton} onPress={handleNotificationPress}>
-                        <Ionicons 
-                            name={isNotified ? "notifications" : "notifications-outline"} 
-                            size={28} 
-                            color="orange" 
-                        />
-                    </TouchableOpacity>
+                    <View style={styles.headerButtons}>
+                        <TouchableOpacity 
+                            style={styles.notificationButton} 
+                            onPress={handleNotificationPress}
+                        >
+                            <Ionicons 
+                                name={isNotified ? "notifications" : "notifications-outline"} 
+                                size={28} 
+                                color="orange" 
+                            />
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
                 {/* Search Bar */}
@@ -99,10 +106,15 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
     },
     headerContainer: {
-        flexDirection: 'row', 
-        justifyContent: 'space-between', 
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
         marginTop: 20,
+    },
+    headerButtons: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
     },
     headerTitle: {
         fontSize: 24, 
@@ -112,7 +124,7 @@ const styles = StyleSheet.create({
         flex: 1, 
     },
     notificationButton: {
-        padding: 8, 
+        padding: 8,
     },
     sectionHeader: {
         flexDirection: 'row',
