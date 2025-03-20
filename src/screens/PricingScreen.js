@@ -123,7 +123,7 @@ const PricingScreen = () => {
             <Text style={[
               styles.periodText,
               selectedPeriod === 'annual' && styles.selectedPeriodText
-            ]}>Hàng năm</Text>
+            ]}>Hàng quý</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             style={[
@@ -135,7 +135,7 @@ const PricingScreen = () => {
             <Text style={[
               styles.periodText,
               selectedPeriod === 'twoYear' && styles.selectedPeriodText
-            ]}>Hai năm</Text>
+            ]}>Hàng năm</Text>
           </TouchableOpacity>
         </View>
 

@@ -10,8 +10,8 @@ import {
   Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import MyFooter from '../components/Footer';
 import { useNavigation } from '@react-navigation/native';
+import Footer from '../components/common/footer/footer';
 
 const SearchScreen = () => {
   const navigation = useNavigation();
@@ -25,22 +25,22 @@ const SearchScreen = () => {
           <View style={styles.searchTopContainer}>
             <TouchableOpacity 
               style={styles.backButton}
-              onPress={() => navigation.goBack()}
+              onPress={() => navigation.navigate('Home')}
             >
               <Icon name="arrow-back" size={24} color="#000" />
             </TouchableOpacity>
             <View style={styles.searchContainer}>
               <TextInput
                 style={styles.searchInput}
-                placeholder="Text"
+                placeholder="Tìm kiếm..."
                 placeholderTextColor="#999"
               />
               <TouchableOpacity style={styles.searchButton}>
-                <Text style={styles.searchButtonText}>SEARCH</Text>
+                <Text style={styles.searchButtonText}>TÌM KIẾM</Text>
               </TouchableOpacity>
             </View>
           </View>
-          <Text style={styles.searchTitle}>Từ đầu guồng</Text>
+          <Text style={styles.searchTitle}>Tìm kiếm phổ biến</Text>
         </View>
 
         {/* Labels List */}
@@ -60,7 +60,7 @@ const SearchScreen = () => {
 
       {/* Footer */}
       <View style={styles.footer}>
-        <MyFooter />
+        <Footer />
       </View>
     </SafeAreaView>
   );
