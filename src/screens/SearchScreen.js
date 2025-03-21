@@ -10,12 +10,8 @@ import {
   Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-<<<<<<< Updated upstream
-=======
-import MyFooter from '../components/common/Footer/Footer';
->>>>>>> Stashed changes
 import { useNavigation } from '@react-navigation/native';
-import Footer from '../components/common/footer/footer';
+import Footer from '../components/common/Footer/footer';
 
 const SearchScreen = () => {
   const navigation = useNavigation();
