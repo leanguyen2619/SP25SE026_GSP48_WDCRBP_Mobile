@@ -35,6 +35,7 @@ const AppNavigator = () => {
         <Stack.Screen name="Woodworker" component={WoodworkerScreen} />
         <Stack.Screen name="WoodworkerRegistration" component={WoodworkerRegistration} />
         <Stack.Screen name="WoodworkerDetail" component={WoodworkerDetailScreen} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );

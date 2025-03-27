@@ -1,7 +1,8 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import FooterBar from "../footerBar/footerBar";
+import FooterBar from "../footerBar/footerBar"; // Import the common footer component
+
 
 const Footer = () => {
   const navigation = useNavigation();

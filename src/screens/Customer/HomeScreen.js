@@ -6,7 +6,8 @@ import CategoryList from '../../components/common/Category/CategoryList';
 import OfferBanner from '../../components/common/Banner/OfferBanner';
 import SaleBanner from '../../components/common/Banner/SaleBanner';
 import PopularList from '../../components/common/Populer/PopularList';
-import Footer from '../../components/common/footer/footer';
+import Footer from '../../components/common/Footer/footer';
+
 
 const HomeScreen = ({ navigation }) => {
     const [isNotified, setIsNotified] = useState(false);
