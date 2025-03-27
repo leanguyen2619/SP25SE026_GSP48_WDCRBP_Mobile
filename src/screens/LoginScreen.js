@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -14,6 +14,102 @@ import { appColorTheme } from '../theme/colors';
 
 const LoginScreen = () => {
   const navigation = useNavigation();
+  const [activeTab, setActiveTab] = useState('password'); // 'password', 'emailOTP', 'phoneOTP'
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [otp, setOtp] = useState('');
+
+  const handleSendOTP = () => {
+    // Xử lý gửi mã OTP
+    console.log('Sending OTP...');
+  };
+
+  const handleLogin = () => {
+    // Xử lý đăng nhập
+    console.log('Logging in...');
+  };
+
+  const renderLoginForm = () => {
+    switch (activeTab) {
+      case 'password':
+        return (
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Mật khẩu"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+              <Text style={styles.loginButtonText}>Đăng nhập</Text>
+            </TouchableOpacity>
+          </View>
+        );
+      case 'emailOTP':
+        return (
+          <View style={styles.inputContainer}>
+            <View style={styles.otpInputContainer}>
+              <TextInput
+                style={[styles.input, styles.emailInput]}
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+              />
+              <TouchableOpacity style={styles.sendOTPButton} onPress={handleSendOTP}>
+                <Text style={styles.sendOTPText}>Gửi OTP</Text>
+              </TouchableOpacity>
+            </View>
+            <TextInput
+              style={styles.input}
+              placeholder="Mã OTP"
+              value={otp}
+              onChangeText={setOtp}
+              keyboardType="number-pad"
+            />
+            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+              <Text style={styles.loginButtonText}>Đăng nhập</Text>
+            </TouchableOpacity>
+          </View>
+        );
+      case 'phoneOTP':
+        return (
+          <View style={styles.inputContainer}>
+            <View style={styles.otpInputContainer}>
+              <TextInput
+                style={[styles.input, styles.emailInput]}
+                placeholder="Số điện thoại"
+                value={phone}
+                onChangeText={setPhone}
+                keyboardType="phone-pad"
+              />
+              <TouchableOpacity style={styles.sendOTPButton} onPress={handleSendOTP}>
+                <Text style={styles.sendOTPText}>Gửi OTP</Text>
+              </TouchableOpacity>
+            </View>
+            <TextInput
+              style={styles.input}
+              placeholder="Mã OTP"
+              value={otp}
+              onChangeText={setOtp}
+              keyboardType="number-pad"
+            />
+            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+              <Text style={styles.loginButtonText}>Đăng nhập</Text>
+            </TouchableOpacity>
+          </View>
+        );
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -28,54 +124,43 @@ const LoginScreen = () => {
           <Text style={styles.logoText}>Woodworking platform</Text>
         </View>
 
-        {/* Login Form */}
-        <View style={styles.formContainer}>
-          <Text style={styles.title}>Đăng nhập</Text>
-          
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email<Text style={styles.required}>*</Text></Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Nhập email của bạn"
-              placeholderTextColor={appColorTheme.grey_2}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-          </View>
+        <Text style={styles.title}>Đăng nhập</Text>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Mật khẩu<Text style={styles.required}>*</Text></Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Nhập mật khẩu của bạn"
-              placeholderTextColor={appColorTheme.grey_2}
-              secureTextEntry
-            />
-          </View>
-
+        {/* Login Method Tabs */}
+        <View style={styles.tabContainer}>
           <TouchableOpacity 
-            style={styles.loginButton}
-            onPress={() => navigation.navigate('Home')}
+            style={[styles.tabButton, activeTab === 'password' && styles.activeTab]}
+            onPress={() => setActiveTab('password')}
           >
-            <Text style={styles.loginButtonText}>Đăng nhập</Text>
+            <Text style={[styles.tabText, activeTab === 'password' && styles.activeTabText]}>Mật khẩu</Text>
           </TouchableOpacity>
-
-          <View style={styles.bottomLinks}>
-            <TouchableOpacity>
-              <Text style={styles.forgotPassword}>Quên mật khẩu</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-              <Text style={styles.register}>Đăng ký</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity 
+            style={[styles.tabButton, activeTab === 'emailOTP' && styles.activeTab]}
+            onPress={() => setActiveTab('emailOTP')}
+          >
+            <Text style={[styles.tabText, activeTab === 'emailOTP' && styles.activeTabText]}>Email OTP</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.tabButton, activeTab === 'phoneOTP' && styles.activeTab]}
+            onPress={() => setActiveTab('phoneOTP')}
+          >
+            <Text style={[styles.tabText, activeTab === 'phoneOTP' && styles.activeTabText]}>Số điện thoại OTP</Text>
+          </TouchableOpacity>
         </View>
 
-        {/* Bottom Text */}
-        <View style={styles.bottomTextContainer}>
-          <Text style={styles.bottomText}>
-            Bạn muốn trở thành nhà cung cấp của chúng tôi?{' '}
-            <Text style={styles.link}>Liên hệ tại đây</Text>
+        {renderLoginForm()}
+
+        {/* Registration Section */}
+        <View style={styles.registrationContainer}>
+          <Text style={styles.registrationText}>
+            Bạn chưa có tài khoản?
           </Text>
+          <TouchableOpacity 
+            style={styles.registerButton}
+            onPress={() => navigation.navigate('Register')}
+          >
+            <Text style={styles.registerButtonText}>Đăng ký</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -85,7 +170,7 @@ const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: appColorTheme.brown_0,
+    backgroundColor: appColorTheme.white_0,
   },
   scrollContent: {
     flexGrow: 1,
@@ -93,85 +178,109 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
-    marginTop: 40,
-    marginBottom: 40,
+    marginVertical: 40,
   },
   logo: {
-    width: 60,
-    height: 60,
+    width: 120,
+    height: 120,
   },
   logoText: {
-    marginTop: 8,
-    fontSize: 16,
-    color: appColorTheme.black_0,
-  },
-  formContainer: {
-    backgroundColor: appColorTheme.black_0,
-    borderRadius: 8,
-    padding: 24,
-    width: '100%',
+    fontSize: 20,
+    fontWeight: '600',
+    color: appColorTheme.brown_0,
+    marginTop: 10,
   },
   title: {
     fontSize: 24,
-    fontWeight: '600',
-    color: appColorTheme.white_0,
-    marginBottom: 24,
-  },
-  inputGroup: {
+    fontWeight: 'bold',
+    color: appColorTheme.black_0,
     marginBottom: 20,
   },
-  label: {
-    fontSize: 14,
-    color: appColorTheme.white_0,
-    marginBottom: 8,
+  tabContainer: {
+    flexDirection: 'row',
+    marginBottom: 20,
+    borderRadius: 8,
+    backgroundColor: appColorTheme.grey_1,
+    padding: 4,
   },
-  required: {
-    color: appColorTheme.brown_2,
+  tabButton: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+    borderRadius: 6,
+  },
+  activeTab: {
+    backgroundColor: appColorTheme.white_0,
+  },
+  tabText: {
+    fontSize: 14,
+    color: appColorTheme.brown_1,
+  },
+  activeTabText: {
+    color: appColorTheme.brown_0,
+    fontWeight: '600',
+  },
+  inputContainer: {
+    gap: 16,
+  },
+  otpInputContainer: {
+    flexDirection: 'row',
+    gap: 8,
   },
   input: {
-    backgroundColor: appColorTheme.white_0,
-    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: appColorTheme.grey_1,
+    borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    color: appColorTheme.black_0,
+  },
+  emailInput: {
+    flex: 1,
+  },
+  sendOTPButton: {
+    backgroundColor: appColorTheme.brown_0,
+    paddingHorizontal: 16,
+    justifyContent: 'center',
+    borderRadius: 8,
+  },
+  sendOTPText: {
+    color: appColorTheme.white_0,
+    fontSize: 14,
+    fontWeight: '600',
   },
   loginButton: {
     backgroundColor: appColorTheme.brown_0,
-    borderRadius: 4,
-    padding: 14,
+    padding: 16,
+    borderRadius: 8,
     alignItems: 'center',
-    marginTop: 24,
+    marginTop: 8,
   },
   loginButtonText: {
-    color: appColorTheme.black_0,
+    color: appColorTheme.white_0,
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
   },
-  bottomLinks: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 16,
-  },
-  forgotPassword: {
-    color: appColorTheme.white_0,
-    fontSize: 14,
-  },
-  register: {
-    color: appColorTheme.white_0,
-    fontSize: 14,
-  },
-  bottomTextContainer: {
+  registrationContainer: {
     marginTop: 24,
     alignItems: 'center',
+    gap: 12,
   },
-  bottomText: {
+  registrationText: {
     fontSize: 14,
-    color: appColorTheme.black_0,
-    textAlign: 'center',
-  },
-  link: {
     color: appColorTheme.brown_1,
-    textDecorationLine: 'underline',
+  },
+  registerButton: {
+    backgroundColor: appColorTheme.white_0,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: appColorTheme.brown_0,
+  },
+  registerButtonText: {
+    color: appColorTheme.brown_0,
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

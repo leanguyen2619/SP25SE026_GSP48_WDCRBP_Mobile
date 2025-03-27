@@ -16,62 +16,58 @@ const { width } = Dimensions.get('window');
 
 const PricingScreen = () => {
   const navigation = useNavigation();
-  const [selectedPeriod, setSelectedPeriod] = useState('monthly'); // 'monthly', 'annual', 'twoYear'
+  const [selectedPeriod, setSelectedPeriod] = useState('month'); // 'month', 'quarter' or 'year'
 
-  const plans = {
-    standard: {
-      monthly: {
-        name: 'Gói Đồng',
-        price: '200.000',
-        originalPrice: '300.000',
-        features: [
-          'Quản lý dịch vụ cung cấp (Tùy chỉnh, sửa chữa)',
-          'Quản lý tương thiết kế',
-          'Quản lý đơn hàng dịch vụ',
-          'Trang cá nhân (Profile) (Giới thiệu, thông tin, hình ảnh)',
-          '5 bài đăng trên trang cá nhân/tháng',
-          'Quản lý sản phẩm & bán sản phẩm có sẵn',
-          'Ưu tiên hiển thị trong kết quả tìm kiếm',
-          'Chức năng cung cấp dịch vụ cá nhân hóa',
-        ],
-        unavailableFeatures: [5, 6, 7], // Indexes of features that are not available
-      },
-    },
-    premium: {
-      monthly: {
-        name: 'Gói Bạc',
-        price: '350.000',
-        originalPrice: '450.000',
-        features: [
-          'Quản lý dịch vụ cung cấp (Tùy chỉnh, sửa chữa)',
-          'Quản lý tương thiết kế',
-          'Quản lý đơn hàng dịch vụ',
-          'Trang cá nhân (Profile) (Giới thiệu, thông tin, hình ảnh)',
-          '10 bài đăng trên trang cá nhân/tháng',
-          'Quản lý sản phẩm & bán sản phẩm có sẵn',
-          'Ưu tiên hiển thị trong kết quả tìm kiếm',
-          'Chức năng cung cấp dịch vụ cá nhân hóa',
-        ],
-        unavailableFeatures: [7], // Indexes of features that are not available
-      },
-    },
-    premiumPlus: {
-      monthly: {
-        name: 'Gói Vàng',
-        price: '500.000',
-        originalPrice: '650.000',
-        features: [
-          'Quản lý dịch vụ cung cấp (Tùy chỉnh, sửa chữa)',
-          'Quản lý tương thiết kế',
-          'Quản lý đơn hàng dịch vụ',
-          'Trang cá nhân (Profile) (Giới thiệu, thông tin, hình ảnh)',
-          '20 bài đăng trên trang cá nhân/tháng',
-          'Có quyền quản lý sản phẩm & bán sản phẩm có sẵn',
-          'Ưu tiên cao nhất trong kết quả tìm kiếm',
-          'Có chức năng cung cấp dịch vụ cá nhân hóa',
-        ],
-      },
-    },
+  const renderCheckIcon = () => (
+    <Icon name="check" size={20} color="#8B4513" />
+  );
+
+  const renderCrossIcon = () => (
+    <Icon name="close" size={20} color="#FF0000" />
+  );
+
+  const renderPackageFeatures = (features) => {
+    return features.map((feature, index) => (
+      <View key={index} style={styles.featureRow}>
+        {feature.available ? renderCheckIcon() : renderCrossIcon()}
+        <Text style={[styles.featureText, !feature.available && styles.unavailableFeature]}>
+          {feature.text}
+        </Text>
+      </View>
+    ));
+  };
+
+  const renderPricingCard = (title, price, features) => (
+    <View style={styles.card}>
+      <Text style={styles.packageTitle}>{title}</Text>
+      <Text style={styles.price}>
+        {price.toLocaleString()}
+        <Text style={styles.period}> đồng/{
+          selectedPeriod === 'month' ? 'tháng' : 
+          selectedPeriod === 'quarter' ? 'quý' : 'năm'
+        }</Text>
+      </Text>
+      <TouchableOpacity 
+        style={styles.registerButton}
+        onPress={() => navigation.navigate('WoodworkerRegistration')}
+      >
+        <Text style={styles.registerButtonText}>Đăng ký trở thành thợ mộc</Text>
+      </TouchableOpacity>
+      {renderPackageFeatures(features)}
+    </View>
+  );
+
+  const getPriceByPeriod = (monthly, quarterly, yearly) => {
+    switch(selectedPeriod) {
+      case 'month':
+        return monthly;
+      case 'quarter':
+        return quarterly;
+      case 'year':
+        return yearly;
+      default:
+        return monthly;
+    }
   };
 
   return (
@@ -80,7 +76,7 @@ const PricingScreen = () => {
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => navigation.goBack()}
+          onPress={() => navigation.navigate('Home')}
         >
           <Icon name="arrow-back" size={24} color={appColorTheme.black_0} />
         </TouchableOpacity>
@@ -100,163 +96,76 @@ const PricingScreen = () => {
         </View>
 
         {/* Period Selection */}
-        <View style={styles.periodSelection}>
+        <View style={styles.periodToggle}>
           <TouchableOpacity 
-            style={[
-              styles.periodButton,
-              selectedPeriod === 'monthly' && styles.selectedPeriod
-            ]}
-            onPress={() => setSelectedPeriod('monthly')}
+            style={[styles.periodButton, selectedPeriod === 'month' && styles.selectedPeriod]}
+            onPress={() => setSelectedPeriod('month')}
           >
-            <Text style={[
-              styles.periodText,
-              selectedPeriod === 'monthly' && styles.selectedPeriodText
-            ]}>Hàng tháng</Text>
+            <Text style={[styles.periodText, selectedPeriod === 'month' && styles.selectedPeriodText]}>
+              Hàng tháng
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity 
-            style={[
-              styles.periodButton,
-              selectedPeriod === 'annual' && styles.selectedPeriod
-            ]}
-            onPress={() => setSelectedPeriod('annual')}
+            style={[styles.periodButton, selectedPeriod === 'quarter' && styles.selectedPeriod]}
+            onPress={() => setSelectedPeriod('quarter')}
           >
-            <Text style={[
-              styles.periodText,
-              selectedPeriod === 'annual' && styles.selectedPeriodText
-            ]}>Hàng quý</Text>
+            <Text style={[styles.periodText, selectedPeriod === 'quarter' && styles.selectedPeriodText]}>
+              Hàng quý
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity 
-            style={[
-              styles.periodButton,
-              selectedPeriod === 'twoYear' && styles.selectedPeriod
-            ]}
-            onPress={() => setSelectedPeriod('twoYear')}
+            style={[styles.periodButton, selectedPeriod === 'year' && styles.selectedPeriod]}
+            onPress={() => setSelectedPeriod('year')}
           >
-            <Text style={[
-              styles.periodText,
-              selectedPeriod === 'twoYear' && styles.selectedPeriodText
-            ]}>Hàng năm</Text>
+            <Text style={[styles.periodText, selectedPeriod === 'year' && styles.selectedPeriodText]}>
+              Hàng năm
+            </Text>
           </TouchableOpacity>
         </View>
 
         {/* Plans */}
         <View style={styles.plansContainer}>
-          {/* Standard Plan */}
-          <View style={styles.planCard}>
-            <View style={styles.planHeader}>
-              <Text style={styles.planName}>{plans.standard.monthly.name}</Text>
-              <View style={styles.discountBadge}>
-                <Text style={styles.discountText}>TIẾT KIỆM</Text>
-              </View>
-            </View>
-            
-            <View style={styles.priceContainer}>
-              <Text style={styles.price}>{plans.standard.monthly.price}</Text>
-              <Text style={styles.period}> đồng/tháng</Text>
-            </View>
-            
-            <Text style={styles.billingInfo}>
-              Thanh toán hàng tháng {plans.standard.monthly.price} đồng{' '}
-              <Text style={styles.originalPrice}>{plans.standard.monthly.originalPrice} đồng</Text>
-            </Text>
+          {renderPricingCard('Gói Đồng', 
+            getPriceByPeriod(200000, 540000, 2160000),
+            [
+              { available: true, text: 'Quản lý dịch vụ cung cấp (Tùy chỉnh, sửa chữa)' },
+              { available: true, text: 'Quản lý tương thiết kế' },
+              { available: true, text: 'Quản lý đơn hàng dịch vụ' },
+              { available: true, text: 'Trang cá nhân (Profile) (Giới thiệu, thông tin, hình ảnh)' },
+              { available: true, text: '5 bài đăng trên trang cá nhân/tháng' },
+              { available: false, text: 'Quản lý sản phẩm & bán sản phẩm có sẵn' },
+              { available: false, text: 'Ưu tiên hiển thị trong kết quả tìm kiếm' },
+              { available: false, text: 'Chức năng cung cấp dịch vụ cá nhân hóa' }
+            ]
+          )}
 
-            <TouchableOpacity style={styles.getStartedButton}>
-              <Text style={styles.getStartedText}>Bắt đầu</Text>
-            </TouchableOpacity>
+          {renderPricingCard('Gói Bạc',
+            getPriceByPeriod(350000, 945000, 3780000),
+            [
+              { available: true, text: 'Quản lý dịch vụ cung cấp (Tùy chỉnh, sửa chữa)' },
+              { available: true, text: 'Quản lý tương thiết kế' },
+              { available: true, text: 'Quản lý đơn hàng dịch vụ' },
+              { available: true, text: 'Trang cá nhân (Profile) (Giới thiệu, thông tin, hình ảnh)' },
+              { available: true, text: '10 bài đăng trên trang cá nhân/tháng' },
+              { available: true, text: 'Quản lý sản phẩm & bán sản phẩm có sẵn' },
+              { available: true, text: 'Ưu tiên hiển thị trong kết quả tìm kiếm' },
+              { available: false, text: 'Chức năng cung cấp dịch vụ cá nhân hóa' }
+            ]
+          )}
 
-            <View style={styles.featuresList}>
-              {plans.standard.monthly.features.map((feature, index) => (
-                <View key={index} style={styles.featureItem}>
-                  <Icon 
-                    name={plans.standard.monthly.unavailableFeatures.includes(index) ? "close" : "check"} 
-                    size={20} 
-                    color={plans.standard.monthly.unavailableFeatures.includes(index) ? "#e74c3c" : appColorTheme.brown_1} 
-                  />
-                  <Text style={[
-                    styles.featureText,
-                    plans.standard.monthly.unavailableFeatures.includes(index) && styles.unavailableFeatureText
-                  ]}>{feature}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-
-          {/* Premium Plan */}
-          <View style={[styles.planCard, styles.popularPlan]}>
-            <View style={styles.popularBadge}>
-              <Text style={styles.popularBadgeText}>PHỔ BIẾN NHẤT</Text>
-            </View>
-            
-            <View style={styles.planHeader}>
-              <Text style={styles.planName}>{plans.premium.monthly.name}</Text>
-              <View style={styles.discountBadge}>
-                <Text style={styles.discountText}>TIẾT KIỆM</Text>
-              </View>
-            </View>
-            
-            <View style={styles.priceContainer}>
-              <Text style={styles.price}>{plans.premium.monthly.price}</Text>
-              <Text style={styles.period}> đồng/tháng</Text>
-            </View>
-            
-            <Text style={styles.billingInfo}>
-              Thanh toán hàng tháng {plans.premium.monthly.price} đồng{' '}
-              <Text style={styles.originalPrice}>{plans.premium.monthly.originalPrice} đồng</Text>
-            </Text>
-
-            <TouchableOpacity style={[styles.getStartedButton, styles.popularButton]}>
-              <Text style={styles.getStartedText}>Bắt đầu</Text>
-            </TouchableOpacity>
-
-            <View style={styles.featuresList}>
-              {plans.premium.monthly.features.map((feature, index) => (
-                <View key={index} style={styles.featureItem}>
-                  <Icon 
-                    name={plans.premium.monthly.unavailableFeatures.includes(index) ? "close" : "check"} 
-                    size={20} 
-                    color={plans.premium.monthly.unavailableFeatures.includes(index) ? "#e74c3c" : appColorTheme.brown_1} 
-                  />
-                  <Text style={[
-                    styles.featureText,
-                    plans.premium.monthly.unavailableFeatures.includes(index) && styles.unavailableFeatureText
-                  ]}>{feature}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-
-          {/* Premium Plus Plan */}
-          <View style={styles.planCard}>
-            <View style={styles.planHeader}>
-              <Text style={styles.planName}>{plans.premiumPlus.monthly.name}</Text>
-              <View style={styles.discountBadge}>
-                <Text style={styles.discountText}>TIẾT KIỆM</Text>
-              </View>
-            </View>
-            
-            <View style={styles.priceContainer}>
-              <Text style={styles.price}>{plans.premiumPlus.monthly.price}</Text>
-              <Text style={styles.period}> đồng/tháng</Text>
-            </View>
-            
-            <Text style={styles.billingInfo}>
-              Thanh toán hàng tháng {plans.premiumPlus.monthly.price} đồng{' '}
-              <Text style={styles.originalPrice}>{plans.premiumPlus.monthly.originalPrice} đồng</Text>
-            </Text>
-
-            <TouchableOpacity style={styles.getStartedButton}>
-              <Text style={styles.getStartedText}>Bắt đầu</Text>
-            </TouchableOpacity>
-
-            <View style={styles.featuresList}>
-              {plans.premiumPlus.monthly.features.map((feature, index) => (
-                <View key={index} style={styles.featureItem}>
-                  <Icon name="check" size={20} color={appColorTheme.brown_1} />
-                  <Text style={styles.featureText}>{feature}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
+          {renderPricingCard('Gói Vàng',
+            getPriceByPeriod(500000, 1350000, 5400000),
+            [
+              { available: true, text: 'Quản lý dịch vụ cung cấp (Tùy chỉnh, sửa chữa)' },
+              { available: true, text: 'Quản lý tương thiết kế' },
+              { available: true, text: 'Quản lý đơn hàng dịch vụ' },
+              { available: true, text: 'Trang cá nhân (Profile) (Giới thiệu, thông tin, hình ảnh)' },
+              { available: true, text: '20 bài đăng trên trang cá nhân/tháng' },
+              { available: true, text: 'Quản lý sản phẩm & bán sản phẩm có sẵn' },
+              { available: true, text: 'Ưu tiên cao nhất trong kết quả tìm kiếm' },
+              { available: true, text: 'Có chức năng cung cấp dịch vụ cá nhân hóa' }
+            ]
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -305,7 +214,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 12,
   },
-  periodSelection: {
+  periodToggle: {
     flexDirection: 'row',
     justifyContent: 'center',
     padding: 8,
@@ -333,7 +242,7 @@ const styles = StyleSheet.create({
   plansContainer: {
     padding: 16,
   },
-  planCard: {
+  card: {
     backgroundColor: appColorTheme.white_0,
     borderRadius: 12,
     padding: 24,
@@ -347,61 +256,17 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  popularPlan: {
-    borderColor: appColorTheme.brown_0,
-    borderWidth: 2,
-  },
-  popularBadge: {
-    position: 'absolute',
-    top: -12,
-    left: '50%',
-    transform: [{ translateX: -50 }],
-    backgroundColor: '#6c5ce7',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  popularBadgeText: {
-    color: appColorTheme.white_0,
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  planHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  planName: {
+  packageTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: appColorTheme.black_0,
-  },
-  discountBadge: {
-    backgroundColor: '#e74c3c',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-  discountText: {
-    color: appColorTheme.white_0,
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  priceContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    marginBottom: 8,
-  },
-  currency: {
-    fontSize: 24,
-    fontWeight: '500',
-    color: appColorTheme.black_0,
+    marginBottom: 16,
   },
   price: {
     fontSize: 36,
     fontWeight: 'bold',
     color: appColorTheme.black_0,
+    marginBottom: 8,
   },
   period: {
     fontSize: 16,
@@ -409,34 +274,19 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginLeft: 4,
   },
-  billingInfo: {
-    fontSize: 14,
-    color: appColorTheme.brown_1,
-    marginBottom: 16,
-  },
-  originalPrice: {
-    textDecorationLine: 'line-through',
-    color: '#e74c3c',
-  },
-  getStartedButton: {
+  registerButton: {
     backgroundColor: appColorTheme.brown_0,
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
     marginBottom: 24,
   },
-  popularButton: {
-    backgroundColor: '#6c5ce7',
-  },
-  getStartedText: {
+  registerButtonText: {
     color: appColorTheme.black_0,
     fontSize: 16,
     fontWeight: '600',
   },
-  featuresList: {
-    gap: 12,
-  },
-  featureItem: {
+  featureRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
@@ -445,7 +295,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: appColorTheme.black_0,
   },
-  unavailableFeatureText: {
+  unavailableFeature: {
     color: '#e74c3c',
   },
 });

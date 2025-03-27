@@ -10,12 +10,8 @@ import {
   Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-<<<<<<< Updated upstream
-=======
-import MyFooter from '../components/common/Footer/Footer';
->>>>>>> Stashed changes
 import { useNavigation } from '@react-navigation/native';
-import Footer from '../components/common/footer/footer';
+import FooterBar from '../components/common/footerBar/footerBar';
 
 const SearchScreen = () => {
   const navigation = useNavigation();
@@ -29,7 +25,7 @@ const SearchScreen = () => {
           <View style={styles.searchTopContainer}>
             <TouchableOpacity 
               style={styles.backButton}
-              onPress={() => navigation.navigate('Home')}
+              onPress={() => navigation.goBack()}
             >
               <Icon name="arrow-back" size={24} color="#000" />
             </TouchableOpacity>
@@ -63,8 +59,14 @@ const SearchScreen = () => {
       </View>
 
       {/* Footer */}
-      <View style={styles.footer}>
-        <Footer />
+      <View style={styles.footerContainer}>
+        <FooterBar 
+          onPressHome={() => navigation.navigate('Home')}
+          onPressDesign={() => navigation.navigate('Design')}
+          onPressWoodworker={() => navigation.navigate('Woodworker')}
+          onPressCart={() => navigation.navigate('Cart')}
+          onPressProfile={() => navigation.navigate('Profile')}
+        />
       </View>
     </SafeAreaView>
   );
@@ -126,7 +128,7 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: {
     padding: 16,
-    paddingBottom: 80,
+    paddingBottom: Platform.OS === 'ios' ? 90 : 70,
   },
   labelItem: {
     paddingVertical: 12,
@@ -137,7 +139,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
   },
-  footer: {
+  footerContainer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
@@ -147,7 +149,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#e0e0e0',
   },
   footerSpace: {
-    height: 80,
+    height: Platform.OS === 'ios' ? 90 : 70,
   },
 });
 
