@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { SafeAreaView, View, FlatList, Image, StyleSheet, Text, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import FilterSidebar from '../../components/common/FilterSidebar/FilterSidebar';
-import Footer from '../../components/common/Footer/footer';
+import Footer from '../../components/common/footer/footer';
+import { useNavigation } from '@react-navigation/native';
 
 
 // Get screen dimensions
@@ -27,6 +28,7 @@ const DesignScreen = () => {
     const [rating, setRating] = useState(1.0);
     const [filteredProducts, setFilteredProducts] = useState(products);
     const [showFilter, setShowFilter] = useState(false);
+    const navigation = useNavigation();
 
     // Animated value for smooth fade-in effect
     const fadeAnim = useState(new Animated.Value(0))[0];
@@ -121,10 +123,10 @@ const DesignScreen = () => {
                         numColumns={2}
                         contentContainerStyle={styles.grid}
                     />
-                    <Footer />
                 </View>
                 </SafeAreaView>
             )}
+            <Footer navigation={navigation} />
         </SafeAreaView>
     );
 };

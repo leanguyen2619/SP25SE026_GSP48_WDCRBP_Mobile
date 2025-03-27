@@ -20,7 +20,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="WoodworkerProfile"
+        initialRouteName="Home"
         screenOptions={{
           headerShown: false,
         }}

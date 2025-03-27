@@ -6,7 +6,7 @@ import CategoryList from '../../components/common/Category/CategoryList';
 import OfferBanner from '../../components/common/Banner/OfferBanner';
 import SaleBanner from '../../components/common/Banner/SaleBanner';
 import PopularList from '../../components/common/Populer/PopularList';
-import Footer from '../../components/common/Footer/footer';
+import Footer from '../../components/common/footer/footer';
 
 
 const HomeScreen = ({ navigation }) => {
@@ -85,7 +85,7 @@ const HomeScreen = ({ navigation }) => {
                 <SaleBanner />
             </ScrollView>
         </KeyboardAvoidingView>
-        <Footer />
+        <Footer navigation={navigation} />
         </View>
         </SafeAreaView>
     );
