@@ -12,6 +12,8 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import FooterBar from '../components/common/footerBar/footerBar';
+import Footer from '../components/common/Footer/footer';
+
 
 const SearchScreen = () => {
   const navigation = useNavigation();
