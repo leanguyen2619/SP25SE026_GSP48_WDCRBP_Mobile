@@ -22,6 +22,7 @@ const WoodworkerScreen = () => {
   const [selectedWorkshop, setSelectedWorkshop] = useState(null);
   const [selectedCity, setSelectedCity] = useState('');
   const [searchText, setSearchText] = useState('');
+  const [starRating, setStarRating] = useState(1);
 
   const workshops = [
     {
@@ -57,35 +58,58 @@ const WoodworkerScreen = () => {
         >
           <Icon name="arrow-back" size={24} color={appColorTheme.brown_0} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Quản lý xưởng mộc</Text>
+        <Text style={styles.headerTitle}>Xưởng mộc</Text>
         <View style={styles.placeholder} />
-      </View>
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'list' && styles.activeTab]}
-          onPress={() => {
-            setActiveTab('list');
-            setSelectedWorkshop(null);
-          }}
-        >
-          <Text style={[styles.tabText, activeTab === 'list' && styles.activeTabText]}>
-            Danh sách xưởng
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'myWorkshop' && styles.activeTab]}
-          onPress={() => setActiveTab('myWorkshop')}
-        >
-          <Text style={[styles.tabText, activeTab === 'myWorkshop' && styles.activeTabText]}>
-            Xưởng của tôi
-          </Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
 
+  const renderTabs = () => (
+    <View style={styles.tabContainer}>
+      <TouchableOpacity
+        style={[styles.tab, activeTab === 'list' && styles.activeTab]}
+        onPress={() => {
+          setActiveTab('list');
+          setSelectedWorkshop(null);
+        }}
+      >
+        <Text style={[styles.tabText, activeTab === 'list' && styles.activeTabText]}>
+          Danh sách xưởng
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.tab, activeTab === 'myWorkshop' && styles.activeTab]}
+        onPress={() => setActiveTab('myWorkshop')}
+      >
+        <Text style={[styles.tabText, activeTab === 'myWorkshop' && styles.activeTabText]}>
+          Xưởng của tôi
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderStarRating = () => {
+    return (
+      <View style={styles.starContainer}>
+        {[1, 2, 3, 4, 5].map((star) => (
+          <TouchableOpacity
+            key={star}
+            onPress={() => setStarRating(star)}
+          >
+            <Icon
+              name={star <= starRating ? "star" : "star-border"}
+              size={24}
+              color={star <= starRating ? "#FFD700" : "#C0C0C0"}
+              style={styles.star}
+            />
+          </TouchableOpacity>
+        ))}
+      </View>
+    );
+  };
+
   const renderFilters = () => (
-    <View style={styles.filtersContainer}>
+    <View style={styles.filterContainer}>
       <Text style={styles.filterTitle}>Bộ lọc</Text>
       
       <View style={styles.filterSection}>
@@ -98,9 +122,7 @@ const WoodworkerScreen = () => {
 
       <View style={styles.filterSection}>
         <Text style={styles.filterLabel}>Lọc theo số sao</Text>
-        <View style={styles.ratingSlider}>
-          <Text>1.0 - 5.0</Text>
-        </View>
+        {renderStarRating()}
       </View>
 
       <View style={styles.filterSection}>
@@ -112,17 +134,14 @@ const WoodworkerScreen = () => {
       </View>
 
       <TextInput
-        style={styles.searchInput}
+        style={styles.input}
         placeholder="Tên xưởng"
         value={searchText}
         onChangeText={setSearchText}
       />
 
-      <View style={styles.filterActions}>
-        <TouchableOpacity style={styles.applyFilterButton}>
-          <Icon name="filter-list" size={20} color={appColorTheme.white_0} />
-          <Text style={styles.applyFilterText}>Lọc</Text>
-        </TouchableOpacity>
+      <View style={styles.filterButton}>
+        <Text style={styles.filterButtonText}>Lọc</Text>
       </View>
     </View>
   );
@@ -259,9 +278,39 @@ const WoodworkerScreen = () => {
     </View>
   );
 
+  const renderServiceInfo = () => (
+    <View style={styles.section}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Thông tin gói dịch vụ</Text>
+        <TouchableOpacity 
+          style={styles.upgradeButton}
+          onPress={() => navigation.navigate('Pricing')}
+        >
+          <Text style={styles.upgradeButtonText}>Mua gói mới</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.serviceDetails}>
+        <View style={styles.serviceRow}>
+          <Text style={styles.serviceLabel}>Loại gói:</Text>
+          <Text style={[styles.serviceValue, { color: '#FFD700' }]}>VÀNG</Text>
+        </View>
+        <View style={styles.serviceRow}>
+          <Text style={styles.serviceLabel}>Ngày bắt đầu:</Text>
+          <Text style={styles.serviceValue}>2024-03-01 12:00</Text>
+        </View>
+        <View style={styles.serviceRow}>
+          <Text style={styles.serviceLabel}>Ngày kết thúc:</Text>
+          <Text style={styles.serviceValue}>2024-06-01 12:00</Text>
+        </View>
+      </View>
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       {renderHeader()}
+      {renderTabs()}
       {activeTab === 'list' && renderWorkshopList()}
       {activeTab === 'detail' && renderWorkshopDetail()}
       {activeTab === 'myWorkshop' && renderMyWorkshop()}
@@ -272,55 +321,57 @@ const WoodworkerScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: appColorTheme.white_0,
+    backgroundColor: '#F8F9FA',
   },
   header: {
-    backgroundColor: appColorTheme.white_0,
-    paddingTop: 48,
+    backgroundColor: '#fff',
+    paddingTop: 8,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: appColorTheme.grey_1,
+    borderBottomColor: '#E5E7EB',
   },
   headerTop: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 16,
+    paddingVertical: 12,
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 8,
+    marginRight: 8,
+  },
+  headerTitle: {
+    flex: 1,
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#F97316',
+    textAlign: 'center',
   },
   placeholder: {
     width: 40,
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: appColorTheme.brown_0,
-  },
   tabContainer: {
     flexDirection: 'row',
-    marginBottom: 16,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
   },
   tab: {
     flex: 1,
     paddingVertical: 12,
     alignItems: 'center',
-  },
-  activeTab: {
     borderBottomWidth: 2,
-    borderBottomColor: appColorTheme.brown_0,
+    borderBottomColor: 'transparent',
   },
   tabText: {
     fontSize: 16,
-    color: appColorTheme.grey_1,
+    color: '#6B7280',
+    textAlign: 'center',
+  },
+  activeTab: {
+    borderBottomColor: '#F97316',
   },
   activeTabText: {
-    color: appColorTheme.brown_0,
+    color: '#F97316',
     fontWeight: '600',
   },
   content: {
@@ -333,75 +384,77 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: appColorTheme.grey_1,
   },
-  filtersContainer: {
-    padding: 16,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+  filterContainer: {
+    backgroundColor: '#fff',
     margin: 16,
+    borderRadius: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
   filterTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '600',
-    marginBottom: 16,
-    color: '#F4A261',
+    color: '#F97316',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
   },
   filterSection: {
-    marginBottom: 16,
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
   },
   filterLabel: {
     fontSize: 14,
+    color: '#4B5563',
     marginBottom: 8,
-    color: '#666666',
   },
   dropdown: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#F4A261',
+    borderColor: '#E5E7EB',
     borderRadius: 8,
     padding: 12,
     backgroundColor: '#FFFFFF',
   },
   dropdownText: {
-    color: '#666666',
+    color: '#6B7280',
   },
-  searchInput: {
+  input: {
+    margin: 16,
     borderWidth: 1,
-    borderColor: '#F4A261',
+    borderColor: '#E5E7EB',
     borderRadius: 8,
     padding: 12,
-    marginBottom: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#fff',
+    color: '#1F2937',
   },
-  filterActions: {
-    alignItems: 'center',
-  },
-  applyFilterButton: {
+  starContainer: {
     flexDirection: 'row',
-    backgroundColor: '#F4A261',
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 20,
     alignItems: 'center',
   },
-  applyFilterText: {
-    color: '#FFFFFF',
-    marginLeft: 8,
-    fontWeight: '600',
-    fontSize: 16,
+  star: {
+    marginRight: 8,
   },
-  ratingSlider: {
-    borderWidth: 1,
-    borderColor: '#F4A261',
+  filterButton: {
+    margin: 16,
+    backgroundColor: '#F97316',
+    padding: 14,
     borderRadius: 8,
-    padding: 12,
-    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+  },
+  filterButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   workshopList: {
     padding: 16,
@@ -561,6 +614,45 @@ const styles = StyleSheet.create({
     color: appColorTheme.white_0,
     fontSize: 16,
     fontWeight: '600',
+  },
+  section: {
+    marginBottom: 16,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  upgradeButton: {
+    backgroundColor: appColorTheme.brown_0,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+  },
+  upgradeButtonText: {
+    color: appColorTheme.white_0,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  serviceDetails: {
+    padding: 16,
+  },
+  serviceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  serviceLabel: {
+    fontSize: 14,
+    color: '#4B5563',
+  },
+  serviceValue: {
+    fontSize: 14,
+    color: appColorTheme.grey_1,
   },
 });
 

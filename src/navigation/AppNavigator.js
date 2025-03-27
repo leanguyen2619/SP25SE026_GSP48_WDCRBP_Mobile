@@ -12,6 +12,7 @@ import DesignScreen from '../screens/Customer/DesignScreen';
 import WoodworkerScreen from '../screens/Woodworker/WoodworkerScreen';
 import WoodworkerRegistration from '../screens/Woodworker/WoodworkerRegistration';
 import WoodworkerDetailScreen from '../screens/Woodworker/WoodworkerDetailScreen';
+import WoodworkerProfileScreen from '../screens/Woodworker/WoodworkerProfileScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -19,7 +20,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Home"
+        initialRouteName="WoodworkerProfile"
         screenOptions={{
           headerShown: false,
         }}
@@ -35,6 +36,7 @@ const AppNavigator = () => {
         <Stack.Screen name="Woodworker" component={WoodworkerScreen} />
         <Stack.Screen name="WoodworkerRegistration" component={WoodworkerRegistration} />
         <Stack.Screen name="WoodworkerDetail" component={WoodworkerDetailScreen} />
+        <Stack.Screen name="WoodworkerProfile" component={WoodworkerProfileScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
