@@ -3,12 +3,13 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import FooterBar from "../footerBar/footerBar"; // Import the common footer component
 
+
 const Footer = () => {
   const navigation = useNavigation();
 
   return (
     <View style={styles.container}>
-     <FooterBar
+      <FooterBar
         onPressHome={() => navigation.navigate("Home")}
         onPressDesign={() => navigation.navigate("Design")}
         onPressWoodworker={() => navigation.navigate("Woodworker")}
@@ -20,27 +21,13 @@ const Footer = () => {
 };
 
 const styles = StyleSheet.create({
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+  container: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-  },
-  footerItem: {
-    alignItems: 'center',
-  },
-  footerText: {
-    fontSize: 12,
-    marginTop: 4,
-    color: 'orange',
-  },
+    backgroundColor: 'white',
+  }
 });
 
 export default Footer;

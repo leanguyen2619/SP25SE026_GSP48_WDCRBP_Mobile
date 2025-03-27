@@ -9,7 +9,9 @@ import HomeScreen from '../screens/Customer/HomeScreen';
 import ProfileScreen from '../screens/Customer/ProfileScreen';
 import CartScreen from '../screens/Customer/CartScreen';
 import DesignScreen from '../screens/Customer/DesignScreen';
-import WoodworkerScreen from '../screens/Customer/WoodworkerScreen';
+import WoodworkerScreen from '../screens/Woodworker/WoodworkerScreen';
+import WoodworkerRegistration from '../screens/Woodworker/WoodworkerRegistration';
+import WoodworkerDetailScreen from '../screens/Woodworker/WoodworkerDetailScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -31,6 +33,9 @@ const AppNavigator = () => {
         <Stack.Screen name="Cart" component={CartScreen} />
         <Stack.Screen name="Design" component={DesignScreen} />
         <Stack.Screen name="Woodworker" component={WoodworkerScreen} />
+        <Stack.Screen name="WoodworkerRegistration" component={WoodworkerRegistration} />
+        <Stack.Screen name="WoodworkerDetail" component={WoodworkerDetailScreen} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );

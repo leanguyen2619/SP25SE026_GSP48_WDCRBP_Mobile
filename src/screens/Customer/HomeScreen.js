@@ -8,7 +8,8 @@ import SaleBanner from '../../components/common/Banner/SaleBanner';
 import PopularList from '../../components/common/Populer/PopularList';
 import Footer from '../../components/common/Footer/footer';
 
-const HomeScreen = () => {
+
+const HomeScreen = ({ navigation }) => {
     const [isNotified, setIsNotified] = useState(false);
 
     const handleNotificationPress = () => {
@@ -30,13 +31,18 @@ const HomeScreen = () => {
                 {/* Header Section */}
                 <View style={styles.headerContainer}>
                     <Text style={styles.headerTitle}>Khám phá những gì{"\n"}Ngôi nhà bạn cần</Text>
-                    <TouchableOpacity style={styles.notificationButton} onPress={handleNotificationPress}>
-                        <Ionicons 
-                            name={isNotified ? "notifications" : "notifications-outline"} 
-                            size={28} 
-                            color="orange" 
-                        />
-                    </TouchableOpacity>
+                    <View style={styles.headerButtons}>
+                        <TouchableOpacity style={styles.headerButton} onPress={() => navigation.navigate('Pricing')}>
+                            <Text style={styles.pricingText}>Gói dịch vụ</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.notificationButton} onPress={handleNotificationPress}>
+                            <Ionicons 
+                                name={isNotified ? "notifications" : "notifications-outline"} 
+                                size={28} 
+                                color="orange" 
+                            />
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
                 {/* Search Bar */}
@@ -110,6 +116,22 @@ const styles = StyleSheet.create({
         color: '#000',
         flexWrap: 'wrap', 
         flex: 1, 
+    },
+    headerButtons: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 16,
+    },
+    headerButton: {
+        backgroundColor: '#8B4513',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 20,
+    },
+    pricingText: {
+        color: '#FFFFFF',
+        fontSize: 14,
+        fontWeight: '600',
     },
     notificationButton: {
         padding: 8, 

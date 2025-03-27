@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import FilterSidebar from '../../components/common/FilterSidebar/FilterSidebar';
 import Footer from '../../components/common/Footer/footer';
 
+
 // Get screen dimensions
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
