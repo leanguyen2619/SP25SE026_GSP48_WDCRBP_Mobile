@@ -8,23 +8,129 @@ import {
   SafeAreaView,
   Image,
   ScrollView,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { appColorTheme } from '../theme/colors';
+import { authService } from '../services/authService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const RegisterScreen = () => {
   const navigation = useNavigation();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: '',
+    username: '',
     email: '',
     phone: '',
     password: '',
     confirmPassword: '',
   });
 
-  const handleRegister = () => {
-    // Xử lý đăng ký
-    console.log('Registering...', formData);
+  const validateForm = () => {
+    if (!formData.username || !formData.email || !formData.password || !formData.confirmPassword) {
+      Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin');
+      return false;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      Alert.alert('Lỗi', 'Mật khẩu xác nhận không khớp');
+      return false;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      Alert.alert('Lỗi', 'Email không hợp lệ');
+      return false;
+    }
+
+    // Validate phone number (Vietnam format) if provided
+    if (formData.phone) {
+      const phoneRegex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
+      if (!phoneRegex.test(formData.phone)) {
+        Alert.alert('Lỗi', 'Số điện thoại không hợp lệ');
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  const handleRegister = async () => {
+    if (!validateForm()) return;
+
+    try {
+      setLoading(true);
+
+      // Đăng ký tài khoản với format đúng theo API
+      const registerData = {
+        username: formData.username,
+        email: formData.email,
+        phone: formData.phone || "",
+        password: formData.password,
+      };
+
+      console.log('Sending register data:', registerData);
+
+      const response = await authService.register(registerData);
+      console.log('Register response:', response);
+
+      if (response) {
+        // Đăng ký thành công
+        Alert.alert(
+          'Thành công',
+          'Đăng ký tài khoản thành công! Vui lòng xác thực email.',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                // Chuyển sang màn hình xác thực OTP với email
+                navigation.navigate('VerifyOTP', {
+                  email: formData.email
+                });
+              }
+            }
+          ]
+        );
+      } else {
+        throw new Error('Không nhận được phản hồi từ server');
+      }
+      
+    } catch (error) {
+      console.log('Register error details:', {
+        error: error,
+        response: error.response,
+        data: error.response?.data,
+        status: error.response?.status,
+        message: error.message
+      });
+      
+      let errorMessage = 'Có lỗi xảy ra trong quá trình đăng ký';
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message === 'Network Error') {
+        errorMessage = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.';
+      } else if (error.response?.status === 400) {
+        errorMessage = 'Thông tin đăng ký không hợp lệ. Vui lòng kiểm tra lại.';
+      } else if (error.response?.status === 409) {
+        errorMessage = 'Email hoặc tên đăng nhập đã tồn tại.';
+      }
+
+      Alert.alert(
+        'Lỗi đăng ký',
+        errorMessage,
+        [
+          {
+            text: 'OK',
+            style: 'cancel'
+          }
+        ]
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -46,9 +152,10 @@ const RegisterScreen = () => {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Họ và tên"
-            value={formData.fullName}
-            onChangeText={(text) => setFormData({...formData, fullName: text})}
+            placeholder="Tên đăng nhập"
+            value={formData.username}
+            onChangeText={(text) => setFormData({...formData, username: text})}
+            editable={!loading}
           />
           <TextInput
             style={styles.input}
@@ -56,13 +163,15 @@ const RegisterScreen = () => {
             value={formData.email}
             onChangeText={(text) => setFormData({...formData, email: text})}
             keyboardType="email-address"
+            editable={!loading}
           />
           <TextInput
             style={styles.input}
-            placeholder="Số điện thoại"
+            placeholder="Số điện thoại "
             value={formData.phone}
             onChangeText={(text) => setFormData({...formData, phone: text})}
             keyboardType="phone-pad"
+            editable={!loading}
           />
           <TextInput
             style={styles.input}
@@ -70,6 +179,7 @@ const RegisterScreen = () => {
             value={formData.password}
             onChangeText={(text) => setFormData({...formData, password: text})}
             secureTextEntry
+            editable={!loading}
           />
           <TextInput
             style={styles.input}
@@ -77,9 +187,18 @@ const RegisterScreen = () => {
             value={formData.confirmPassword}
             onChangeText={(text) => setFormData({...formData, confirmPassword: text})}
             secureTextEntry
+            editable={!loading}
           />
-          <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
-            <Text style={styles.registerButtonText}>Đăng ký</Text>
+          <TouchableOpacity 
+            style={[styles.registerButton, loading && styles.disabledButton]}
+            onPress={handleRegister}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color={appColorTheme.white_0} />
+            ) : (
+              <Text style={styles.registerButtonText}>Đăng ký</Text>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -91,6 +210,7 @@ const RegisterScreen = () => {
           <TouchableOpacity 
             style={styles.loginLinkButton}
             onPress={() => navigation.navigate('Login')}
+            disabled={loading}
           >
             <Text style={styles.loginLinkText}>Đăng nhập</Text>
           </TouchableOpacity>
@@ -172,6 +292,9 @@ const styles = StyleSheet.create({
     color: appColorTheme.brown_0,
     fontSize: 16,
     fontWeight: '600',
+  },
+  disabledButton: {
+    opacity: 0.7,
   },
 });
 
