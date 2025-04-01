@@ -11,9 +11,11 @@ import ProfileScreen from '../screens/Customer/ProfileScreen';
 import CartScreen from '../screens/Customer/CartScreen';
 import DesignScreen from '../screens/Customer/DesignScreen';
 import WoodworkerScreen from '../screens/Woodworker/WoodworkerScreen';
-import WoodworkerRegistration from '../screens/Woodworker/WoodworkerRegistration';
 import WoodworkerDetailScreen from '../screens/Woodworker/WoodworkerDetailScreen';
 import WoodworkerProfileScreen from '../screens/Woodworker/WoodworkerProfileScreen';
+import WoodworkerRegistration from '../screens/Woodworker/WoodworkerRegistration';
+import WoodworkerDashboard from '../screens/Woodworker/WoodworkerDashboard';
+import { colors } from '../theme/colors';
 
 const Stack = createNativeStackNavigator();
 
@@ -21,7 +23,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Login"
+        initialRouteName="WoodworkerRegistration"
         screenOptions={{
           headerShown: false,
         }}
@@ -36,9 +38,19 @@ const AppNavigator = () => {
         <Stack.Screen name="Cart" component={CartScreen} />
         <Stack.Screen name="Design" component={DesignScreen} />
         <Stack.Screen name="Woodworker" component={WoodworkerScreen} />
-        <Stack.Screen name="WoodworkerRegistration" component={WoodworkerRegistration} />
         <Stack.Screen name="WoodworkerDetail" component={WoodworkerDetailScreen} />
         <Stack.Screen name="WoodworkerProfile" component={WoodworkerProfileScreen} />
+        <Stack.Screen 
+          name="WoodworkerRegistration" 
+          component={WoodworkerRegistration}
+        />
+        <Stack.Screen 
+          name="WoodworkerDashboard" 
+          component={WoodworkerDashboard}
+          options={{
+            headerShown: false
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -40,13 +40,35 @@ export const appColorTheme = {
   gold: '#FFD700', // Màu vàng cho gói VÀNG
   brown_0: '#8B4513', // Màu nâu cho theme gỗ
   brown_1: '#A0522D',
+  brown_2: '#6B3410',
   white_0: '#FFFFFF',
-  grey_0: '#F3F4F6',
-  grey_1: '#6B7280',
+  white_1: '#F5F5F5',
+  white_2: '#FAFAFA',
+  black_0: '#000000',
+  black_1: '#1A1A1A',
+  black_2: '#333333',
+  grey_0: '#808080',
+  grey_1: '#CCCCCC',
+  grey_2: '#666666',
   
   // Shadow
   shadow: {
     color: '#000000',
     opacity: 0.1,
   },
+};
+
+export const colors = {
+  brown_0: appColorTheme.brown_0,
+  brown_1: appColorTheme.brown_1,
+  brown_2: appColorTheme.brown_2,
+  white_0: appColorTheme.white_0,
+  white_1: appColorTheme.white_1,
+  white_2: appColorTheme.white_2,
+  black_0: appColorTheme.black_0,
+  black_1: appColorTheme.black_1,
+  black_2: appColorTheme.black_2,
+  grey_0: appColorTheme.grey_0,
+  grey_1: appColorTheme.grey_1,
+  grey_2: appColorTheme.grey_2
 }; 

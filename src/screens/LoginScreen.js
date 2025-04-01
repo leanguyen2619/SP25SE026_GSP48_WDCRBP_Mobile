@@ -26,20 +26,101 @@ const LoginScreen = () => {
   const [loading, setLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
 
-  const handleSendOTP = async () => {
+  const handleLoginWithOTP = async () => {
+    if (!otp) {
+      Alert.alert('Lỗi', 'Vui lòng nhập mã OTP');
+      return;
+    }
+
     try {
       setLoading(true);
-      if (activeTab === 'emailOTP') {
-        await authService.sendEmailOTP(email);
+      console.log('Attempting login with OTP:', { email, otp });
+
+      const response = await authService.loginWithEmailOTP(email, otp);
+
+      console.log('Login OTP response:', response);
+
+      if (response?.code === 200) {
+        Alert.alert(
+          'Thành công',
+          'Đăng nhập thành công!',
+          [
+            {
+              text: 'OK',
+              onPress: () => navigation.replace('Home')
+            }
+          ]
+        );
+      } else {
+        throw new Error('Đăng nhập không thành công');
+      }
+    } catch (error) {
+      console.log('Login OTP error:', error);
+      
+      let errorMessage = 'Có lỗi xảy ra khi đăng nhập';
+      if (error.message) {
+        errorMessage = error.message;
+      }
+
+      Alert.alert(
+        'Lỗi',
+        errorMessage,
+        [
+          {
+            text: 'Thử lại',
+            onPress: () => setLoading(false)
+          }
+        ]
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendOTP = async () => {
+    if (!email) {
+      Alert.alert('Lỗi', 'Vui lòng nhập email');
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert('Lỗi', 'Email không đúng định dạng');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      console.log('Sending OTP to:', email);
+
+      const response = await authService.sendEmailOTP(email);
+      console.log('Send OTP response:', response);
+
+      if (response?.code === 200) {
         setOtpSent(true);
         Alert.alert('Thành công', 'Mã OTP đã được gửi đến email của bạn');
       } else {
-        await authService.sendPhoneOTP(phone);
-        setOtpSent(true);
-        Alert.alert('Thành công', 'Mã OTP đã được gửi đến số điện thoại của bạn');
+        throw new Error('Không thể gửi mã OTP');
       }
     } catch (error) {
-      Alert.alert('Lỗi', error.message || 'Có lỗi xảy ra khi gửi mã OTP');
+      console.log('Send OTP error:', error);
+      
+      let errorMessage = 'Có lỗi xảy ra khi gửi mã OTP';
+      if (error.message) {
+        errorMessage = error.message;
+      }
+
+      Alert.alert(
+        'Lỗi',
+        errorMessage,
+        [
+          {
+            text: 'Thử lại',
+            onPress: () => setLoading(false)
+          }
+        ]
+      );
     } finally {
       setLoading(false);
     }
@@ -140,20 +221,16 @@ const LoginScreen = () => {
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
-                editable={!loading && !otpSent}
+                editable={!loading}
               />
               <TouchableOpacity 
-                style={[styles.sendOTPButton, (loading || otpSent) && styles.disabledButton]} 
+                style={[styles.sendOTPButton, loading && styles.disabledButton]} 
                 onPress={handleSendOTP}
-                disabled={loading || otpSent}
+                disabled={loading}
               >
-                {loading ? (
-                  <ActivityIndicator color={appColorTheme.white_0} />
-                ) : (
-                  <Text style={styles.sendOTPText}>
-                    {otpSent ? 'Đã gửi' : 'Gửi OTP'}
-                  </Text>
-                )}
+                <Text style={styles.sendOTPText}>
+                  {otpSent ? 'Gửi lại' : 'Gửi OTP'}
+                </Text>
               </TouchableOpacity>
             </View>
             <TextInput
@@ -162,12 +239,13 @@ const LoginScreen = () => {
               value={otp}
               onChangeText={setOtp}
               keyboardType="number-pad"
-              editable={!loading && otpSent}
+              maxLength={6}
+              editable={!loading}
             />
             <TouchableOpacity 
               style={[styles.loginButton, loading && styles.disabledButton]} 
-              onPress={handleLogin}
-              disabled={loading}
+              onPress={handleLoginWithOTP}
+              disabled={loading || !otpSent}
             >
               {loading ? (
                 <ActivityIndicator color={appColorTheme.white_0} />

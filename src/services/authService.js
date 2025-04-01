@@ -7,8 +7,6 @@ const getBaseUrl = () => {
   if (Platform.OS === 'android') {
     // Sử dụng 10.0.2.2 cho Android Emulator
     return 'http://10.0.2.2:8080/api/v1';
-    // Nếu dùng thiết bị thật, thay bằng IP máy tính của bạn
-    // return 'http://192.168.1.x:8080/api/v1';
   }
   // Sử dụng localhost cho iOS và web
   return 'http://localhost:8080/api/v1';
@@ -133,42 +131,63 @@ export const authService = {
     }
   },
 
+  // GỬI MÃ OTP QUA EMAIL
+  sendEmailOTP: async (email) => {
+    try {
+      console.log('Sending OTP to email:', email);
+      const response = await api.post(`/auth/send-otp?email=${email}`, null, {
+        headers: {
+          'Accept': '*/*'
+        }
+      });
+
+      console.log('Send OTP response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.log('Send email OTP error:', error.response?.data || error.message);
+      
+      if (error.code === 'ERR_NETWORK') {
+        throw new Error('Lỗi kết nối mạng. Vui lòng kiểm tra lại kết nối internet.');
+      }
+
+      if (error.response?.status === 401) {
+        throw new Error('Không có quyền truy cập. Vui lòng thử lại sau.');
+      }
+
+      if (error.response?.status === 400) {
+        throw new Error('Email không hợp lệ hoặc không tồn tại trong hệ thống.');
+      }
+
+      throw new Error('Không thể gửi mã OTP qua email. Vui lòng thử lại sau.');
+    }
+  },
+
   // ĐĂNG NHẬP BẰNG EMAIL OTP
   loginWithEmailOTP: async (email, otp) => {
     try {
-      console.log('Login with email OTP:', { email });
+      console.log('Login with email OTP:', { email, otp });
       
-      // Bước 1: Xác thực OTP
-      const verifyResponse = await api.post('/auth/verification-otp', {
+      const response = await api.post('/auth/login-otp', {
         email,
         otp
       });
 
-      // Bước 2: Nếu OTP đúng, tự động đăng nhập
-      if (verifyResponse.status === 200) {
-        const loginResponse = await api.post('/auth/login-with-otp', {
-          email,
-          otp
-        });
+      console.log('Login OTP response:', response.data);
 
-        if (loginResponse.data?.accessToken) {
-          await AsyncStorage.setItem('accessToken', loginResponse.data.accessToken);
-          await AsyncStorage.setItem('refreshToken', loginResponse.data.refreshToken);
-          if (loginResponse.data.user) {
-            await AsyncStorage.setItem('userData', JSON.stringify(loginResponse.data.user));
-          }
-        }
-
-        return loginResponse.data;
+      if (response.data?.data?.access_token) {
+        await AsyncStorage.setItem('accessToken', response.data.data.access_token);
+        await AsyncStorage.setItem('refreshToken', response.data.data.refresh_token);
       }
-      
-      throw new Error('Xác thực OTP không thành công');
+
+      return response.data;
     } catch (error) {
-      console.log('Login with email OTP error:', error.response?.data);
+      console.log('Login with OTP error:', error.response?.data);
       if (error.response?.status === 400) {
-        throw new Error('Mã OTP không chính xác');
+        throw new Error('Mã OTP không chính xác hoặc đã hết hạn');
+      } else if (error.code === 'ERR_NETWORK') {
+        throw new Error('Lỗi kết nối mạng. Vui lòng kiểm tra lại kết nối internet');
       }
-      throw new Error('Có lỗi xảy ra khi đăng nhập bằng email');
+      throw new Error('Có lỗi xảy ra khi đăng nhập bằng OTP');
     }
   },
 
@@ -250,19 +269,6 @@ export const authService = {
     }
   },
 
-  // GỬI MÃ OTP QUA EMAIL
-  sendEmailOTP: async (email) => {
-    try {
-      const response = await api.post('/auth/send-otp', { 
-        email 
-      });
-      return response;
-    } catch (error) {
-      console.log('Send email OTP error:', error.response?.data);
-      throw new Error('Không thể gửi mã OTP qua email');
-    }
-  },
-
   // GỬI MÃ OTP QUA SỐ ĐIỆN THOẠI
   sendPhoneOTP: async (phone) => {
     try {
@@ -307,5 +313,59 @@ export const authService = {
       console.error('Logout error:', error);
       throw error;
     }
-  }
+  },
+
+  // ĐĂNG KÝ LÀM THỢ MỘC
+  registerWoodworker: async (woodworkerData) => {
+    try {
+      console.log('Register woodworker request:', woodworkerData);
+
+      const response = await api.post('/ww/register', woodworkerData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Accept': '*/*'
+        }
+      });
+
+      console.log('Register woodworker response:', response.data);
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      console.log('Register woodworker error:', error.response?.data || error.message);
+
+      if (error.code === 'ERR_NETWORK') {
+        return {
+          success: false,
+          message: 'Lỗi kết nối mạng. Vui lòng kiểm tra lại kết nối internet.'
+        };
+      }
+
+      if (error.response?.status === 400) {
+        const message = error.response.data?.message;
+        if (message?.includes('email')) {
+          return {
+            success: false,
+            message: 'Email đã được sử dụng'
+          };
+        }
+        if (message?.includes('phone')) {
+          return {
+            success: false,
+            message: 'Số điện thoại đã được sử dụng'
+          };
+        }
+        return {
+          success: false,
+          message: message || 'Thông tin đăng ký không hợp lệ'
+        };
+      }
+
+      return {
+        success: false,
+        message: 'Có lỗi xảy ra khi đăng ký. Vui lòng thử lại sau.'
+      };
+    }
+  },
 }; 
