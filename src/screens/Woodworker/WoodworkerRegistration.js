@@ -18,6 +18,7 @@ import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { appColorTheme } from '../../theme/colors';
 import { authService } from '../../services/authService';
+import { extractRealImageUrl } from '../../utils/urlHelpers';
 
 const CITIES = [
   { id: '1', name: 'Hồ Chí Minh' },
@@ -263,73 +264,47 @@ const WoodworkerRegistration = () => {
       Alert.alert('Lỗi', 'Vui lòng nhập giới thiệu về xưởng');
       return false;
     }
-    if (!formData.image) {
-      Alert.alert('Lỗi', 'Vui lòng chọn ảnh đại diện cho xưởng');
+    if (!formData.imgUrl.trim()) {
+      Alert.alert('Lỗi', 'Vui lòng dán link ảnh đại diện cho xưởng');
       return false;
     }
     return true;
   };
 
   const handleSubmit = async () => {
-    try {
-      if (!validateForm()) {
-        return;
-      }
+    if (!validateForm()) return;
 
+    try {
       setIsLoading(true);
 
-      // Tạo FormData để gửi file
-      const formDataToSend = new FormData();
+      const payload = {
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        wardCode: formData.wardCode,
+        districtId: formData.districtId,
+        cityId: formData.cityId,
+        businessType: 'Cá nhân', // or get from UI
+        taxCode: formData.taxCode,
+        brandName: formData.workshopName,
+        bio: formData.description,
+        imgUrl: formData.imgUrl, // ✅ use image URL
+      };
 
-      // Thêm thông tin cơ bản
-      formDataToSend.append('fullName', formData.fullName);
-      formDataToSend.append('email', formData.email);
-      formDataToSend.append('phone', formData.phone);
-      formDataToSend.append('address', formData.address);
-      formDataToSend.append('wardCode', formData.wardCode);
-      formDataToSend.append('districtId', formData.districtId);
-      formDataToSend.append('cityId', formData.cityId);
-      formDataToSend.append('taxCode', formData.taxCode);
-      formDataToSend.append('brandName', formData.workshopName);
-      formDataToSend.append('bio', formData.description);
+      const response = await authService.registerWoodworker(payload);
 
-      // Xử lý ảnh
-      if (formData.image) {
-        const imageUri = formData.image.uri;
-        const imageName = imageUri.split('/').pop();
-        const match = /\.(\w+)$/.exec(imageName);
-        const imageType = match ? `image/${match[1]}` : 'image/jpeg';
-
-        formDataToSend.append('image', {
-          uri: imageUri,
-          name: imageName,
-          type: imageType,
-        });
-      }
-
-      // Gọi API đăng ký
-      const response = await authService.registerWoodworker(formDataToSend);
-      
       if (response.success) {
-        Alert.alert(
-          'Thành công',
-          'Đăng ký thông tin xưởng mộc thành công!',
-          [
-            {
-              text: 'OK',
-              onPress: () => navigation.navigate('WoodworkerDashboard')
-            }
-          ]
-        );
+        Alert.alert('Thành công', 'Đăng ký thành công!', [
+          { text: 'OK', onPress: () => navigation.goBack() }
+        ]);
       } else {
-        Alert.alert('Lỗi', response.message || 'Đã có lỗi xảy ra khi đăng ký');
+        Alert.alert('Lỗi', response.message);
       }
+
     } catch (error) {
-      console.error('Lỗi đăng ký:', error);
-      Alert.alert(
-        'Lỗi',
-        error.message || 'Đã có lỗi xảy ra khi đăng ký. Vui lòng thử lại sau.'
-      );
+      Alert.alert('Lỗi', 'Đã xảy ra lỗi khi đăng ký');
+      console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -344,7 +319,7 @@ const WoodworkerRegistration = () => {
 
   const pickerItemStyle = {
     fontSize: 14,
-    color: '#333333', // Màu tối cho các lựa chọn
+    color: '#333333',
   };
 
   return (
@@ -359,14 +334,14 @@ const WoodworkerRegistration = () => {
 
       <ScrollView style={styles.content}>
         <Text style={styles.sectionTitle}>Thông tin người đại diện</Text>
-        
+
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Họ và tên <Text style={styles.required}>*</Text></Text>
           <TextInput
             style={styles.input}
             placeholder="Nhập họ và tên"
             value={formData.fullName}
-            onChangeText={(text) => setFormData({...formData, fullName: text})}
+            onChangeText={(text) => setFormData({ ...formData, fullName: text })}
           />
         </View>
 
@@ -377,7 +352,7 @@ const WoodworkerRegistration = () => {
             placeholder="Nhập email"
             keyboardType="email-address"
             value={formData.email}
-            onChangeText={(text) => setFormData({...formData, email: text})}
+            onChangeText={(text) => setFormData({ ...formData, email: text })}
           />
         </View>
 
@@ -388,7 +363,7 @@ const WoodworkerRegistration = () => {
             placeholder="Nhập số điện thoại"
             keyboardType="phone-pad"
             value={formData.phone}
-            onChangeText={(text) => setFormData({...formData, phone: text})}
+            onChangeText={(text) => setFormData({ ...formData, phone: text })}
           />
         </View>
 
@@ -400,7 +375,7 @@ const WoodworkerRegistration = () => {
             style={styles.input}
             placeholder="Nhập tên xưởng"
             value={formData.workshopName}
-            onChangeText={(text) => setFormData({...formData, workshopName: text})}
+            onChangeText={(text) => setFormData({ ...formData, workshopName: text })}
           />
         </View>
 
@@ -460,7 +435,7 @@ const WoodworkerRegistration = () => {
           ]}>
             <Picker
               selectedValue={formData.wardCode}
-              onValueChange={(wardCode) => setFormData({...formData, wardCode})}
+              onValueChange={(wardCode) => setFormData({ ...formData, wardCode })}
               style={styles.picker}
               itemStyle={styles.pickerItem}
               mode="dropdown"
@@ -484,7 +459,7 @@ const WoodworkerRegistration = () => {
             style={styles.input}
             placeholder="Nhập số nhà, tên đường"
             value={formData.address}
-            onChangeText={(text) => setFormData({...formData, address: text})}
+            onChangeText={(text) => setFormData({ ...formData, address: text })}
           />
         </View>
 
@@ -494,7 +469,7 @@ const WoodworkerRegistration = () => {
             style={styles.input}
             placeholder="Nhập mã số thuế"
             value={formData.taxCode}
-            onChangeText={(text) => setFormData({...formData, taxCode: text})}
+            onChangeText={(text) => setFormData({ ...formData, taxCode: text })}
           />
         </View>
 
@@ -506,40 +481,38 @@ const WoodworkerRegistration = () => {
             multiline
             numberOfLines={4}
             value={formData.description}
-            onChangeText={(text) => setFormData({...formData, description: text})}
+            onChangeText={(text) => setFormData({ ...formData, description: text })}
           />
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Ảnh đại diện cho xưởng <Text style={styles.required}>*</Text></Text>
-          <TouchableOpacity style={styles.imageUpload} onPress={pickImage}>
-            {formData.image ? (
-              <View style={styles.selectedImageContainer}>
-                <Image
-                  source={{ uri: formData.image.uri }}
-                  style={styles.selectedImage}
-                />
-                <TouchableOpacity
-                  style={styles.removeImageButton}
-                  onPress={() => setFormData({ ...formData, image: null })}
-                >
-                  <Icon name="close" size={20} color={appColorTheme.white_0} />
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <View style={styles.uploadPlaceholder}>
-                <Icon name="add-photo-alternate" size={40} color={appColorTheme.grey_0} />
-                <Text style={styles.uploadText}>Chọn ảnh từ thư viện</Text>
-              </View>
-            )}
-          </TouchableOpacity>
+          <Text style={styles.label}>Link ảnh đại diện cho xưởng <Text style={styles.required}>*</Text></Text>
+          <TextInput
+            style={styles.input}
+            placeholder="https://example.com/image.jpg"
+            value={formData.imgUrl}
+            onChangeText={(text) => setFormData({ ...formData, imgUrl: text })}
+          />
+          <Text style={styles.helperText}>
+            Dán link ảnh trực tiếp (.jpg, .png) hoặc link Google redirect chứa ảnh
+          </Text>
         </View>
 
-        <TouchableOpacity 
+        {/* Optional preview */}
+        {formData.imgUrl !== '' && (
+          <Image
+            source={{ uri: extractRealImageUrl(formData.imgUrl) }}
+            style={{ width: '100%', height: 200, borderRadius: 8, marginBottom: 16 }}
+            resizeMode="cover"
+            onError={() => Alert.alert('Lỗi', 'Link ảnh không hợp lệ hoặc không thể tải ảnh')}
+          />
+        )}
+
+        <TouchableOpacity
           style={[
             styles.submitButton,
             isLoading && styles.submitButtonDisabled
-          ]} 
+          ]}
           onPress={handleSubmit}
           disabled={isLoading}
         >
