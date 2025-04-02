@@ -18,6 +18,7 @@ import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { appColorTheme } from '../../theme/colors';
 import { authService } from '../../services/authService';
+import { addressService } from '../../services/addressService';
 import { extractRealImageUrl } from '../../utils/urlHelpers';
 
 const CITIES = [
@@ -135,26 +136,65 @@ const WoodworkerRegistration = () => {
     wardCode: '',
     taxCode: '',
     description: '',
-    image: null,
+    imgUrl: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [cities, setCities] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
+  const [isLoadingCities, setIsLoadingCities] = useState(false);
+  const [isLoadingDistricts, setIsLoadingDistricts] = useState(false);
+  const [isLoadingWards, setIsLoadingWards] = useState(false);
 
   useEffect(() => {
-    setCities(CITIES);
+    loadCities();
   }, []);
 
-  const handleCityChange = (cityId) => {
-    setFormData({ ...formData, cityId, districtId: '', wardCode: '' });
-    setDistricts(DISTRICTS[cityId] || []);
-    setWards([]);
+  const loadCities = async () => {
+    try {
+      setIsLoadingCities(true);
+      const citiesData = await addressService.getCities();
+      setCities(citiesData);
+    } catch (error) {
+      Alert.alert('Lỗi', error.message);
+    } finally {
+      setIsLoadingCities(false);
+    }
   };
 
-  const handleDistrictChange = (districtId) => {
-    setFormData({ ...formData, districtId, wardCode: '' });
-    setWards(WARDS[districtId] || []);
+  const handleCityChange = async (cityId) => {
+    try {
+      setFormData({ ...formData, cityId, districtId: '', wardCode: '' });
+      setDistricts([]);
+      setWards([]);
+
+      if (cityId) {
+        setIsLoadingDistricts(true);
+        const districtsData = await addressService.getDistrictsByCity(cityId);
+        setDistricts(districtsData);
+      }
+    } catch (error) {
+      Alert.alert('Lỗi', error.message);
+    } finally {
+      setIsLoadingDistricts(false);
+    }
+  };
+
+  const handleDistrictChange = async (districtId) => {
+    try {
+      setFormData({ ...formData, districtId, wardCode: '' });
+      setWards([]);
+
+      if (districtId) {
+        setIsLoadingWards(true);
+        const wardsData = await addressService.getWardsByDistrict(districtId);
+        setWards(wardsData);
+      }
+    } catch (error) {
+      Alert.alert('Lỗi', error.message);
+    } finally {
+      setIsLoadingWards(false);
+    }
   };
 
   const pickImage = async () => {
@@ -285,26 +325,36 @@ const WoodworkerRegistration = () => {
         wardCode: formData.wardCode,
         districtId: formData.districtId,
         cityId: formData.cityId,
-        businessType: 'Cá nhân', // or get from UI
+        businessType: 'Cá nhân',
         taxCode: formData.taxCode,
         brandName: formData.workshopName,
         bio: formData.description,
-        imgUrl: formData.imgUrl, // ✅ use image URL
+        imgUrl: formData.imgUrl,
       };
 
+      console.log('Sending registration data:', payload);
+
       const response = await authService.registerWoodworker(payload);
+      console.log('Registration response:', response);
 
       if (response.success) {
-        Alert.alert('Thành công', 'Đăng ký thành công!', [
-          { text: 'OK', onPress: () => navigation.goBack() }
-        ]);
+        Alert.alert(
+          'Đăng ký thành công', 
+          'Yêu cầu đăng ký của bạn đã được gửi đi. Vui lòng chờ admin duyệt và kiểm tra email để nhận mật khẩu đăng nhập.', 
+          [
+            { 
+              text: 'OK', 
+              onPress: () => navigation.navigate('Login')
+            }
+          ]
+        );
       } else {
-        Alert.alert('Lỗi', response.message);
+        Alert.alert('Lỗi', response.message || 'Đã xảy ra lỗi khi đăng ký');
       }
 
     } catch (error) {
-      Alert.alert('Lỗi', 'Đã xảy ra lỗi khi đăng ký');
-      console.log(error);
+      console.error('Registration error:', error);
+      Alert.alert('Lỗi', error.message || 'Đã xảy ra lỗi khi đăng ký');
     } finally {
       setIsLoading(false);
     }
@@ -382,22 +432,26 @@ const WoodworkerRegistration = () => {
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Tỉnh/Thành phố <Text style={styles.required}>*</Text></Text>
           <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={formData.cityId}
-              onValueChange={handleCityChange}
-              style={styles.picker}
-              itemStyle={styles.pickerItem}
-              mode="dropdown"
-            >
-              <Picker.Item label="Chọn Tỉnh/Thành phố" value="" />
-              {CITIES.map((city) => (
-                <Picker.Item 
-                  key={city.id} 
-                  label={city.name} 
-                  value={city.id}
-                />
-              ))}
-            </Picker>
+            {isLoadingCities ? (
+              <ActivityIndicator size="small" color={appColorTheme.primary} />
+            ) : (
+              <Picker
+                selectedValue={formData.cityId}
+                onValueChange={handleCityChange}
+                style={styles.picker}
+                itemStyle={styles.pickerItem}
+                mode="dropdown"
+              >
+                <Picker.Item label="Chọn Tỉnh/Thành phố" value="" />
+                {cities.map((city) => (
+                  <Picker.Item 
+                    key={city.id} 
+                    label={city.name} 
+                    value={city.id}
+                  />
+                ))}
+              </Picker>
+            )}
           </View>
         </View>
 
@@ -407,23 +461,27 @@ const WoodworkerRegistration = () => {
             styles.pickerContainer,
             !formData.cityId && styles.disabledPicker
           ]}>
-            <Picker
-              selectedValue={formData.districtId}
-              onValueChange={handleDistrictChange}
-              style={styles.picker}
-              itemStyle={styles.pickerItem}
-              mode="dropdown"
-              enabled={!!formData.cityId}
-            >
-              <Picker.Item label="Chọn Quận/Huyện" value="" />
-              {DISTRICTS[formData.cityId]?.map((district) => (
-                <Picker.Item 
-                  key={district.id} 
-                  label={district.name} 
-                  value={district.id}
-                />
-              ))}
-            </Picker>
+            {isLoadingDistricts ? (
+              <ActivityIndicator size="small" color={appColorTheme.primary} />
+            ) : (
+              <Picker
+                selectedValue={formData.districtId}
+                onValueChange={handleDistrictChange}
+                style={styles.picker}
+                itemStyle={styles.pickerItem}
+                mode="dropdown"
+                enabled={!!formData.cityId}
+              >
+                <Picker.Item label="Chọn Quận/Huyện" value="" />
+                {districts.map((district) => (
+                  <Picker.Item 
+                    key={district.id} 
+                    label={district.name} 
+                    value={district.id}
+                  />
+                ))}
+              </Picker>
+            )}
           </View>
         </View>
 
@@ -433,23 +491,27 @@ const WoodworkerRegistration = () => {
             styles.pickerContainer,
             !formData.districtId && styles.disabledPicker
           ]}>
-            <Picker
-              selectedValue={formData.wardCode}
-              onValueChange={(wardCode) => setFormData({ ...formData, wardCode })}
-              style={styles.picker}
-              itemStyle={styles.pickerItem}
-              mode="dropdown"
-              enabled={!!formData.districtId}
-            >
-              <Picker.Item label="Chọn Phường/Xã" value="" />
-              {WARDS[formData.districtId]?.map((ward) => (
-                <Picker.Item 
-                  key={ward.code} 
-                  label={ward.name} 
-                  value={ward.code}
-                />
-              ))}
-            </Picker>
+            {isLoadingWards ? (
+              <ActivityIndicator size="small" color={appColorTheme.primary} />
+            ) : (
+              <Picker
+                selectedValue={formData.wardCode}
+                onValueChange={(wardCode) => setFormData({...formData, wardCode})}
+                style={styles.picker}
+                itemStyle={styles.pickerItem}
+                mode="dropdown"
+                enabled={!!formData.districtId}
+              >
+                <Picker.Item label="Chọn Phường/Xã" value="" />
+                {wards.map((ward) => (
+                  <Picker.Item 
+                    key={ward.code} 
+                    label={ward.name} 
+                    value={ward.code}
+                  />
+                ))}
+              </Picker>
+            )}
           </View>
         </View>
 

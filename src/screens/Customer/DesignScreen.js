@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { SafeAreaView, View, FlatList, Image, StyleSheet, Text, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import FilterSidebar from '../../components/common/FilterSidebar/FilterSidebar';
-import Footer from '../../components/common/Footer/footer';
+import Footer from '../../components/common/footer/Footer';
 import { useNavigation } from '@react-navigation/native';
 
 

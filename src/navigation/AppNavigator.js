@@ -15,6 +15,8 @@ import WoodworkerDetailScreen from '../screens/Woodworker/WoodworkerDetailScreen
 import WoodworkerProfileScreen from '../screens/Woodworker/WoodworkerProfileScreen';
 import WoodworkerRegistration from '../screens/Woodworker/WoodworkerRegistration';
 import WoodworkerDashboard from '../screens/Woodworker/WoodworkerDashboard';
+import AdminScreen from '../screens/Admin/AdminScreen';
+import WoodworkerRegistrationManagement from '../screens/Admin/WoodworkerRegistrationManagement';
 import { colors } from '../theme/colors';
 
 const Stack = createNativeStackNavigator();
@@ -23,7 +25,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="WoodworkerRegistration"
+        initialRouteName="AdminDashboard"
         screenOptions={{
           headerShown: false,
         }}
@@ -47,6 +49,20 @@ const AppNavigator = () => {
         <Stack.Screen 
           name="WoodworkerDashboard" 
           component={WoodworkerDashboard}
+          options={{
+            headerShown: false
+          }}
+        />
+        <Stack.Screen 
+          name="AdminDashboard" 
+          component={AdminScreen}
+          options={{
+            headerShown: false
+          }}
+        />
+        <Stack.Screen 
+          name="WoodworkerRegistrationManagement" 
+          component={WoodworkerRegistrationManagement}
           options={{
             headerShown: false
           }}

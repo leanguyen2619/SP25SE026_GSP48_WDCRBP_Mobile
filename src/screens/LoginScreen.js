@@ -141,16 +141,20 @@ const LoginScreen = () => {
       console.log('Login response:', response);
 
       if (response?.code === 200) {
-        Alert.alert(
-          'Thành công',
-          'Đăng nhập thành công!',
-          [
-            {
-              text: 'OK',
-              onPress: () => navigation.replace('Home')
-            }
-          ]
-        );
+        // Lưu thông tin user vào AsyncStorage
+        await AsyncStorage.setItem('userRole', response.data.role);
+        
+        // Kiểm tra role và điều hướng tương ứng
+        if (response.data.role === 'WOODWORKER') {
+          navigation.replace('WoodworkerDashboard');
+        } else if (response.data.role === 'CUSTOMER') {
+          navigation.replace('Home');
+        } else if (response.data.role === 'ADMIN') {
+          navigation.replace('AdminDashboard');
+        } else {
+          // Role khác hoặc không xác định
+          Alert.alert('Lỗi', 'Không thể xác định loại tài khoản');
+        }
       } else {
         throw new Error('Đăng nhập không thành công');
       }
