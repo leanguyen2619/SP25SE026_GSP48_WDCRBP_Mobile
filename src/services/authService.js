@@ -108,15 +108,27 @@ export const authService = {
         password
       });
 
+      console.log('Raw login response:', response);
+      console.log('Login response data:', response.data);
+
       // Kiểm tra response và lưu token
       if (response.data?.data?.access_token) {
+        console.log('Access token found in response');
         await AsyncStorage.setItem('accessToken', response.data.data.access_token);
+        console.log('Access token saved to AsyncStorage');
         await AsyncStorage.setItem('refreshToken', response.data.data.refresh_token);
+        console.log('Refresh token saved to AsyncStorage');
+      } else {
+        console.log('No access token found in response');
       }
 
       return response.data;
     } catch (error) {
-      console.log('Login error:', error.response?.data);
+      console.log('Login error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
       
       // Xử lý các loại lỗi cụ thể
       if (error.response?.status === 400) {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,14 +8,24 @@ import {
   ScrollView,
   Dimensions,
   StatusBar,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { appColorTheme } from '../../theme/colors';
 import { useNavigation } from '@react-navigation/native';
+import { useAuth } from '../../context/AuthContext';
 
 const AdminScreen = () => {
+  const { checkAccess } = useAuth();
   const navigation = useNavigation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const hasAccess = checkAccess('Admin');
+    if (!hasAccess) {
+      navigation.goBack();
+    }
+  }, []);
 
   const MenuItem = ({ icon, title, onPress, isActive = false }) => (
     <TouchableOpacity 
