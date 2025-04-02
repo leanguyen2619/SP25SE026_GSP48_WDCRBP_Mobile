@@ -280,6 +280,8 @@ const WoodworkerRegistration = () => {
 
       // Tạo FormData để gửi file
       const formDataToSend = new FormData();
+
+      // Thêm thông tin cơ bản
       formDataToSend.append('fullName', formData.fullName);
       formDataToSend.append('email', formData.email);
       formDataToSend.append('phone', formData.phone);
@@ -288,21 +290,24 @@ const WoodworkerRegistration = () => {
       formDataToSend.append('districtId', formData.districtId);
       formDataToSend.append('cityId', formData.cityId);
       formDataToSend.append('taxCode', formData.taxCode);
-      formDataToSend.append('brandName', formData.workshopName); // Tên thương hiệu/xưởng
-      formDataToSend.append('bio', formData.description); // Mô tả
-      formDataToSend.append('imgUrl', ''); // URL ảnh sẽ được server trả về
+      formDataToSend.append('brandName', formData.workshopName);
+      formDataToSend.append('bio', formData.description);
 
-      // Append image
-      const imageUri = formData.image.uri;
-      const imageName = imageUri.split('/').pop();
-      const imageType = 'image/' + (imageName.split('.').pop() || 'jpeg');
+      // Xử lý ảnh
+      if (formData.image) {
+        const imageUri = formData.image.uri;
+        const imageName = imageUri.split('/').pop();
+        const match = /\.(\w+)$/.exec(imageName);
+        const imageType = match ? `image/${match[1]}` : 'image/jpeg';
 
-      formDataToSend.append('image', {
-        uri: imageUri,
-        name: imageName,
-        type: imageType,
-      });
+        formDataToSend.append('image', {
+          uri: imageUri,
+          name: imageName,
+          type: imageType,
+        });
+      }
 
+      // Gọi API đăng ký
       const response = await authService.registerWoodworker(formDataToSend);
       
       if (response.success) {
@@ -323,7 +328,7 @@ const WoodworkerRegistration = () => {
       console.error('Lỗi đăng ký:', error);
       Alert.alert(
         'Lỗi',
-        'Đã có lỗi xảy ra khi đăng ký. Vui lòng thử lại sau.'
+        error.message || 'Đã có lỗi xảy ra khi đăng ký. Vui lòng thử lại sau.'
       );
     } finally {
       setIsLoading(false);
@@ -406,10 +411,16 @@ const WoodworkerRegistration = () => {
               selectedValue={formData.cityId}
               onValueChange={handleCityChange}
               style={styles.picker}
+              itemStyle={styles.pickerItem}
+              mode="dropdown"
             >
               <Picker.Item label="Chọn Tỉnh/Thành phố" value="" />
-              {cities.map((city) => (
-                <Picker.Item key={city.id} label={city.name} value={city.id} />
+              {CITIES.map((city) => (
+                <Picker.Item 
+                  key={city.id} 
+                  label={city.name} 
+                  value={city.id}
+                />
               ))}
             </Picker>
           </View>
@@ -417,16 +428,25 @@ const WoodworkerRegistration = () => {
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Quận/Huyện <Text style={styles.required}>*</Text></Text>
-          <View style={styles.pickerContainer}>
+          <View style={[
+            styles.pickerContainer,
+            !formData.cityId && styles.disabledPicker
+          ]}>
             <Picker
               selectedValue={formData.districtId}
               onValueChange={handleDistrictChange}
               style={styles.picker}
+              itemStyle={styles.pickerItem}
+              mode="dropdown"
               enabled={!!formData.cityId}
             >
               <Picker.Item label="Chọn Quận/Huyện" value="" />
-              {districts.map((district) => (
-                <Picker.Item key={district.id} label={district.name} value={district.id} />
+              {DISTRICTS[formData.cityId]?.map((district) => (
+                <Picker.Item 
+                  key={district.id} 
+                  label={district.name} 
+                  value={district.id}
+                />
               ))}
             </Picker>
           </View>
@@ -434,16 +454,25 @@ const WoodworkerRegistration = () => {
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Phường/Xã <Text style={styles.required}>*</Text></Text>
-          <View style={styles.pickerContainer}>
+          <View style={[
+            styles.pickerContainer,
+            !formData.districtId && styles.disabledPicker
+          ]}>
             <Picker
               selectedValue={formData.wardCode}
               onValueChange={(wardCode) => setFormData({...formData, wardCode})}
               style={styles.picker}
+              itemStyle={styles.pickerItem}
+              mode="dropdown"
               enabled={!!formData.districtId}
             >
               <Picker.Item label="Chọn Phường/Xã" value="" />
-              {wards.map((ward) => (
-                <Picker.Item key={ward.code} label={ward.name} value={ward.code} />
+              {WARDS[formData.districtId]?.map((ward) => (
+                <Picker.Item 
+                  key={ward.code} 
+                  label={ward.name} 
+                  value={ward.code}
+                />
               ))}
             </Picker>
           </View>
@@ -585,12 +614,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: appColorTheme.grey_1,
     borderRadius: 8,
-    overflow: 'hidden',
+    marginTop: 5,
     backgroundColor: appColorTheme.white_0,
+    height: 50,
   },
   picker: {
     height: 50,
     width: '100%',
+    color: appColorTheme.black_0,
+  },
+  pickerItem: {
+    color: appColorTheme.black_0,
+    fontSize: 16,
+  },
+  disabledPicker: {
+    opacity: 0.5,
   },
   imageUpload: {
     width: '100%',
