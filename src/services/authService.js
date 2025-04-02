@@ -316,56 +316,50 @@ export const authService = {
   },
 
   // ĐĂNG KÝ LÀM THỢ MỘC
-  registerWoodworker: async (woodworkerData) => {
+  registerWoodworker: async (formData) => {
     try {
-      console.log('Register woodworker request:', woodworkerData);
-
-      const response = await api.post('/ww/register', woodworkerData, {
+      console.log('Sending woodworker registration:', formData);
+      
+      const response = await api.post('/auth/register-woodworker', formData, {
         headers: {
+          'Accept': '*/*',
           'Content-Type': 'multipart/form-data',
-          'Accept': '*/*'
-        }
+        },
       });
 
-      console.log('Register woodworker response:', response.data);
+      console.log('Registration response:', response.data);
+
+      if (response.data?.accessToken) {
+        await AsyncStorage.setItem('accessToken', response.data.accessToken);
+        await AsyncStorage.setItem('refreshToken', response.data.refreshToken);
+        if (response.data.user) {
+          await AsyncStorage.setItem('userData', JSON.stringify(response.data.user));
+        }
+      }
+
       return {
         success: true,
         data: response.data
       };
     } catch (error) {
-      console.log('Register woodworker error:', error.response?.data || error.message);
-
-      if (error.code === 'ERR_NETWORK') {
-        return {
-          success: false,
-          message: 'Lỗi kết nối mạng. Vui lòng kiểm tra lại kết nối internet.'
-        };
-      }
+      console.error('Register woodworker error:', error.response?.data || error.message);
 
       if (error.response?.status === 400) {
         const message = error.response.data?.message;
         if (message?.includes('email')) {
-          return {
-            success: false,
-            message: 'Email đã được sử dụng'
-          };
+          throw new Error('Email đã được sử dụng');
         }
         if (message?.includes('phone')) {
-          return {
-            success: false,
-            message: 'Số điện thoại đã được sử dụng'
-          };
+          throw new Error('Số điện thoại đã được sử dụng');
         }
-        return {
-          success: false,
-          message: message || 'Thông tin đăng ký không hợp lệ'
-        };
+        throw new Error(message || 'Thông tin đăng ký không hợp lệ');
       }
 
-      return {
-        success: false,
-        message: 'Có lỗi xảy ra khi đăng ký. Vui lòng thử lại sau.'
-      };
+      if (error.code === 'ERR_NETWORK') {
+        throw new Error('Lỗi kết nối mạng. Vui lòng kiểm tra lại kết nối internet.');
+      }
+
+      throw new Error('Có lỗi xảy ra khi đăng ký. Vui lòng thử lại sau.');
     }
   },
 }; 
