@@ -7,10 +7,13 @@ import {
   ScrollView,
   SafeAreaView,
   StatusBar,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { colors } from '../../theme/colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 
 const QuickActionCard = ({ icon, title, subtitle, onPress }) => (
   <TouchableOpacity style={styles.card} onPress={onPress}>
@@ -53,6 +56,35 @@ const getIconColor = (icon) => {
 const WoodworkerDashboard = () => {
   const navigation = useNavigation();
   const woodworkerName = "Mộc Chạm"; // Thay thế bằng tên thật từ context/redux
+
+  const handleLogout = async () => {
+    Alert.alert(
+      'Đăng xuất',
+      'Bạn có chắc chắn muốn đăng xuất?',
+      [
+        {
+          text: 'Hủy',
+          style: 'cancel',
+        },
+        {
+          text: 'Đăng xuất',
+          onPress: async () => {
+            try {
+              await AsyncStorage.removeItem('token');
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }],
+              });
+            } catch (error) {
+              console.error('Logout error:', error);
+              Alert.alert('Lỗi', 'Không thể đăng xuất. Vui lòng thử lại sau.');
+            }
+          },
+          style: 'destructive',
+        },
+      ],
+    );
+  };
 
   const quickActions = [
     {
@@ -111,6 +143,12 @@ const WoodworkerDashboard = () => {
       
       <View style={styles.header}>
         <Text style={styles.welcomeText}>Xin chào, {woodworkerName}</Text>
+        <TouchableOpacity 
+          style={styles.logoutButton}
+          onPress={handleLogout}
+        >
+          <Ionicons name="log-out-outline" size={24} color={colors.brown_0} />
+        </TouchableOpacity>
       </View>
 
       <Text style={styles.sectionTitle}>Thao tác nhanh</Text>
@@ -141,17 +179,22 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white_0,
   },
   header: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: colors.grey_1,
     backgroundColor: colors.white_0,
-    alignItems: 'flex-start',
+    elevation: 2,
   },
   welcomeText: {
     fontSize: 20,
     fontWeight: '600',
     color: colors.black_0,
+  },
+  logoutButton: {
+    padding: 8,
   },
   sectionTitle: {
     fontSize: 16,
