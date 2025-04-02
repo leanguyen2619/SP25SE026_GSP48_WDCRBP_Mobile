@@ -15,9 +15,12 @@ import { useNavigation } from '@react-navigation/native';
 import { appColorTheme } from '../theme/colors';
 import { authService } from '../services/authService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { jwtDecode } from 'jwt-decode';
+import { useAuth } from '../context/AuthContext';
 
 const LoginScreen = () => {
   const navigation = useNavigation();
+  const { signIn } = useAuth();
   const [activeTab, setActiveTab] = useState('password'); // 'password', 'emailOTP', 'phoneOTP'
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -141,19 +144,37 @@ const LoginScreen = () => {
       console.log('Login response:', response);
 
       if (response?.code === 200) {
-        // Lưu thông tin user vào AsyncStorage
-        await AsyncStorage.setItem('userRole', response.data.role);
+        const accessToken = response.data?.access_token;
+        console.log('Access token received:', accessToken);
+
+        if (!accessToken) {
+          Alert.alert('Lỗi', 'Thông tin đăng nhập không hợp lệ');
+          return;
+        }
+
+        // Sử dụng AuthContext để đăng nhập và lấy role
+        console.log('Calling signIn with token...');
+        const userRole = await signIn(accessToken);
+        console.log('User role after signIn:', userRole);
         
-        // Kiểm tra role và điều hướng tương ứng
-        if (response.data.role === 'WOODWORKER') {
-          navigation.replace('WoodworkerDashboard');
-        } else if (response.data.role === 'CUSTOMER') {
-          navigation.replace('Home');
-        } else if (response.data.role === 'ADMIN') {
-          navigation.replace('AdminDashboard');
-        } else {
-          // Role khác hoặc không xác định
-          Alert.alert('Lỗi', 'Không thể xác định loại tài khoản');
+        // Kiểm tra token đã được lưu
+        const savedToken = await AsyncStorage.getItem('accessToken');
+        console.log('Token saved in AsyncStorage:', savedToken);
+        
+        // Điều hướng dựa trên role
+        switch(userRole) {
+          case 'Admin':
+            navigation.replace('AdminDashboard');
+            break;
+          case 'Woodworker':
+            navigation.replace('WoodworkerDashboard');
+            break;
+          case 'Customer':
+            navigation.replace('Home');
+            break;
+          default:
+            Alert.alert('Lỗi', 'Không thể xác định loại tài khoản');
+            return;
         }
       } else {
         throw new Error('Đăng nhập không thành công');
