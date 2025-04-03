@@ -76,7 +76,7 @@ const PricingScreen = () => {
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => navigation.navigate('Home')}
+          onPress={() => navigation.goBack()}
         >
           <Icon name="arrow-back" size={24} color={appColorTheme.black_0} />
         </TouchableOpacity>
