@@ -26,12 +26,6 @@ const FooterBar = ({
         <Text style={[styles.iconText, { fontSize: textSize, color: textColor }]}>Store</Text>
       </TouchableOpacity>
 
-      {/* Cart Button */}
-      <TouchableOpacity onPress={onPressCart} style={styles.iconButton}>
-        <Ionicons name="cart" size={iconSize} color="gray" />
-        <Text style={[styles.iconText, { fontSize: textSize, color: textColor }]}>Cart</Text>
-      </TouchableOpacity>
-
       {/* Profile Button */}
       <TouchableOpacity onPress={onPressProfile} style={styles.iconButton}>
         <Ionicons name="person" size={iconSize} color="gray" />

@@ -247,7 +247,7 @@ export const authService = {
             await AsyncStorage.setItem('userData', JSON.stringify(loginResponse.data.user));
           }
         }
-
+        console.log('Login response:', loginResponse.data);
         return loginResponse.data;
       }
 
