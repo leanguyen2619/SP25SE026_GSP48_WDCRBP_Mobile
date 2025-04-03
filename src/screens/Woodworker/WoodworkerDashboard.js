@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,12 +8,15 @@ import {
   SafeAreaView,
   StatusBar,
   Alert,
+  Animated,
+  Dimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { colors } from '../../theme/colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
+import SidebarMenu from '../../components/common/SidebarMenu/SidebarMenu';
 
 const QuickActionCard = ({ icon, title, subtitle, onPress }) => (
   <TouchableOpacity style={styles.card} onPress={onPress}>
@@ -55,7 +58,43 @@ const getIconColor = (icon) => {
 
 const WoodworkerDashboard = () => {
   const navigation = useNavigation();
-  const woodworkerName = "Mộc Chạm"; // Thay thế bằng tên thật từ context/redux
+  const woodworkerName = "Mộc Chạm";
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const slideAnim = useState(new Animated.Value(-280))[0];
+  const fadeAnim = useState(new Animated.Value(0))[0];
+
+  const toggleMenu = () => {
+    if (isMenuOpen) {
+      // Close menu
+      Animated.parallel([
+        Animated.timing(slideAnim, {
+          toValue: -280,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start(() => setIsMenuOpen(false));
+    } else {
+      // Open menu
+      setIsMenuOpen(true);
+      Animated.parallel([
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  };
 
   const handleLogout = async () => {
     Alert.alert(
@@ -138,42 +177,80 @@ const WoodworkerDashboard = () => {
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.safeArea}>
       <StatusBar backgroundColor={colors.white_0} barStyle="dark-content" />
       
-      <View style={styles.header}>
-        <Text style={styles.welcomeText}>Xin chào, {woodworkerName}</Text>
-        <TouchableOpacity 
-          style={styles.logoutButton}
-          onPress={handleLogout}
+      {/* Main Content */}
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={toggleMenu}>
+            <Icon name="menu" size={24} color={colors.brown_0} />
+          </TouchableOpacity>
+          <Text style={styles.welcomeText}>Xin chào, {woodworkerName}</Text>
+          <TouchableOpacity 
+            style={styles.logoutButton}
+            onPress={handleLogout}
+          >
+            <Ionicons name="log-out-outline" size={24} color={colors.brown_0} />
+          </TouchableOpacity>
+        </View>
+
+        <Text style={styles.sectionTitle}>Thao tác nhanh</Text>
+
+        <ScrollView 
+          style={styles.content}
+          showsVerticalScrollIndicator={false}
         >
-          <Ionicons name="log-out-outline" size={24} color={colors.brown_0} />
-        </TouchableOpacity>
+          <View style={styles.gridContainer}>
+            {quickActions.map((action, index) => (
+              <QuickActionCard
+                key={index}
+                icon={action.icon}
+                title={action.title}
+                subtitle={action.subtitle}
+                onPress={action.onPress}
+              />
+            ))}
+          </View>
+        </ScrollView>
       </View>
 
-      <Text style={styles.sectionTitle}>Thao tác nhanh</Text>
+      {/* Overlay */}
+      {isMenuOpen && (
+        <Animated.View 
+          style={[
+            styles.overlay,
+            { opacity: fadeAnim }
+          ]}
+        >
+          <TouchableOpacity 
+            style={styles.overlayTouch}
+            activeOpacity={1}
+            onPress={toggleMenu}
+          />
+        </Animated.View>
+      )}
 
-      <ScrollView 
-        style={styles.content}
-        showsVerticalScrollIndicator={false}
+      {/* Sidebar Menu */}
+      <Animated.View
+        style={[
+          styles.sideMenu,
+          {
+            transform: [{ translateX: slideAnim }],
+          },
+        ]}
       >
-        <View style={styles.gridContainer}>
-          {quickActions.map((action, index) => (
-            <QuickActionCard
-              key={index}
-              icon={action.icon}
-              title={action.title}
-              subtitle={action.subtitle}
-              onPress={action.onPress}
-            />
-          ))}
-        </View>
-      </ScrollView>
+        <SidebarMenu navigation={navigation} />
+      </Animated.View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.white_0,
+  },
   container: {
     flex: 1,
     backgroundColor: colors.white_0,
@@ -192,9 +269,36 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '600',
     color: colors.black_0,
+    flex: 1,
+    textAlign: 'center',
   },
   logoutButton: {
     padding: 8,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    zIndex: 1,
+  },
+  overlayTouch: {
+    flex: 1,
+  },
+  sideMenu: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    width: 280,
+    backgroundColor: colors.white_0,
+    zIndex: 2,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 2,
+      height: 0,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   sectionTitle: {
     fontSize: 16,

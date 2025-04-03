@@ -1,6 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
+import { jwtDecode } from 'jwt-decode';
 
 // Chọn URL API dựa vào platform
 const getBaseUrl = () => {
@@ -113,11 +114,29 @@ export const authService = {
 
       // Kiểm tra response và lưu token
       if (response.data?.data?.access_token) {
+        const access_token = response.data.data.access_token;
         console.log('Access token found in response');
-        await AsyncStorage.setItem('accessToken', response.data.data.access_token);
+        await AsyncStorage.setItem('accessToken', access_token);
         console.log('Access token saved to AsyncStorage');
         await AsyncStorage.setItem('refreshToken', response.data.data.refresh_token);
         console.log('Refresh token saved to AsyncStorage');
+        
+        // Decode token để lấy thông tin
+        try {
+          const decoded = jwtDecode(access_token);
+          console.log('Decoded token:', decoded);
+          
+          if (decoded.userId) {
+            await AsyncStorage.setItem('userId', decoded.userId.toString());
+            console.log('UserId saved to AsyncStorage');
+          }
+          if (decoded.role) {
+            await AsyncStorage.setItem('userRole', decoded.role);
+            console.log('UserRole saved to AsyncStorage');
+          }
+        } catch (decodeError) {
+          console.error('Error decoding token:', decodeError);
+        }
       } else {
         console.log('No access token found in response');
       }
