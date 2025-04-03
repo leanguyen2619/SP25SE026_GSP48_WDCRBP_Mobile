@@ -387,9 +387,16 @@ const LoginScreen = () => {
             style={styles.registerButton}
             onPress={() => navigation.navigate('Register')}
           >
-            <Text style={styles.registerButtonText}>Đăng ký</Text>
+            <Text style={styles.registerButtonText}>Đăng ký </Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.registerButton}
+            onPress={() => navigation.navigate('WoodworkerRegistration')}
+          >
+            <Text style={styles.registerButtonText}>Đăng ký thành thợ mộc</Text>
           </TouchableOpacity>
         </View>
+
       </ScrollView>
     </SafeAreaView>
   );

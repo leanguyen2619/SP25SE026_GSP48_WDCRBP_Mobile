@@ -9,7 +9,7 @@ import HomeScreen from '../screens/Customer/HomeScreen';
 import ProfileScreen from '../screens/Customer/ProfileScreen';
 import CartScreen from '../screens/Customer/CartScreen';
 import DesignScreen from '../screens/Customer/DesignScreen';
-import WoodworkerScreen from '../screens/Woodworker/WoodworkerScreen';
+import WoodworkerScreen from '../screens/Customer/WoodworkerScreen';
 import WoodworkerDetailScreen from '../screens/Woodworker/WoodworkerDetailScreen';
 import WoodworkerProfileScreen from '../screens/Woodworker/WoodworkerProfileScreen';
 import WoodworkerRegistration from '../screens/Woodworker/WoodworkerRegistration';
@@ -17,6 +17,7 @@ import WoodworkerDashboard from '../screens/Woodworker/WoodworkerDashboard';
 import AdminScreen from '../screens/Admin/AdminScreen';
 import WoodworkerRegistrationManagement from '../screens/Admin/WoodworkerRegistrationManagement';
 import WoodworkerRegistrationDetail from '../screens/Admin/WoodworkerRegistrationDetail';
+import ProductScreen from '../screens/Customer/ProductScreen';
 import { colors } from '../theme/colors';
 import { useAuth } from '../context/AuthContext';
 
@@ -72,6 +73,8 @@ const AppNavigator = () => {
       <Stack.Screen name="Woodworker" component={WoodworkerScreen} />
       <Stack.Screen name="WoodworkerDetail" component={WoodworkerDetailScreen} />
       <Stack.Screen name="WoodworkerProfile" component={WoodworkerProfileScreen} />
+      <Stack.Screen name="Product" component={ProductScreen} />
+
       
       {/* Woodworker screens */}
       <Stack.Screen 
