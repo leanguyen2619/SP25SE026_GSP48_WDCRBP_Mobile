@@ -50,7 +50,7 @@ const WalletCusScreen = ({ navigation }) => {
       transactionType,
       amount: parseInt(amount),
       email,
-      returnUrl: 'https://your-domain.com/payment-success', // Replace with your real domain
+      returnUrl: 'https://dummy-payment-success.com', // Replace with your real domain
     };
 
     const res = await dispatch(topUpWallet(payload));

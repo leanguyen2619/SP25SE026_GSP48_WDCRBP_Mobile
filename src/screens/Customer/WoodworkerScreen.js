@@ -10,7 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchWoodworkers } from '../../redux/slice/woodworkerSlice';
 import Footer from '../../components/common/footer/footer';
-import ServiceBadge from '../../components/common/ServiceBadge';
+import ServiceBadge from '../../components/common/Badge/ServiceBadge';
 
 const servicePackColors = {
   bronze: '#cd7f32',

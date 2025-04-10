@@ -38,7 +38,7 @@ const AppNavigator = () => {
       case 'Woodworker':
         return 'WoodworkerDashboard';
       case 'Customer':
-        return 'Home';
+        return 'Product';
       default:
         return 'Login';
     }
@@ -63,8 +63,8 @@ const AppNavigator = () => {
 
       {/* Customer screens */}
       <Stack.Screen 
-        name="Home" 
-        component={HomeScreen}
+        name="Product" 
+        component={ProductScreen}
         options={{
           headerShown: false
         }}
@@ -78,7 +78,6 @@ const AppNavigator = () => {
       <Stack.Screen name="Woodworker" component={WoodworkerScreen} />
       <Stack.Screen name="WoodworkerDetail" component={WoodworkerDetailScreen} />
       <Stack.Screen name="WoodworkerProfile" component={WoodworkerProfileScreen} />
-      <Stack.Screen name="Product" component={ProductScreen} />
       <Stack.Screen name="Wallet" component={WalletCusScreen} />
 
       
