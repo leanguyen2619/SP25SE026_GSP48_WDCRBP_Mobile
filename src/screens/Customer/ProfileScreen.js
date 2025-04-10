@@ -102,12 +102,6 @@ const ProfileScreen = () => {
             secure={!showEmail}
             onToggle={() => setShowEmail(!showEmail)}
           />
-          <InfoItem
-            label="Vai trò"
-            value={showRole ? user?.role : '••••••'}
-            secure={!showRole}
-            onToggle={() => setShowRole(!showRole)}
-          />
           <InfoItem label="Điện thoại" value={user?.phone} />
 
           {/* Address List */}
