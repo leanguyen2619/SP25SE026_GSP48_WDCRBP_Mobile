@@ -19,6 +19,8 @@ import WoodworkerRegistrationManagement from '../screens/Admin/WoodworkerRegistr
 import WoodworkerRegistrationDetail from '../screens/Admin/WoodworkerRegistrationDetail';
 import ProductScreen from '../screens/Customer/ProductScreen';
 import DesignIdeaDetailScreen from '../screens/Customer/DesignIdeaDetailScreen';
+import WalletCusScreen from '../screens/Customer/WalletCusScreen';
+import PaymentSuccessScreen from '../screens/Payment/PaymentSuccessScreen';
 import { colors } from '../theme/colors';
 import { useAuth } from '../context/AuthContext';
 
@@ -57,6 +59,7 @@ const AppNavigator = () => {
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="VerifyOTP" component={VerifyOTPScreen} />
+      <Stack.Screen name="PaymentSuccess" component={PaymentSuccessScreen} />
 
       {/* Customer screens */}
       <Stack.Screen 
@@ -76,6 +79,7 @@ const AppNavigator = () => {
       <Stack.Screen name="WoodworkerDetail" component={WoodworkerDetailScreen} />
       <Stack.Screen name="WoodworkerProfile" component={WoodworkerProfileScreen} />
       <Stack.Screen name="Product" component={ProductScreen} />
+      <Stack.Screen name="Wallet" component={WalletCusScreen} />
 
       
       {/* Woodworker screens */}
@@ -117,4 +121,4 @@ const AppNavigator = () => {
   );
 };
 
-export default AppNavigator; 
+export default AppNavigator;

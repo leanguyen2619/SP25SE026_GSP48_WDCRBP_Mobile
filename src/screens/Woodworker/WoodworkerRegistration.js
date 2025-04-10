@@ -378,7 +378,7 @@ const WoodworkerRegistration = () => {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={24} color={appColorTheme.black_0} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Đăng ký thông tin xưởng mộc</Text>
+        <Text>Đăng ký thông tin xưởng mộc</Text>
         <View style={styles.placeholder} />
       </View>
 
@@ -724,4 +724,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default WoodworkerRegistration; 
+export default WoodworkerRegistration;
