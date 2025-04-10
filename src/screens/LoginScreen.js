@@ -50,7 +50,7 @@ const LoginScreen = () => {
           [
             {
               text: 'OK',
-              onPress: () => navigation.replace('Home')
+              onPress: () => navigation.replace('Product')
             }
           ]
         );
@@ -170,7 +170,7 @@ const LoginScreen = () => {
             navigation.replace('WoodworkerDashboard');
             break;
           case 'Customer':
-            navigation.replace('Home');
+            navigation.replace('Product');
             break;
           default:
             Alert.alert('Lỗi', 'Không thể xác định loại tài khoản');
