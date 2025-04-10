@@ -165,7 +165,11 @@ const WoodworkerScreen = () => {
             const badgeColor = servicePackColors[packName] || '#aaa';
 
             return (
-              <TouchableOpacity key={w.woodworkerId} style={styles.card}>
+              <TouchableOpacity 
+                key={w.woodworkerId}
+                onPress={() => navigation.navigate('WoodworkerDetail', { woodworkerId: w.woodworkerId })}
+                style={styles.card}
+              >
                 <Image source={{ uri: w.imgUrl }} style={styles.image} />
                 <View style={{ padding: 12 }}>
                   <Text style={styles.name}>{w.brandName}</Text>
@@ -241,8 +245,11 @@ const styles = StyleSheet.create({
   buttonText: { color: '#fff', fontWeight: '600' },
   clearButtonText: { color: '#333', fontWeight: '500' },
   card: {
-    backgroundColor: '#fff', marginBottom: 16,
-    borderRadius: 8, overflow: 'hidden', elevation: 1,
+    backgroundColor: '#fff',
+    marginBottom: 16,
+    borderRadius: 8,
+    overflow: 'hidden',
+    elevation: 1,
   },
   image: { width: '100%', height: 200 },
   name: { fontSize: 18, fontWeight: 'bold', marginBottom: 4 },

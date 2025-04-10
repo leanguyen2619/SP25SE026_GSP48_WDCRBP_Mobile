@@ -4,6 +4,8 @@ import woodworkerReducer from './slice/woodworkerSlice';
 import productReducer from './slice/productSlice';
 import walletReducer from './slice/walletSlice';
 import userAddressReducer from './slice/userAddressSlice';
+import designReducer from './slice/designSlice';
+
 const store = configureStore({
   reducer: {
     user: userReducer,
@@ -11,6 +13,7 @@ const store = configureStore({
     product: productReducer,
     wallet: walletReducer, 
     userAddress: userAddressReducer,
+    design: designReducer,
   },
 });
 
