@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    View, 
-    Text, 
-    StyleSheet, 
-    Image, 
-    ScrollView, 
+import {
+    View,
+    Text,
+    StyleSheet,
+    Image,
+    ScrollView,
     TouchableOpacity,
     Dimensions,
     ActivityIndicator,
@@ -14,7 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import Footer from '../../components/common/footer/footer';
 import axios from 'axios';
-import { getServicePackageInfo } from '../../utils/servicePackageUtils';
+import ServiceBadge from '../../components/common/Badge/ServiceBadge';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const BASE_URL = 'http://10.0.2.2:8080'; // URL cho Android Emulator
@@ -45,23 +45,23 @@ const DesignIdeaScreen = ({ navigation }) => {
         }
     };
 
-    const renderServicePackageBadge = (packageName) => {
-        const { label, badgeStyle, textStyle } = getServicePackageInfo(packageName);
-        return (
-            <View style={[styles.servicePackBadge, badgeStyle]}>
-                <Text style={[styles.servicePackText, textStyle]}>{label}</Text>
-            </View>
-        );
-    };
+    // const renderServicePackageBadge = (packageName) => {
+    //     const { label, badgeStyle, textStyle } = getServicePackageInfo(packageName);
+    //     return (
+    //         <View style={[styles.servicePackBadge, badgeStyle]}>
+    //             <Text style={[styles.servicePackText, textStyle]}>{label}</Text>
+    //         </View>
+    //     );
+    // };
 
     const renderDesignCard = (item) => (
-        <TouchableOpacity 
-            key={item.designIdeaId} 
+        <TouchableOpacity
+            key={item.designIdeaId}
             style={styles.card}
             onPress={() => navigation.navigate('DesignDetail', { designId: item.designIdeaId })}
         >
-            <Image 
-                source={{ uri: item.img_urls }} 
+            <Image
+                source={{ uri: item.img_urls }}
                 style={styles.image}
                 resizeMode="cover"
             />
@@ -72,9 +72,10 @@ const DesignIdeaScreen = ({ navigation }) => {
                 <Text style={styles.address} numberOfLines={1}>
                     {item.woodworkerProfile?.address}
                 </Text>
-                {item.woodworkerProfile?.servicePack?.name && 
-                    renderServicePackageBadge(item.woodworkerProfile.servicePack.name)
+                {item.woodworkerProfile?.servicePack?.name &&
+                    <ServiceBadge packType={item.woodworkerProfile.servicePack.name} />
                 }
+
                 <View style={styles.ratingContainer}>
                     <View style={styles.stars}>
                         {[1, 2, 3, 4, 5].map((star) => (
@@ -107,7 +108,7 @@ const DesignIdeaScreen = ({ navigation }) => {
             <View style={styles.headerContainer}>
                 <Text style={styles.headerText}>Danh sách thiết kế</Text>
             </View>
-            <ScrollView 
+            <ScrollView
                 style={styles.scrollView}
                 contentContainerStyle={styles.scrollViewContent}
             >

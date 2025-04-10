@@ -11,7 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllProducts } from '../../redux/slice/productSlice';
 import Footer from '../../components/common/footer/footer';
-import ServiceBadge from '../../components/common/ServiceBadge';
+import ServiceBadge from '../../components/common/Badge/ServiceBadge';
 
 const packTypeColors = {
     bronze: '#cd7f32',

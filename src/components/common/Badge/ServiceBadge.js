@@ -8,16 +8,23 @@ const packTypeColors = {
   gold: '#ffd700',
 };
 
+const packTypeLabels = {
+  bronze: 'đồng',
+  silver: 'bạc',
+  gold: 'vàng',
+};
+
 const ServiceBadge = ({ packType }) => {
   if (!packType) return null;
 
   const lowerPack = packType.toLowerCase();
   const color = packTypeColors[lowerPack] || '#aaa';
+  const vietnameseLabel = packTypeLabels[lowerPack] || packType;
 
   return (
     <View style={[styles.badge, { backgroundColor: color }]}>
       <Icon name="star" size={14} color="#fff" />
-      <Text style={styles.text}>Gói {packType}</Text>
+      <Text style={styles.text}>Gói {vietnameseLabel}</Text>
     </View>
   );
 };
