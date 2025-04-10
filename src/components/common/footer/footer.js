@@ -13,18 +13,12 @@ const Footer = ({ navigation }) => {
   return (
     <View style={styles.footer}>
       <TouchableFooterItem
-        icon="home"
-        label="Trang chủ"
-        onPress={() => navigation.navigate('Home')}
-        color={getColor('Home')}
-      />
-      <TouchableFooterItem
         icon="shopping-bag"
         label="Sản phẩm"
         onPress={() => navigation.navigate('Product')}
         color={getColor('Product')}
       />
-      <TouchableFooterItem
+       <TouchableFooterItem
         icon="design-services"
         label="Thiết kế"
         onPress={() => navigation.navigate('Design')}
@@ -35,6 +29,12 @@ const Footer = ({ navigation }) => {
         label="Xưởng gỗ"
         onPress={() => navigation.navigate('Woodworker')}
         color={getColor('Woodworker')}
+      />
+      <TouchableFooterItem
+        icon="account-balance-wallet"
+        label="Ví"
+        onPress={() => navigation.navigate('Wallet')}
+        color={getColor('Wallet')}
       />
       <TouchableFooterItem
         icon="person"
