@@ -22,6 +22,12 @@ const Footer = ({ navigation }) => {
         icon="shopping-bag"
         label="Sản phẩm"
         onPress={() => navigation.navigate('Product')}
+        color={getColor('Product')}
+      />
+      <TouchableFooterItem
+        icon="design-services"
+        label="Thiết kế"
+        onPress={() => navigation.navigate('Design')}
         color={getColor('Design')}
       />
       <TouchableFooterItem
@@ -36,14 +42,13 @@ const Footer = ({ navigation }) => {
         onPress={() => navigation.navigate('Profile')}
         color={getColor('Profile')}
       />
-
     </View>
   );
 };
 
 const TouchableFooterItem = ({ icon, label, onPress, color }) => (
   <TouchableOpacity style={styles.footerItem} onPress={onPress}>
-    <Icon name={icon} size={30} color={color} />
+    <Icon name={icon} size={24} color={color} />
     <Text style={[styles.footerLabel, { color }]}>{label}</Text>
   </TouchableOpacity>
 );
@@ -54,7 +59,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
     backgroundColor: appColorTheme.surface,
-    paddingVertical: 10,
+    paddingVertical: 8,
     borderTopWidth: 1,
     borderTopColor: appColorTheme.border.light,
     position: 'absolute',
@@ -64,11 +69,11 @@ const styles = StyleSheet.create({
   },
   footerItem: {
     alignItems: 'center',
-    padding: 8,
+    padding: 6,
   },
   footerLabel: {
-    marginTop: 4,
-    fontSize: 13,
+    marginTop: 2,
+    fontSize: 11,
     fontWeight: '500',
   },
 });
