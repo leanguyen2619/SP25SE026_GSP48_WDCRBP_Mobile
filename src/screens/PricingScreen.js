@@ -19,41 +19,48 @@ const PricingScreen = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('month'); // 'month', 'quarter' or 'year'
 
   const renderCheckIcon = () => (
-    <Icon name="check" size={20} color="#8B4513" />
+    <Icon name="check" size={20} color={appColorTheme.brown_0} />
   );
 
   const renderCrossIcon = () => (
-    <Icon name="close" size={20} color="#FF0000" />
+    <Icon name="close" size={20} color={appColorTheme.red_0} />
   );
 
-  const renderPackageFeatures = (features) => {
+  const renderPackageFeatures = (features, type) => {
     return features.map((feature, index) => (
       <View key={index} style={styles.featureRow}>
-        {feature.available ? renderCheckIcon() : renderCrossIcon()}
-        <Text style={[styles.featureText, !feature.available && styles.unavailableFeature]}>
+        {feature.available ? 
+          <Icon name="check" size={20} color={styles[`${type}Card`].accentColor} /> : 
+          <Icon name="close" size={20} color={appColorTheme.red_0} />
+        }
+        <Text style={[
+          styles.featureText, 
+          !feature.available && styles.unavailableFeature,
+          styles[`${type}FeatureText`]
+        ]}>
           {feature.text}
         </Text>
       </View>
     ));
   };
 
-  const renderPricingCard = (title, price, features) => (
-    <View style={styles.card}>
-      <Text style={styles.packageTitle}>{title}</Text>
-      <Text style={styles.price}>
+  const renderPricingCard = (title, price, features, type) => (
+    <View style={[styles.card, styles[`${type}Card`]]}>
+      <Text style={[styles.packageTitle, styles[`${type}Title`]]}>{title}</Text>
+      <Text style={[styles.price, styles[`${type}Price`]]}>
         {price.toLocaleString()}
-        <Text style={styles.period}> đồng/{
+        <Text style={[styles.period, styles[`${type}Period`]]}> đồng/{
           selectedPeriod === 'month' ? 'tháng' : 
           selectedPeriod === 'quarter' ? 'quý' : 'năm'
         }</Text>
       </Text>
       <TouchableOpacity 
-        style={styles.registerButton}
+        style={[styles.registerButton, styles[`${type}Button`]]}
         onPress={() => navigation.navigate('WoodworkerRegistration')}
       >
         <Text style={styles.registerButtonText}>Đăng ký trở thành thợ mộc</Text>
       </TouchableOpacity>
-      {renderPackageFeatures(features)}
+      {renderPackageFeatures(features, type)}
     </View>
   );
 
@@ -136,7 +143,8 @@ const PricingScreen = () => {
               { available: false, text: 'Quản lý sản phẩm & bán sản phẩm có sẵn' },
               { available: false, text: 'Ưu tiên hiển thị trong kết quả tìm kiếm' },
               { available: false, text: 'Chức năng cung cấp dịch vụ cá nhân hóa' }
-            ]
+            ],
+            'bronze'
           )}
 
           {renderPricingCard('Gói Bạc',
@@ -150,7 +158,8 @@ const PricingScreen = () => {
               { available: true, text: 'Quản lý sản phẩm & bán sản phẩm có sẵn' },
               { available: true, text: 'Ưu tiên hiển thị trong kết quả tìm kiếm' },
               { available: false, text: 'Chức năng cung cấp dịch vụ cá nhân hóa' }
-            ]
+            ],
+            'silver'
           )}
 
           {renderPricingCard('Gói Vàng',
@@ -164,7 +173,8 @@ const PricingScreen = () => {
               { available: true, text: 'Quản lý sản phẩm & bán sản phẩm có sẵn' },
               { available: true, text: 'Ưu tiên cao nhất trong kết quả tìm kiếm' },
               { available: true, text: 'Có chức năng cung cấp dịch vụ cá nhân hóa' }
-            ]
+            ],
+            'gold'
           )}
         </View>
       </ScrollView>
@@ -175,22 +185,26 @@ const PricingScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9ff',
+    backgroundColor: '#F5F5F5',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     padding: 16,
-    backgroundColor: appColorTheme.white_0,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E9ECEF',
   },
   backButton: {
     padding: 8,
   },
   headerTitle: {
+    flex: 1,
     fontSize: 18,
     fontWeight: '600',
-    color: appColorTheme.black_0,
+    color: appColorTheme.brown_0,
+    textAlign: 'center',
+    marginRight: 40,
   },
   placeholder: {
     width: 40,
@@ -205,98 +219,184 @@ const styles = StyleSheet.create({
   mainTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: appColorTheme.black_0,
+    color: appColorTheme.brown_0,
     textAlign: 'center',
+    marginBottom: 4,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: appColorTheme.brown_1,
     textAlign: 'center',
     marginTop: 12,
+    lineHeight: 20,
   },
   periodToggle: {
     flexDirection: 'row',
     justifyContent: 'center',
-    padding: 8,
-    backgroundColor: appColorTheme.grey_1,
+    padding: 4,
+    backgroundColor: '#E8E0D8',
     marginHorizontal: 24,
     borderRadius: 24,
     marginBottom: 24,
   },
   periodButton: {
-    paddingVertical: 8,
+    flex: 1,
+    paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 20,
+    alignItems: 'center',
   },
   selectedPeriod: {
-    backgroundColor: appColorTheme.white_0,
+    backgroundColor: '#fff',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
   },
   periodText: {
     color: appColorTheme.brown_1,
     fontSize: 14,
   },
   selectedPeriodText: {
-    color: appColorTheme.black_0,
-    fontWeight: '500',
+    color: appColorTheme.brown_0,
+    fontWeight: '600',
   },
   plansContainer: {
     padding: 16,
   },
   card: {
-    backgroundColor: appColorTheme.white_0,
-    borderRadius: 12,
-    padding: 24,
+    borderRadius: 16,
+    padding: 20,
     marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 3,
   },
   packageTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: appColorTheme.black_0,
-    marginBottom: 16,
+    color: appColorTheme.brown_0,
+    marginBottom: 12,
   },
   price: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: 'bold',
-    color: appColorTheme.black_0,
-    marginBottom: 8,
+    color: appColorTheme.brown_0,
+    marginBottom: 4,
   },
   period: {
     fontSize: 16,
     color: appColorTheme.brown_1,
     marginBottom: 8,
-    marginLeft: 4,
   },
   registerButton: {
     backgroundColor: appColorTheme.brown_0,
-    padding: 16,
-    borderRadius: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 12,
     alignItems: 'center',
-    marginBottom: 24,
+    marginVertical: 20,
   },
   registerButtonText: {
-    color: appColorTheme.black_0,
+    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
   featureRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    paddingVertical: 8,
+    gap: 12,
   },
   featureText: {
+    flex: 1,
     fontSize: 14,
-    color: appColorTheme.black_0,
+    lineHeight: 20,
+    color: appColorTheme.brown_1,
   },
   unavailableFeature: {
-    color: '#e74c3c',
+    color: appColorTheme.red_0,
+    opacity: 0.8,
+  },
+  // Bronze Package Styles
+  bronzeCard: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#CD7F32',
+    accentColor: '#CD7F32',
+  },
+  bronzeTitle: {
+    color: '#CD7F32',
+  },
+  bronzePrice: {
+    color: '#CD7F32',
+  },
+  bronzePeriod: {
+    color: '#CD7F32',
+    opacity: 0.8,
+  },
+  bronzeButton: {
+    backgroundColor: '#CD7F32',
+  },
+  bronzeFeatureText: {
+    color: '#666',
+  },
+
+  // Silver Package Styles
+  silverCard: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#C0C0C0',
+    accentColor: '#808080',
+  },
+  silverTitle: {
+    color: '#808080',
+  },
+  silverPrice: {
+    color: '#808080',
+  },
+  silverPeriod: {
+    color: '#808080',
+    opacity: 0.8,
+  },
+  silverButton: {
+    backgroundColor: '#808080',
+  },
+  silverFeatureText: {
+    color: '#666',
+  },
+
+  // Gold Package Styles
+  goldCard: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#FFD700',
+    accentColor: '#DAA520',
+  },
+  goldTitle: {
+    color: '#DAA520',
+  },
+  goldPrice: {
+    color: '#DAA520',
+  },
+  goldPeriod: {
+    color: '#DAA520',
+    opacity: 0.8,
+  },
+  goldButton: {
+    backgroundColor: '#DAA520',
+  },
+  goldFeatureText: {
+    color: '#666',
   },
 });
 
