@@ -15,10 +15,13 @@ import { fetchWallet } from '../../redux/slice/walletSlice';
 import { topUpWallet } from '../../redux/slice/paymentSlice';
 import { useAuth } from '../../context/AuthContext';
 import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
 import Footer from '../../components/common/footer/footer';
+import { useLinkTo } from '@react-navigation/native';
 
 const WalletCusScreen = ({ navigation }) => {
   const dispatch = useDispatch();
+  const linkTo = useLinkTo();
   const { userId, userToken } = useAuth();
   const { wallet, status, error } = useSelector((state) => state.wallet);
 
@@ -31,36 +34,56 @@ const WalletCusScreen = ({ navigation }) => {
     if (userId && userToken) {
       dispatch(fetchWallet({ userId, token: userToken }));
     }
+
+    // handle deep link from VNPay
+    const subscription = Linking.addEventListener('url', handleDeepLink);
+    return () => subscription.remove();
   }, [dispatch, userId, userToken]);
 
+  const handleDeepLink = ({ url }) => {
+    const path = Linking.parse(url).path;
+    if (path === 'payment-success') {
+      navigation.navigate('PaymentSuccessScreen');
+    }
+  };
+
   const handleTopUp = async () => {
-    if (!wallet?.id) {
+    if (!wallet?.walletId) {
       Alert.alert('Lỗi', 'Không tìm thấy thông tin ví');
       return;
     }
-
+  
     if (!transactionType || !amount || !email) {
       Alert.alert('Thiếu thông tin', 'Vui lòng nhập đầy đủ các trường');
       return;
     }
-
+  
+    const returnUrl = Linking.createURL('payment-success');
+  
     const payload = {
       userId,
-      walletId: wallet.id,
+      walletId: wallet.walletId,
       transactionType,
       amount: parseInt(amount),
       email,
-      returnUrl: 'https://dummy-payment-success.com', // Replace with your real domain
+      returnUrl,
     };
-
+  
     const res = await dispatch(topUpWallet(payload));
     setModalVisible(false);
-
+  
     if (res.meta.requestStatus === 'fulfilled') {
       const { url } = res.payload;
       if (url) {
-        await WebBrowser.openBrowserAsync(url);
-        navigation.navigate('PaymentSuccessScreen');
+        // ✅ Use secure session-based browser flow
+        const result = await WebBrowser.openAuthSessionAsync(url, returnUrl);
+  
+        if (result.type === 'dismiss') {
+          Alert.alert('Đã hủy thanh toán');
+        }
+  
+        // Optional: manually handle return if redirect is not caught
+        // Linking.parse(result.url)?.path === 'payment-success' also works
       } else {
         Alert.alert('Lỗi', 'Không tìm thấy URL thanh toán');
       }
@@ -190,8 +213,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   placeholderText: { color: '#999', fontStyle: 'italic' },
-
-  // Modal styles
   modalBackdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',

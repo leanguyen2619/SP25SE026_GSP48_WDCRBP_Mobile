@@ -23,8 +23,20 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.woodworker.app"
+      "package": "com.woodworker.app",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": {
+            "scheme": "woodworker",
+            "host": "payment-success"
+          },
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
+    "scheme": "woodworker", 
+    "deepLinking": true,
     "web": {
       "favicon": "./assets/favicon.png"
     }
