@@ -11,10 +11,25 @@ export const topUpWallet = createAsyncThunk(
   'payment/topUpWallet',
   async (data, thunkAPI) => {
     try {
-      const res = await axios.post(`${BASE_URL}/top-up-wallet`, data);
-      return res.data; // assume it contains VNPay redirect URL
+      const res = await axios.post(`${BASE_URL}/top-up-wallet`, data, {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+
+      // Just in case: backend wraps the response, return what matters
+      const { url } = res.data;
+      if (!url) {
+        return thunkAPI.rejectWithValue('Không nhận được VNPay URL từ máy chủ');
+      }
+
+      return { url }; // Only return what's needed
     } catch (err) {
-      return thunkAPI.rejectWithValue(err.response?.data?.message || 'Top-up failed');
+      console.error('🔴 Payment error:', err);
+      return thunkAPI.rejectWithValue(
+        err.response?.data?.message || 'Top-up failed'
+      );
     }
   }
 );
