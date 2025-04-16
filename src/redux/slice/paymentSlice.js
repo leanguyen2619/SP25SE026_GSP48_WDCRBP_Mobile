@@ -1,4 +1,3 @@
-// redux/slice/paymentSlice.js
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { Platform } from 'react-native';
@@ -18,13 +17,17 @@ export const topUpWallet = createAsyncThunk(
         },
       });
 
-      // Just in case: backend wraps the response, return what matters
-      const { url } = res.data;
+      // Log the full response for debugging
+      console.log('Response from API:', res);
+
+      // Ensure the correct response structure from backend
+      const { url } = res.data.data || {};  // Accessing the nested data object
+
       if (!url) {
         return thunkAPI.rejectWithValue('Không nhận được VNPay URL từ máy chủ');
       }
 
-      return { url }; // Only return what's needed
+      return { url };  // Only return what's needed
     } catch (err) {
       console.error('🔴 Payment error:', err);
       return thunkAPI.rejectWithValue(
@@ -33,3 +36,25 @@ export const topUpWallet = createAsyncThunk(
     }
   }
 );
+
+// The reducer to handle actions from topUpWallet
+import { createSlice } from '@reduxjs/toolkit';
+
+const paymentSlice = createSlice({
+  name: 'payment',
+  initialState: { url: null, status: 'idle', error: null },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(topUpWallet.fulfilled, (state, action) => {
+        state.url = action.payload.url; // Store the URL in the state
+        state.status = 'succeeded';
+      })
+      .addCase(topUpWallet.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload || 'Payment failed';
+      });
+  },
+});
+
+export default paymentSlice.reducer;
