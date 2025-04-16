@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -6,203 +6,210 @@ import {
     Image,
     ScrollView,
     TouchableOpacity,
+    Dimensions,
     ActivityIndicator,
     SafeAreaView,
-    Dimensions,
+    Alert
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchDesignDetail, clearDesign } from '../../redux/slice/designSlice';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { getServicePackageInfo } from '../../utils/servicePackageUtils';
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../../redux/slice/cartSlice';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
+const BASE_URL = 'http://10.0.2.2:8080';
+
+const renderServicePackageBadge = (packageName) => {
+    const { label, badgeStyle, textStyle } = getServicePackageInfo(packageName);
+    return (
+        <View style={[styles.servicePackBadge, badgeStyle]}>
+            <Text style={[styles.servicePackText, textStyle]}>{label}</Text>
+        </View>
+    );
+};
 
 const DesignIdeaDetailScreen = ({ route, navigation }) => {
     const { designId } = route.params;
+    const [design, setDesign] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const dispatch = useDispatch();
-    const { currentDesign: design, loading, error } = useSelector((state) => state.design);
-    const [imageToken, setImageToken] = React.useState(null);
 
     useEffect(() => {
-        const getToken = async () => {
-            const token = await AsyncStorage.getItem('accessToken');
-            setImageToken(token);
+        fetchDesignDetail();
+    }, [designId]);
+
+    const fetchDesignDetail = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const response = await axios.get(`${BASE_URL}/api/v1/designIdea/getDesignById/${designId}`);
+            if (response.data && response.data.data) {
+                setDesign(response.data.data);
+            }
+        } catch (error) {
+            console.error('Error fetching design detail:', error);
+            setError('Không thể tải thông tin chi tiết. Vui lòng thử lại sau.');
+            Alert.alert('Thông báo', 'Không thể tải thông tin chi tiết. Vui lòng thử lại sau.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const renderRating = (totalStar, totalReviews) => {
+        const rating = totalReviews > 0 ? totalStar / totalReviews : 0;
+        return (
+            <View style={styles.ratingContainer}>
+                <View style={styles.stars}>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                        <Ionicons
+                            key={star}
+                            name={star <= rating ? "star" : "star-outline"}
+                            size={20}
+                            color="#FFD700"
+                        />
+                    ))}
+                </View>
+                <Text style={styles.ratingText}>
+                    {rating.toFixed(1)} ({totalReviews} đánh giá)
+                </Text>
+            </View>
+        );
+    };
+
+    const handleAddToCart = () => {
+        const cartItem = {
+            id: design.id,
+            name: design.name,
+            description: design.description || 'Không có mô tả',
+            price: design.price,
+            img_urls: Array.isArray(design.img_urls) ? design.img_urls : [design.img_urls],
+            woodworkerName: design.woodworkerProfile?.brandName || 'Không xác định'
         };
-        getToken();
-        dispatch(fetchDesignDetail(designId));
-        console.log('Design Detail Data:', design);
-        return () => {
-            dispatch(clearDesign());
-        };
-    }, [dispatch, designId]);
+        dispatch(addToCart(cartItem));
+        Alert.alert(
+            'Thành công',
+            'Đã thêm sản phẩm vào giỏ hàng',
+            [
+                {
+                    text: 'Tiếp tục mua sắm',
+                    style: 'cancel',
+                },
+                {
+                    text: 'Xem giỏ hàng',
+                    onPress: () => navigation.navigate('Cart')
+                }
+            ]
+        );
+    };
 
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#f97316" />
+                <ActivityIndicator size="large" color="#A0522D" />
             </View>
         );
     }
 
-    if (error || !design) {
+    if (!design) {
         return (
             <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>
-                    {error || 'Không tìm thấy thông tin thiết kế'}
-                </Text>
+                <Text style={styles.errorText}>Không tìm thấy thông tin thiết kế</Text>
             </View>
         );
     }
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <TouchableOpacity 
-                    style={styles.backButton}
-                    onPress={() => navigation.goBack()}
-                >
-                    <Ionicons name="arrow-back" size={24} color="#333" />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Chi tiết thiết kế</Text>
-                <View style={{width: 24}} />
-            </View>
-
             <ScrollView style={styles.scrollView}>
-                <View style={styles.imageContainer}>
-                    {design.img_urls?.[0] ? (
-                        <>
-                            <Image
-                                source={{ 
-                                    uri: design.img_urls[0],
-                                    headers: {
-                                        'Authorization': `Bearer ${imageToken}`
-                                    },
-                                    cache: 'reload'
-                                }}
-                                style={styles.mainImage}
-                                resizeMode="cover"
-                                onLoadStart={() => {
-                                    console.log('Đang tải ảnh từ URL:', design.img_urls[0]);
-                                }}
-                                onError={(error) => {
-                                    console.log('Lỗi tải ảnh từ URL:', design.img_urls[0]);
-                                    console.log('Chi tiết lỗi:', error.nativeEvent);
-                                }}
-                            />
-                        </>
-                    ) : (
-                        <View style={[styles.mainImage, styles.placeholderContainer]}>
-                            <Ionicons name="image-outline" size={48} color="#666" />
-                            <Text style={styles.placeholderText}>Chưa có hình ảnh</Text>
-                        </View>
-                    )}
+                {/* Header với nút back */}
+                <View style={styles.header}>
+                    <TouchableOpacity 
+                        style={styles.backButton}
+                        onPress={() => navigation.goBack()}
+                    >
+                        <Ionicons name="arrow-back" size={24} color="#333" />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Chi tiết thiết kế</Text>
                 </View>
 
-                <View style={styles.contentContainer}>
-                    <Text style={styles.designName}>{design.name || ''}</Text>
-                    
-                    {/* Rating */}
-                    <View style={styles.ratingContainer}>
-                        {[1, 2, 3, 4, 5].map((star) => (
-                            <Ionicons
-                                key={star}
-                                name={star <= (design.totalStar || 0) ? "star" : "star-outline"}
-                                size={20}
-                                color="#FFD700"
-                            />
-                        ))}
-                        <Text style={styles.ratingText}>
-                            {design.totalReviews ? `${design.totalReviews} đánh giá` : 'Chưa có đánh giá'}
-                        </Text>
-                    </View>
+                {/* Hình ảnh chính */}
+                <Image
+                    source={{ 
+                        uri: Array.isArray(design.img_urls) ? design.img_urls[0] : design.img_urls,
+                        headers: {
+                            'Cache-Control': 'no-cache'
+                        }
+                    }}
+                    style={styles.mainImage}
+                    resizeMode="cover"
+                    onError={(error) => {
+                        console.log('Lỗi tải hình ảnh:', error);
+                        Alert.alert('Thông báo', 'Không thể tải hình ảnh. Vui lòng thử lại sau.');
+                    }}
+                />
 
-                    {/* Product Info */}
-                    <View style={styles.infoSection}>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.label}>Loại sản phẩm:</Text>
-                            <Text style={styles.value}>
-                                {design.category?.categoryName || 'Tủ đứng độc lập'}
+                {/* Thông tin cơ bản */}
+                <View style={styles.infoContainer}>
+                    <Text style={styles.title}>{design.name}</Text>
+                    {renderRating(design.totalStar, design.totalReviews)}
+                    
+                    {/* Thông tin thợ mộc */}
+                    <View style={styles.woodworkerContainer}>
+                        <Image
+                            source={{ uri: design.woodworkerProfile.imgUrl }}
+                            style={styles.woodworkerImage}
+                        />
+                        <View style={styles.woodworkerInfo}>
+                            <Text style={styles.woodworkerName}>
+                                {design.woodworkerProfile.brandName}
+                            </Text>
+                            {design.woodworkerProfile.servicePack?.name && 
+                                renderServicePackageBadge(design.woodworkerProfile.servicePack.name)
+                            }
+                            <Text style={styles.address}>
+                                {design.woodworkerProfile.address}
                             </Text>
                         </View>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.label}>Lắp đặt:</Text>
-                            <Text style={styles.value}>Không cần lắp đặt</Text>
-                        </View>
                     </View>
 
-                    {/* Description */}
-                    <View style={styles.descriptionSection}>
-                        <Text style={styles.descriptionTitle}>Mô tả:</Text>
-                        <Text style={styles.descriptionText}>
-                            {design.description || `Tủ quần áo đứng độc lập là lựa chọn hoàn hảo cho những ai mong muốn sự linh hoạt và tiện dụng trong không gian sống. Với thiết kế sang trọng, đường nét tinh tế, sản phẩm này không chỉ giúp lưu trữ quần áo gọn gàng mà còn tạo điểm nhấn thẩm mỹ cho phòng ngủ.\n\nĐặc điểm nổi bật:\n- Thiết kế đa dạng: Nhiều kích thước, kiểu dáng phù hợp với mọi phong cách nội thất.`}
+                    {/* Danh mục */}
+                    <View style={styles.categoryContainer}>
+                        <Text style={styles.sectionTitle}>Danh mục:</Text>
+                        <Text style={styles.categoryText}>
+                            {design.category.categoryName}
                         </Text>
                     </View>
 
-                    {/* Product Configuration */}
-                    <View style={styles.configSection}>
-                        <Text style={styles.configTitle}>Cấu hình sản phẩm</Text>
-                        
-                        <View style={styles.configGroup}>
-                            <Text style={styles.configLabel}>Loại gỗ</Text>
-                            <View style={styles.optionsContainer}>
-                                <TouchableOpacity 
-                                    style={[styles.optionButton, styles.optionSelected]}
-                                    activeOpacity={0.7}
-                                >
-                                    <Text style={[styles.optionText, styles.optionTextSelected]}>
-                                        {design.woodType || 'Xoan đào'}
-                                    </Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity 
-                                    style={styles.optionButton}
-                                    activeOpacity={0.7}
-                                >
-                                    <Text style={styles.optionText}>Sồi</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-
-                        <View style={styles.configGroup}>
-                            <Text style={styles.configLabel}>Kích thước (dài x rộng x cao - cm)</Text>
-                            <View style={styles.optionsContainer}>
-                                <TouchableOpacity 
-                                    style={[styles.optionButton, styles.optionSelected]}
-                                    activeOpacity={0.7}
-                                >
-                                    <Text style={[styles.optionText, styles.optionTextSelected]}>
-                                        {design.dimensions || '2000 x 1500 x 300'}
-                                    </Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity 
-                                    style={styles.optionButton}
-                                    activeOpacity={0.7}
-                                >
-                                    <Text style={styles.optionText}>1500 x 1000 x 300</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    </View>
-
-                    {/* Price */}
-                    <View style={styles.priceSection}>
-                        <Text style={styles.price}>
-                            {design?.price !== null && design?.price !== undefined && design?.price !== 0
-                                ? `${design.price.toLocaleString('vi-VN')} đ`
-                                : `${(5000000).toLocaleString('vi-VN')} đ`}
+                    {/* Mô tả */}
+                    <View style={styles.descriptionContainer}>
+                        <Text style={styles.sectionTitle}>Mô tả chi tiết:</Text>
+                        <Text style={styles.description}>
+                            {design.description}
                         </Text>
-                    </View>
-
-                    {/* Action Buttons */}
-                    <View style={styles.actionButtons}>
-                        <TouchableOpacity style={styles.orderButton}>
-                            <Text style={styles.orderButtonText}>ĐẶT NGAY</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.cartButton}>
-                            <Text style={styles.cartButtonText}>Thêm vào giỏ</Text>
-                        </TouchableOpacity>
                     </View>
                 </View>
             </ScrollView>
+
+            {/* Action buttons */}
+            <View style={styles.actionButtonsContainer}>
+                <TouchableOpacity 
+                    style={styles.addToCartButton}
+                    onPress={handleAddToCart}
+                >
+                    <Text style={styles.addToCartButtonText}>Thêm vào giỏ hàng</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                    style={styles.buyNowButton}
+                    onPress={() => {
+                        handleAddToCart();
+                        navigation.navigate('Cart');
+                    }}
+                >
+                    <Text style={styles.buyNowButtonText}>Mua ngay</Text>
+                </TouchableOpacity>
+            </View>
         </SafeAreaView>
     );
 };
@@ -210,180 +217,123 @@ const DesignIdeaDetailScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: '#F5F5F5',
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
+        padding: 15,
         backgroundColor: '#fff',
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
     },
+    backButton: {
+        padding: 5,
+    },
     headerTitle: {
         fontSize: 18,
-        fontWeight: '600',
+        fontWeight: 'bold',
+        marginLeft: 10,
         color: '#333',
-    },
-    backButton: {
-        padding: 8,
     },
     scrollView: {
         flex: 1,
     },
-    imageContainer: {
-        width: '100%',
-        aspectRatio: 1,
-        backgroundColor: '#f5f5f5',
-    },
     mainImage: {
-        width: '100%',
-        height: '100%',
+        width: SCREEN_WIDTH,
+        height: SCREEN_WIDTH * 0.75,
     },
-    placeholderContainer: {
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#f5f5f5',
+    infoContainer: {
+        padding: 15,
+        backgroundColor: '#fff',
     },
-    placeholderText: {
-        marginTop: 8,
-        color: '#666',
-        fontSize: 14,
-    },
-    contentContainer: {
-        padding: 16,
-    },
-    designName: {
-        fontSize: 24,
+    title: {
+        fontSize: 22,
         fontWeight: 'bold',
         color: '#333',
-        marginBottom: 8,
+        marginBottom: 10,
     },
     ratingContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 16,
+        marginBottom: 15,
+    },
+    stars: {
+        flexDirection: 'row',
+        marginRight: 10,
     },
     ratingText: {
-        fontSize: 14,
+        fontSize: 16,
         color: '#666',
-        marginLeft: 4,
     },
-    infoSection: {
-        marginBottom: 20,
-    },
-    infoRow: {
+    woodworkerContainer: {
         flexDirection: 'row',
-        marginBottom: 8,
+        padding: 15,
+        backgroundColor: '#f9f9f9',
+        borderRadius: 10,
+        marginBottom: 15,
     },
-    label: {
-        width: 120,
-        fontSize: 14,
-        color: '#666',
-        fontWeight: '500',
+    woodworkerImage: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        marginRight: 15,
     },
-    value: {
+    woodworkerInfo: {
         flex: 1,
-        fontSize: 14,
-        color: '#333',
     },
-    descriptionSection: {
-        marginBottom: 20,
-    },
-    descriptionTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#333',
-        marginBottom: 8,
-    },
-    descriptionText: {
-        fontSize: 14,
-        lineHeight: 20,
-        color: '#333',
-    },
-    configSection: {
-        marginBottom: 24,
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        padding: 16,
-    },
-    configTitle: {
-        fontSize: 20,
-        fontWeight: '600',
-        color: '#333',
-        marginBottom: 20,
-    },
-    configGroup: {
-        marginBottom: 20,
-    },
-    configLabel: {
-        fontSize: 16,
-        color: '#333',
-        marginBottom: 12,
-        fontWeight: '500',
-    },
-    optionsContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 12,
-    },
-    optionButton: {
-        paddingHorizontal: 20,
-        paddingVertical: 12,
-        borderRadius: 8,
-        borderWidth: 1.5,
-        borderColor: '#e5e5e5',
-        backgroundColor: '#fff',
-        minWidth: '45%',
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
-    },
-    optionSelected: {
-        backgroundColor: '#f97316',
-        borderColor: '#f97316',
-    },
-    optionText: {
-        color: '#333',
-        fontSize: 15,
-        fontWeight: '500',
-    },
-    optionTextSelected: {
-        color: '#fff',
-    },
-    priceSection: {
-        marginBottom: 20,
-    },
-    price: {
-        fontSize: 24,
+    woodworkerName: {
+        fontSize: 18,
         fontWeight: 'bold',
-        color: '#f97316',
+        color: '#333',
+        marginBottom: 5,
     },
-    actionButtons: {
-        flexDirection: 'row',
-        gap: 12,
+    servicePackBadge: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
+        alignSelf: 'flex-start',
+        marginVertical: 8,
+        borderWidth: 1,
     },
-    orderButton: {
-        flex: 1,
-        backgroundColor: '#f97316',
-        paddingVertical: 12,
-        borderRadius: 8,
-        alignItems: 'center',
-    },
-    orderButtonText: {
-        color: '#fff',
-        fontSize: 16,
+    servicePackText: {
+        fontSize: 14,
         fontWeight: '600',
     },
-    cartButton: {
+    address: {
+        fontSize: 14,
+        color: '#666',
+    },
+    categoryContainer: {
+        marginBottom: 15,
+    },
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 5,
+    },
+    categoryText: {
+        fontSize: 14,
+        color: '#666',
+    },
+    descriptionContainer: {
+        marginBottom: 20,
+    },
+    description: {
+        fontSize: 14,
+        color: '#333',
+        lineHeight: 20,
+    },
+    actionButtonsContainer: {
+        flexDirection: 'row',
+        padding: 15,
+        backgroundColor: '#fff',
+        borderTopWidth: 1,
+        borderTopColor: '#eee',
+        gap: 10,
+    },
+    addToCartButton: {
         flex: 1,
         backgroundColor: '#fff',
         paddingVertical: 12,
@@ -392,8 +342,20 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#f97316',
     },
-    cartButtonText: {
+    buyNowButton: {
+        flex: 1,
+        backgroundColor: '#f97316',
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    addToCartButtonText: {
         color: '#f97316',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    buyNowButtonText: {
+        color: '#fff',
         fontSize: 16,
         fontWeight: '600',
     },
@@ -410,7 +372,7 @@ const styles = StyleSheet.create({
     },
     errorText: {
         fontSize: 16,
-        color: '#dc3545',
+        color: '#FF0000',
         textAlign: 'center',
     },
 });

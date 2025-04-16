@@ -3,12 +3,22 @@ import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { appColorTheme } from '../../../theme/colors';
 import { useRoute } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
+
+const packTypeColors = {
+  bronze: '#cd7f32',
+  silver: '#c0c0c0',
+  gold: '#ffd700',
+};
 
 const Footer = ({ navigation }) => {
   const route = useRoute();
+  const { user } = useSelector((state) => state.auth);
+  const packType = user?.packType?.toLowerCase() || 'bronze';
+  const activeColor = packTypeColors[packType] || appColorTheme.primary;
 
   const getColor = (screen) =>
-    route.name === screen ? appColorTheme.primary : appColorTheme.text.secondary;
+    route.name === screen ? activeColor : appColorTheme.text.secondary;
 
   return (
     <View style={styles.footer}>
