@@ -20,6 +20,7 @@ import ProductScreen from '../screens/Customer/ProductScreen';
 import DesignIdeaDetailScreen from '../screens/Customer/DesignIdeaDetailScreen';
 import WalletCusScreen from '../screens/Customer/WalletCusScreen';
 import PaymentSuccessScreen from '../screens/Payment/PaymentSuccessScreen';
+import cartScreen from '../screens/Customer/CartScreen';
 import { colors } from '../theme/colors';
 import { useAuth } from '../context/AuthContext';
 

@@ -31,6 +31,12 @@ const Footer = ({ navigation }) => {
         color={getColor('Woodworker')}
       />
       <TouchableFooterItem
+        icon="shopping-cart"
+        label="Giỏ hàng"
+        onPress={() => navigation.navigate('Cart')}
+        color={getColor('Cart')}
+      />
+      <TouchableFooterItem
         icon="account-balance-wallet"
         label="Ví"
         onPress={() => navigation.navigate('Wallet')}
