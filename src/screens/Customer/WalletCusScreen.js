@@ -175,8 +175,6 @@ const WalletCusScreen = ({ navigation }) => {
   );
 };
 
-export default WalletCusScreen;
-
 const styles = StyleSheet.create({
   pageContainer: { paddingTop: 20, flex: 1, backgroundColor: '#fff' },
   container: { padding: 20, paddingBottom: 80 },
@@ -251,3 +249,5 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
 });
+
+export default WalletCusScreen;
