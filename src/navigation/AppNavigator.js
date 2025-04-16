@@ -17,10 +17,10 @@ import AdminScreen from '../screens/Admin/AdminScreen';
 import WoodworkerRegistrationManagement from '../screens/Admin/WoodworkerRegistrationManagement';
 import WoodworkerRegistrationDetail from '../screens/Admin/WoodworkerRegistrationDetail';
 import ProductScreen from '../screens/Customer/ProductScreen';
+import ProductDetailScreen from '../screens/Customer/ProductDetailScreen';
 import DesignIdeaDetailScreen from '../screens/Customer/DesignIdeaDetailScreen';
 import WalletCusScreen from '../screens/Customer/WalletCusScreen';
 import PaymentSuccessScreen from '../screens/Payment/PaymentSuccessScreen';
-import cartScreen from '../screens/Customer/CartScreen';
 import { colors } from '../theme/colors';
 import { useAuth } from '../context/AuthContext';
 
@@ -65,6 +65,13 @@ const AppNavigator = () => {
       <Stack.Screen 
         name="Product" 
         component={ProductScreen}
+        options={{
+          headerShown: false
+        }}
+      />
+      <Stack.Screen 
+        name="ProductDetail" 
+        component={ProductDetailScreen}
         options={{
           headerShown: false
         }}

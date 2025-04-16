@@ -4,6 +4,8 @@ import woodworkerReducer from './slice/woodworkerSlice';
 import productReducer from './slice/productSlice';
 import walletReducer from './slice/walletSlice';
 import userAddressReducer from './slice/userAddressSlice';
+import authReducer from './slice/authSlice';
+import cartReducer from './slice/cartSlice';
 import designReducer from './slice/designSlice';
 
 const store = configureStore({
@@ -13,6 +15,8 @@ const store = configureStore({
     product: productReducer,
     wallet: walletReducer, 
     userAddress: userAddressReducer,
+    auth: authReducer,
+    cart: cartReducer,
     design: designReducer,
   },
 });

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -10,79 +10,74 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
+import { useSelector, useDispatch } from 'react-redux';
+import { removeFromCart, updateQuantity } from '../../redux/slice/cartSlice';
 import { appColorTheme } from '../../theme/colors';
 
 const CartScreen = () => {
   const navigation = useNavigation();
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: 'Giường Ngủ Gỗ Sồi',
-      description: 'Gỗ sồi tự nhiên, 1m8 x 2m, Màu nâu đậm',
-      price: 15000000,
-      quantity: 1,
-      image: 'https://product.hstatic.net/1000360516/product/giuong_ngu_go_soi_4_d8661c2040f44d49a5983658f560fbce_master.jpg'
-    },
-    {
-      id: 2,
-      name: 'Tủ Quần Áo 4 Cánh',
-      description: 'Gỗ óc chó, 2m x 2.4m, Có gương',
-      price: 12000000,
-      quantity: 1,
-      image: 'https://product.hstatic.net/1000360516/product/tu_quan_ao_go_soi_4_canh_3_d9529c71d84d4f0aa1dc31502f4c2a0f_master.jpg'
-    },
-    {
-      id: 3,
-      name: 'Bàn Ăn 6 Ghế',
-      description: 'Gỗ cao su, 1.6m x 0.8m, Màu nâu nhạt',
-      price: 8500000,
-      quantity: 1,
-      image: 'https://product.hstatic.net/1000360516/product/ban_an_go_soi_6_ghe_3_c3acf3a0c4434d359c9cf96943619fc2_master.jpg'
-    }
-  ]);
+  const dispatch = useDispatch();
+  const cartItems = useSelector(state => state.cart.items);
 
-  const updateQuantity = (id, change) => {
-    setCartItems(cartItems.map(item => {
-      if (item.id === id) {
-        const newQuantity = item.quantity + change;
-        return {
-          ...item,
-          quantity: newQuantity > 0 ? newQuantity : 1
-        };
-      }
-      return item;
-    }));
+  const handleUpdateQuantity = (id, change) => {
+    dispatch(updateQuantity({ id, change }));
   };
 
-  const removeItem = (id) => {
-    setCartItems(cartItems.filter(item => item.id !== id));
+  const handleRemoveItem = (id) => {
+    dispatch(removeFromCart(id));
   };
 
   const calculateTotal = () => {
-    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cartItems.reduce((total, item) => {
+      const itemPrice = item.price || 0;
+      return total + (itemPrice * (item.quantity || 1));
+    }, 0);
   };
 
   const renderCartItem = (item) => (
     <View key={item.id} style={styles.cartItem}>
-      <Image
-        source={{ uri: item.image }}
-        style={styles.itemImage}
-      />
+      <View style={styles.imageContainer}>
+        {item.img_urls ? (
+          <Image
+            source={{ 
+              uri: Array.isArray(item.img_urls) ? item.img_urls[0] : item.img_urls,
+              headers: {
+                'Cache-Control': 'no-cache'
+              }
+            }}
+            style={styles.itemImage}
+            onError={() => console.log('Lỗi tải hình ảnh:', item.id)}
+          />
+        ) : (
+          <View style={[styles.itemImage, styles.placeholderImage]}>
+            <Icon name="image-not-supported" size={40} color={appColorTheme.grey_1} />
+          </View>
+        )}
+      </View>
       <View style={styles.itemDetails}>
-        <Text style={styles.itemName}>{item.name}</Text>
-        <Text style={styles.itemDescription}>{item.description}</Text>
-        <Text style={styles.itemPrice}>{item.price.toLocaleString()}đ</Text>
+        <Text style={styles.itemName}>{item.name || 'Sản phẩm không tên'}</Text>
+        <Text style={styles.itemDescription}>{item.description || 'Không có mô tả'}</Text>
+        <Text style={styles.itemPrice}>
+          {(item.price || 0).toLocaleString()}đ
+        </Text>
         <View style={styles.quantityContainer}>
-          <TouchableOpacity onPress={() => updateQuantity(item.id, -1)}>
-            <Icon name="remove-circle-outline" size={24} color={appColorTheme.brown_1} />
+          <TouchableOpacity 
+            onPress={() => handleUpdateQuantity(item.id, -1)}
+            disabled={item.quantity <= 1}
+          >
+            <Icon 
+              name="remove-circle-outline" 
+              size={24} 
+              color={item.quantity <= 1 ? appColorTheme.grey_1 : appColorTheme.brown_1} 
+            />
           </TouchableOpacity>
-          <Text style={styles.quantity}>{item.quantity}</Text>
-          <TouchableOpacity onPress={() => updateQuantity(item.id, 1)}>
+          <Text style={styles.quantity}>{item.quantity || 1}</Text>
+          <TouchableOpacity onPress={() => handleUpdateQuantity(item.id, 1)}>
             <Icon name="add-circle-outline" size={24} color={appColorTheme.brown_1} />
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.removeButton}
-            onPress={() => removeItem(item.id)}
+            onPress={() => handleRemoveItem(item.id)}
           >
             <Icon name="delete-outline" size={24} color="#e74c3c" />
           </TouchableOpacity>
@@ -107,9 +102,14 @@ const CartScreen = () => {
             {cartItems.map(renderCartItem)}
             <View style={styles.totalSection}>
               <Text style={styles.totalText}>Tổng tiền:</Text>
-              <Text style={styles.totalAmount}>{calculateTotal().toLocaleString()}đ</Text>
+              <Text style={styles.totalAmount}>
+                {calculateTotal().toLocaleString()}đ
+              </Text>
             </View>
-            <TouchableOpacity style={styles.checkoutButton}>
+            <TouchableOpacity 
+              style={styles.checkoutButton}
+              onPress={() => navigation.navigate('Checkout')}
+            >
               <Text style={styles.checkoutButtonText}>Tiến hành thanh toán</Text>
             </TouchableOpacity>
           </>
@@ -119,7 +119,7 @@ const CartScreen = () => {
             <Text style={styles.emptyCartText}>Giỏ hàng của bạn đang trống</Text>
             <TouchableOpacity 
               style={styles.continueShopping}
-              onPress={() => navigation.navigate('Home')}
+              onPress={() => navigation.navigate('Product')}
             >
               <Text style={styles.continueShoppingText}>Tiếp tục mua sắm</Text>
             </TouchableOpacity>
@@ -170,11 +170,20 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  itemImage: {
+  imageContainer: {
     width: 100,
     height: 100,
-    borderRadius: 8,
     marginRight: 16,
+  },
+  itemImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 8,
+  },
+  placeholderImage: {
+    backgroundColor: appColorTheme.grey_0,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   itemDetails: {
     flex: 1,

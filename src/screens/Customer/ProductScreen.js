@@ -174,7 +174,11 @@ const ProductScreen = () => {
 
                 <View style={{ paddingHorizontal: 16, paddingBottom: 100 }}>
                     {filteredProducts.map((product) => (
-                        <TouchableOpacity key={product.productId} style={styles.card}>
+                        <TouchableOpacity 
+                            key={product.productId} 
+                            style={styles.card}
+                            onPress={() => navigation.navigate('ProductDetail', { productId: product.productId })}
+                        >
                             <Image source={{ uri: product.mediaUrls }} style={styles.image} />
                             <View style={{ padding: 12 }}>
                                 <Text style={styles.name}>{product.productName}</Text>
