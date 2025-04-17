@@ -11,34 +11,34 @@ import {
 } from 'react-native';
 import Modal from 'react-native-modal';
 import { Picker } from '@react-native-picker/picker';
-import { addressService } from '../../../services/addressService';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProvinces } from '../../../redux/slice/provinceSlice';
+import { fetchDistricts, clearDistricts } from '../../../redux/slice/districtSlice';
+import { fetchWards, clearWards } from '../../../redux/slice/wardSlice';
 import { createUserAddress } from '../../../redux/slice/userAddressSlice';
 import CustomAlert from '../../common/Alert/CustomAlert';
 
-
-const AddAddressModal = ({ isVisible, onClose, userId }) => {
+const AddAddressModal = ({ isVisible, onClose, userId, onSuccess }) => {
   const dispatch = useDispatch();
-  const [errorVisible, setErrorVisible] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
 
-
-  const [isDefault, setIsDefault] = useState(true);
-  const [cities, setCities] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [wards, setWards] = useState([]);
+  const provinces = useSelector((state) => state.province.data);
+  const districts = useSelector((state) => state.district.data);
+  const wards = useSelector((state) => state.ward.data);
+  const districtLoading = useSelector((state) => state.district.loading);
+  const wardLoading = useSelector((state) => state.ward.loading);
 
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [selectedWard, setSelectedWard] = useState('');
   const [address, setAddress] = useState('');
+  const [isDefault, setIsDefault] = useState(true);
 
-  const [loadingDistricts, setLoadingDistricts] = useState(false);
-  const [loadingWards, setLoadingWards] = useState(false);
+  const [errorVisible, setErrorVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     if (isVisible) {
-      loadCities();
+      dispatch(fetchProvinces());
       resetForm();
     }
   }, [isVisible]);
@@ -48,48 +48,23 @@ const AddAddressModal = ({ isVisible, onClose, userId }) => {
     setSelectedDistrict('');
     setSelectedWard('');
     setAddress('');
-    setDistricts([]);
-    setWards([]);
     setIsDefault(true);
+    dispatch(clearDistricts());
+    dispatch(clearWards());
   };
 
-  const loadCities = async () => {
-    try {
-      const data = await addressService.getCities();
-      setCities(data);
-    } catch (e) {
-      Alert.alert('Lỗi', 'Không thể tải danh sách tỉnh/thành phố');
-    }
-  };
-
-  const handleCityChange = async (cityId) => {
+  const handleCityChange = (cityId) => {
     setSelectedCity(cityId);
     setSelectedDistrict('');
     setSelectedWard('');
-    setDistricts([]);
-    setWards([]);
-    setLoadingDistricts(true);
-    try {
-      const data = await addressService.getDistrictsByCity(cityId);
-      setDistricts(data);
-    } catch (e) {
-      Alert.alert('Lỗi', 'Không thể tải danh sách quận/huyện');
-    }
-    setLoadingDistricts(false);
+    dispatch(fetchDistricts(cityId));
+    dispatch(clearWards());
   };
 
-  const handleDistrictChange = async (districtId) => {
+  const handleDistrictChange = (districtId) => {
     setSelectedDistrict(districtId);
     setSelectedWard('');
-    setWards([]);
-    setLoadingWards(true);
-    try {
-      const data = await addressService.getWardsByDistrict(districtId);
-      setWards(data);
-    } catch (e) {
-      Alert.alert('Lỗi', 'Không thể tải danh sách phường/xã');
-    }
-    setLoadingWards(false);
+    dispatch(fetchWards(districtId));
   };
 
   const handleSubmit = () => {
@@ -109,13 +84,12 @@ const AddAddressModal = ({ isVisible, onClose, userId }) => {
 
     dispatch(createUserAddress(payload)).then((res) => {
       if (res.meta.requestStatus === 'rejected') {
-        // 👇 Clean and format the message
         const cleanMsg = (res.payload || '').replace('Không thể thực thi:', '').trim();
         setErrorMessage(cleanMsg);
         setErrorVisible(true);
         return;
       }
-      onClose();
+      onSuccess?.(); // Refresh list in parent
     });
   };
 
@@ -129,14 +103,16 @@ const AddAddressModal = ({ isVisible, onClose, userId }) => {
           <Switch value={isDefault} onValueChange={setIsDefault} />
         </View>
 
+        {/* Province */}
         <Picker selectedValue={selectedCity} onValueChange={handleCityChange}>
           <Picker.Item label="Chọn tỉnh/thành phố" value="" />
-          {cities.map((city) => (
-            <Picker.Item key={city.id} label={city.name} value={city.id} />
+          {provinces.map((city) => (
+            <Picker.Item key={city.ProvinceID} label={city.ProvinceName} value={city.ProvinceID} />
           ))}
         </Picker>
 
-        {loadingDistricts ? (
+        {/* District */}
+        {districtLoading ? (
           <ActivityIndicator color="orange" />
         ) : (
           <Picker
@@ -146,26 +122,28 @@ const AddAddressModal = ({ isVisible, onClose, userId }) => {
           >
             <Picker.Item label="Chọn quận/huyện" value="" />
             {districts.map((d) => (
-              <Picker.Item key={d.id} label={d.name} value={d.id} />
+              <Picker.Item key={d.DistrictID} label={d.DistrictName} value={d.DistrictID} />
             ))}
           </Picker>
         )}
 
-        {loadingWards ? (
+        {/* Ward */}
+        {wardLoading ? (
           <ActivityIndicator color="orange" />
         ) : (
           <Picker
             selectedValue={selectedWard}
-            onValueChange={setSelectedWard}
+            onValueChange={(val) => setSelectedWard(val)}
             enabled={wards.length > 0}
           >
             <Picker.Item label="Chọn phường/xã" value="" />
             {wards.map((w) => (
-              <Picker.Item key={w.code} label={w.name} value={w.code} />
+              <Picker.Item key={w.WardCode} label={w.WardName} value={w.WardCode} />
             ))}
           </Picker>
         )}
 
+        {/* Address */}
         <TextInput
           placeholder="Nhập địa chỉ cụ thể (số nhà, tên đường...)"
           value={address}
@@ -179,10 +157,10 @@ const AddAddressModal = ({ isVisible, onClose, userId }) => {
       </View>
 
       <CustomAlert
-      visible={errorVisible}
-      message={errorMessage}
-      onClose={() => setErrorVisible(false)}
-    />
+        visible={errorVisible}
+        message={errorMessage}
+        onClose={() => setErrorVisible(false)}
+      />
     </Modal>
   );
 };
