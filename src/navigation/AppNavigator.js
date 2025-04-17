@@ -14,6 +14,7 @@ import SearchScreen from '../screens/SearchScreen';
 import ProfileScreen from '../screens/Customer/ProfileScreen';
 import PricingScreen from '../screens/PricingScreen';
 import CartScreen from '../screens/Customer/CartScreen';
+import CheckoutScreen from '../screens/Customer/CheckoutScreen';
 import DesignIdeaScreen from '../screens/Customer/DesignIdeaScreen';
 import DesignIdeaDetailScreen from '../screens/Customer/DesignIdeaDetailScreen';
 import WoodworkerScreen from '../screens/Customer/WoodworkerScreen';
@@ -108,6 +109,7 @@ const AppNavigator = () => {
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="Pricing" component={PricingScreen} />
       <Stack.Screen name="Cart" component={CartScreen} />
+      <Stack.Screen name="Checkout" component={CheckoutScreen} />
       <Stack.Screen name="Design" component={DesignIdeaScreen} />
       <Stack.Screen name="DesignDetail" component={DesignIdeaDetailScreen} />
       <Stack.Screen name="Woodworker" component={WoodworkerScreen} />

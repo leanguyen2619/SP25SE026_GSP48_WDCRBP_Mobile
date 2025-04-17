@@ -19,12 +19,12 @@ const CartScreen = () => {
   const dispatch = useDispatch();
   const cartItems = useSelector(state => state.cart.items);
 
-  const handleUpdateQuantity = (id, change) => {
-    dispatch(updateQuantity({ id, change }));
+  const handleUpdateQuantity = (cartItemKey, change) => {
+    dispatch(updateQuantity({ cartItemKey, change }));
   };
 
-  const handleRemoveItem = (id) => {
-    dispatch(removeFromCart(id));
+  const handleRemoveItem = (cartItemKey) => {
+    dispatch(removeFromCart(cartItemKey));
   };
 
   const calculateTotal = () => {
@@ -35,7 +35,7 @@ const CartScreen = () => {
   };
 
   const renderCartItem = (item) => (
-    <View key={item.id} style={styles.cartItem}>
+    <View key={item.cartItemKey} style={styles.cartItem}>
       <View style={styles.imageContainer}>
         {item.img_urls ? (
           <Image
@@ -56,13 +56,29 @@ const CartScreen = () => {
       </View>
       <View style={styles.itemDetails}>
         <Text style={styles.itemName}>{item.name || 'Sản phẩm không tên'}</Text>
-        <Text style={styles.itemDescription}>{item.description || 'Không có mô tả'}</Text>
+        
+        {/* Hiển thị thông tin cấu hình */}
+        {item.configuration && (
+          <View style={styles.configContainer}>
+            {item.configuration.woodType && (
+              <Text style={styles.configText}>
+                Loại gỗ: {item.configuration.woodType}
+              </Text>
+            )}
+            {item.configuration.size && (
+              <Text style={styles.configText}>
+                Kích thước: {item.configuration.size}
+              </Text>
+            )}
+          </View>
+        )}
+
         <Text style={styles.itemPrice}>
           {(item.price || 0).toLocaleString()}đ
         </Text>
         <View style={styles.quantityContainer}>
           <TouchableOpacity 
-            onPress={() => handleUpdateQuantity(item.id, -1)}
+            onPress={() => handleUpdateQuantity(item.cartItemKey, -1)}
             disabled={item.quantity <= 1}
           >
             <Icon 
@@ -72,12 +88,12 @@ const CartScreen = () => {
             />
           </TouchableOpacity>
           <Text style={styles.quantity}>{item.quantity || 1}</Text>
-          <TouchableOpacity onPress={() => handleUpdateQuantity(item.id, 1)}>
+          <TouchableOpacity onPress={() => handleUpdateQuantity(item.cartItemKey, 1)}>
             <Icon name="add-circle-outline" size={24} color={appColorTheme.brown_1} />
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.removeButton}
-            onPress={() => handleRemoveItem(item.id)}
+            onPress={() => handleRemoveItem(item.cartItemKey)}
           >
             <Icon name="delete-outline" size={24} color="#e74c3c" />
           </TouchableOpacity>
@@ -270,6 +286,14 @@ const styles = StyleSheet.create({
     color: appColorTheme.white_0,
     fontSize: 16,
     fontWeight: '500',
+  },
+  configContainer: {
+    marginBottom: 8,
+  },
+  configText: {
+    fontSize: 14,
+    color: appColorTheme.grey_1,
+    marginBottom: 4,
   },
 });
 
