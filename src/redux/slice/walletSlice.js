@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { Platform } from 'react-native';
 
-// ✅ Set base URL depending on platform
+// ✅ Set base URL depending on platform (Android or iOS)
 const BASE_URL = Platform.OS === 'android'
   ? 'http://10.0.2.2:8080/api/v1/wallet'
   : 'http://localhost:8080/api/v1/wallet';
@@ -28,7 +28,32 @@ export const fetchWallet = createAsyncThunk(
   }
 );
 
-// 🔄 Redux slice
+// 🔄 Async thunk to update wallet balance
+export const updateWallet = createAsyncThunk(
+  'wallet/updateWallet',
+  async ({ walletId, amount, token }, thunkAPI) => {
+    try {
+      const res = await axios.put(
+        `${BASE_URL}/update`,
+        { walletId, amount },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+          },
+        }
+      );
+      return res.data; // Return the updated wallet data
+    } catch (error) {
+      console.error('❌ Error updating wallet:', error.message);
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || 'Failed to update wallet'
+      );
+    }
+  }
+);
+
+// 🔄 Redux slice for wallet state
 const walletSlice = createSlice({
   name: 'wallet',
   initialState: {
@@ -37,6 +62,7 @@ const walletSlice = createSlice({
     error: null,
   },
   reducers: {
+    // Action to clear wallet data
     clearWallet: (state) => {
       state.wallet = null;
       state.error = null;
@@ -45,8 +71,10 @@ const walletSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Fetch wallet actions
       .addCase(fetchWallet.pending, (state) => {
         state.status = 'loading';
+        state.error = null;
       })
       .addCase(fetchWallet.fulfilled, (state, action) => {
         state.status = 'succeeded';
@@ -55,9 +83,24 @@ const walletSlice = createSlice({
       .addCase(fetchWallet.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
+      })
+
+      // Update wallet actions
+      .addCase(updateWallet.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(updateWallet.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.wallet = action.payload; // Updating the wallet with new data
+      })
+      .addCase(updateWallet.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload;
       });
   },
 });
 
 export const { clearWallet } = walletSlice.actions;
+
 export default walletSlice.reducer;
