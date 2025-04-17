@@ -1,30 +1,33 @@
-// screens/TopUpScreen.js
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { useDispatch } from 'react-redux';
 import { topUpWallet } from '../redux/slice/paymentSlice';
 import { useAuth } from '../context/AuthContext';
+import * as Linking from 'expo-linking';
 
-const TopUpScreen = ({ navigation }) => {
+const TopUpScreen = () => {
   const dispatch = useDispatch();
   const { userId } = useAuth();
 
   const handleTopUp = async () => {
+    const returnUrl = Linking.createURL('payment-success');
+
     const payload = {
-      userId: userId,
-      walletId: 'WALLET-ID-HERE', // get from Redux wallet data
+      userId,
+      walletId: 'WALLET-ID-HERE', // get from Redux wallet
       transactionType: 'TOP_UP',
-      amount: 500000, // or from input
+      amount: 500000,
       email: 'user@example.com',
-      returnUrl: 'myapp://payment-success', // use a deep link or just navigate manually
+      returnUrl,
     };
 
     const res = await dispatch(topUpWallet(payload));
-
     if (res.meta.requestStatus === 'fulfilled') {
-      const redirectUrl = res.payload.url; // <- URL from backend response
-      await WebBrowser.openBrowserAsync(redirectUrl);
+      const { url } = res.payload;
+      if (url) {
+        await WebBrowser.openAuthSessionAsync(url, returnUrl);
+      }
     } else {
       alert('Giao dịch thất bại: ' + res.payload);
     }

@@ -11,9 +11,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.woodworker.app"
@@ -32,15 +30,28 @@
             "host": "payment-success"
           },
           "category": ["BROWSABLE", "DEFAULT"]
+        },
+        {
+          "action": "VIEW",
+          "data": {
+            "scheme": "woodworker",
+            "host": "service-pack-success"
+          },
+          "category": ["BROWSABLE", "DEFAULT"]
+        },
+        {
+          "action": "VIEW",
+          "data": {
+            "scheme": "woodworker",
+            "host": "wallet-topup-success"
+          },
+          "category": ["BROWSABLE", "DEFAULT"]
         }
       ]
     },
-    "scheme": "woodworker", 
-    "deepLinking": true,
+    "scheme": "woodworker",
     "web": {
       "favicon": "./assets/favicon.png"
     }
-  },
-  "name": "woodworker",
-  "displayName": "Woodworker App"
+  }
 }
