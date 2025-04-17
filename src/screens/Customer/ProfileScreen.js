@@ -9,63 +9,89 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
+
+import Footer from '../../components/common/footer/footer';
+import AddAddressModal from '../../components/common/modals/AddAddressModal';
+
 import { fetchUserById } from '../../redux/slice/userSlice';
 import {
   fetchUserAddresses,
   deleteUserAddress,
 } from '../../redux/slice/userAddressSlice';
-import { useAuth } from '../../context/AuthContext';
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import Footer from '../../components/common/footer/footer';
-import AddAddressModal from '../../components/common/modals/AddAddressModal';
-import { resolveLocation } from '../../utils/locationResolver'; // 👈 Your location helper
+import {
+  fetchProvinces,
+  fetchDistricts,
+  fetchWardsByDistrict,
+} from '../../redux/slice/ghnSlice'; // ✅ USING GHN API here
 
 const ProfileScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const { userId, signOut } = useAuth();
+
   const { profile, loading, error } = useSelector((state) => state.user);
-  const { list: rawAddresses } = useSelector((state) => state.userAddress);
-  const addresses = Array.isArray(rawAddresses) ? rawAddresses : [];
-  const user = profile?.data;
+  const { list: addresses } = useSelector((state) => state.userAddress);
+
+  const {
+    provinces,
+    districts,
+    wardsByDistrict,
+    loading: ghnLoading,
+  } = useSelector((state) => state.ghn);
 
   const [showEmail, setShowEmail] = useState(false);
-  const [showRole, setShowRole] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
-  const [resolvedAddresses, setResolvedAddresses] = useState([]);
 
+  // Initial fetch
   useEffect(() => {
     if (userId) {
       dispatch(fetchUserById(userId));
       dispatch(fetchUserAddresses(userId));
     }
+    dispatch(fetchProvinces());
+    dispatch(fetchDistricts());
   }, [dispatch, userId]);
 
+  // Fetch necessary ward data per district in addresses
   useEffect(() => {
-    const resolveAll = async () => {
-      const enriched = await Promise.all(
-        addresses.map(async (addr) => {
-          const names = await resolveLocation(addr);
-          return {
-            ...addr,
-            fullAddress: `${addr.address}, ${names.ward}, ${names.district}, ${names.city}`,
-          };
-        })
-      );
-      setResolvedAddresses(enriched);
-    };
+    if (!addresses || addresses.length === 0) return;
 
-    if (addresses.length > 0) {
-      resolveAll();
-    }
+    const uniqueDistricts = [...new Set(addresses.map((addr) => addr.district_id))];
+    uniqueDistricts.forEach((districtId) => {
+      if (!wardsByDistrict[districtId]) {
+        dispatch(fetchWardsByDistrict(districtId));
+      }
+    });
   }, [addresses]);
 
   const handleDeleteAddress = (id) => {
-    dispatch(deleteUserAddress(id));
+    dispatch(deleteUserAddress(id)).then(() => {
+      dispatch(fetchUserAddresses(userId));
+    });
   };
 
-  if (loading) {
+  const handleAddressAdded = () => {
+    dispatch(fetchUserAddresses(userId));
+    setModalVisible(false);
+  };
+
+  const getFullAddress = (addr) => {
+    const wardList = wardsByDistrict[addr.district_id] || [];
+
+    const wardName =
+      wardList.find((w) => w.WardCode === addr.ward_code)?.WardName || '';
+    const districtName =
+      districts.find((d) => d.DistrictID === addr.district_id)?.DistrictName || '';
+    const provinceName =
+      provinces.find((p) => p.ProvinceID === addr.city_id)?.ProvinceName || '';
+
+    return `${addr.address}, ${wardName}, ${districtName}, ${provinceName}`;
+  };
+
+  if (loading || ghnLoading) {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="orange" />
@@ -84,27 +110,24 @@ const ProfileScreen = () => {
   return (
     <View style={styles.screenWrapper}>
       <ScrollView contentContainerStyle={styles.container}>
-        {/* Avatar */}
         <View style={styles.avatarContainer}>
           <Image
             source={require('../../../assets/avatar-placeholder.png')}
             style={styles.avatar}
           />
-          <Text style={styles.name}>{user?.username}</Text>
+          <Text style={styles.name}>{profile?.username}</Text>
         </View>
 
-        {/* Info */}
         <View style={styles.infoCard}>
-          <InfoItem label="Tên" value={user?.username} />
+          <InfoItem label="Tên" value={profile?.username} />
           <InfoItem
             label="Email"
-            value={showEmail ? user?.email : '••••••••'}
+            value={showEmail ? profile?.email : '••••••••'}
             secure={!showEmail}
             onToggle={() => setShowEmail(!showEmail)}
           />
-          <InfoItem label="Điện thoại" value={user?.phone} />
+          <InfoItem label="Điện thoại" value={profile?.phone} />
 
-          {/* Address List */}
           <View style={styles.addressHeader}>
             <Text style={styles.subTitle}>Địa chỉ</Text>
             <TouchableOpacity onPress={() => setModalVisible(true)}>
@@ -112,14 +135,14 @@ const ProfileScreen = () => {
             </TouchableOpacity>
           </View>
 
-          {resolvedAddresses.length === 0 ? (
+          {(!addresses || addresses.length === 0) ? (
             <Text style={styles.noAddressText}>Chưa có địa chỉ nào.</Text>
           ) : (
             <View style={styles.addressList}>
-              {resolvedAddresses.map((addr) => (
-                <View key={addr.id} style={styles.addressRow}>
-                  <Text style={styles.addressText}>{addr.fullAddress}</Text>
-                  <TouchableOpacity onPress={() => handleDeleteAddress(addr.id)}>
+              {addresses.map((addr) => (
+                <View key={addr.user_address_id} style={styles.addressRow}>
+                  <Text style={styles.addressText}>{getFullAddress(addr)}</Text>
+                  <TouchableOpacity onPress={() => handleDeleteAddress(addr.user_address_id)}>
                     <Ionicons name="remove-circle-outline" size={20} color="red" />
                   </TouchableOpacity>
                 </View>
@@ -128,7 +151,6 @@ const ProfileScreen = () => {
           )}
         </View>
 
-        {/* Logout */}
         <View style={styles.settingsContainer}>
           <TouchableOpacity
             style={styles.logoutItem}
@@ -150,6 +172,7 @@ const ProfileScreen = () => {
         isVisible={isModalVisible}
         onClose={() => setModalVisible(false)}
         userId={userId}
+        onSuccess={handleAddressAdded}
       />
       <Footer navigation={navigation} />
     </View>
@@ -200,8 +223,6 @@ const styles = StyleSheet.create({
     elevation: 2,
     marginBottom: 10,
   },
-  sectionTitle: { fontWeight: 'bold', fontSize: 16, color: '#222' },
-  divider: { height: 1, backgroundColor: '#e0e0e0', marginVertical: 8 },
 
   infoItem: { marginBottom: 16 },
   infoLabel: { fontSize: 12, fontWeight: '500', color: '#aaa', marginBottom: 2 },

@@ -11,6 +11,7 @@ import transactionReducer from './slice/transactionSlice';
 import provinceSlice from './slice/provinceSlice';
 import districtSlice from './slice/districtSlice';
 import wardSlice from './slice/wardSlice';
+import ghnSlice from './slice/ghnSlice';
 
 const store = configureStore({
   reducer: {
@@ -26,6 +27,7 @@ const store = configureStore({
     province: provinceSlice,
     district: districtSlice,
     ward: wardSlice,
+    ghn: ghnSlice,
   },
 });
 
