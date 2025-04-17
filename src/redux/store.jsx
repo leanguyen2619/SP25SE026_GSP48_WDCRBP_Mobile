@@ -8,6 +8,7 @@ import authReducer from './slice/authSlice';
 import cartReducer from './slice/cartSlice';
 import designReducer from './slice/designSlice';
 import transactionReducer from './slice/transactionSlice';
+import ghnSlice from './slice/ghnSlice'; 
 
 const store = configureStore({
   reducer: {
@@ -20,6 +21,7 @@ const store = configureStore({
     cart: cartReducer,
     design: designReducer,
     transaction: transactionReducer,
+    ghn: ghnSlice,
   },
 });
 
