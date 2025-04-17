@@ -59,7 +59,7 @@ const LoginScreen = () => {
       }
     } catch (error) {
       console.log('Login OTP error:', error);
-      
+
       let errorMessage = 'Có lỗi xảy ra khi đăng nhập';
       if (error.message) {
         errorMessage = error.message;
@@ -108,7 +108,7 @@ const LoginScreen = () => {
       }
     } catch (error) {
       console.log('Send OTP error:', error);
-      
+
       let errorMessage = 'Có lỗi xảy ra khi gửi mã OTP';
       if (error.message) {
         errorMessage = error.message;
@@ -156,13 +156,13 @@ const LoginScreen = () => {
         console.log('Calling signIn with token...');
         const userRole = await signIn(accessToken);
         console.log('User role after signIn:', userRole);
-        
+
         // Kiểm tra token đã được lưu
         const savedToken = await AsyncStorage.getItem('accessToken');
         console.log('Token saved in AsyncStorage:', savedToken);
-        
+
         // Điều hướng dựa trên role
-        switch(userRole) {
+        switch (userRole) {
           case 'Admin':
             navigation.replace('AdminDashboard');
             break;
@@ -181,7 +181,7 @@ const LoginScreen = () => {
       }
     } catch (error) {
       console.log('Login error:', error);
-      
+
       let errorMessage = 'Có lỗi xảy ra khi đăng nhập';
       if (error.message) {
         errorMessage = error.message;
@@ -223,8 +223,8 @@ const LoginScreen = () => {
               secureTextEntry
               editable={!loading}
             />
-            <TouchableOpacity 
-              style={[styles.loginButton, loading && styles.disabledButton]} 
+            <TouchableOpacity
+              style={[styles.loginButton, loading && styles.disabledButton]}
               onPress={handleLogin}
               disabled={loading}
             >
@@ -248,8 +248,8 @@ const LoginScreen = () => {
                 keyboardType="email-address"
                 editable={!loading}
               />
-              <TouchableOpacity 
-                style={[styles.sendOTPButton, loading && styles.disabledButton]} 
+              <TouchableOpacity
+                style={[styles.sendOTPButton, loading && styles.disabledButton]}
                 onPress={handleSendOTP}
                 disabled={loading}
               >
@@ -267,57 +267,10 @@ const LoginScreen = () => {
               maxLength={6}
               editable={!loading}
             />
-            <TouchableOpacity 
-              style={[styles.loginButton, loading && styles.disabledButton]} 
+            <TouchableOpacity
+              style={[styles.loginButton, loading && styles.disabledButton]}
               onPress={handleLoginWithOTP}
               disabled={loading || !otpSent}
-            >
-              {loading ? (
-                <ActivityIndicator color={appColorTheme.white_0} />
-              ) : (
-                <Text style={styles.loginButtonText}>Đăng nhập</Text>
-              )}
-            </TouchableOpacity>
-          </View>
-        );
-      case 'phoneOTP':
-        return (
-          <View style={styles.inputContainer}>
-            <View style={styles.otpInputContainer}>
-              <TextInput
-                style={[styles.input, styles.emailInput]}
-                placeholder="Số điện thoại"
-                value={phone}
-                onChangeText={setPhone}
-                keyboardType="phone-pad"
-                editable={!loading && !otpSent}
-              />
-              <TouchableOpacity 
-                style={[styles.sendOTPButton, (loading || otpSent) && styles.disabledButton]} 
-                onPress={handleSendOTP}
-                disabled={loading || otpSent}
-              >
-                {loading ? (
-                  <ActivityIndicator color={appColorTheme.white_0} />
-                ) : (
-                  <Text style={styles.sendOTPText}>
-                    {otpSent ? 'Đã gửi' : 'Gửi OTP'}
-                  </Text>
-                )}
-              </TouchableOpacity>
-            </View>
-            <TextInput
-              style={styles.input}
-              placeholder="Mã OTP"
-              value={otp}
-              onChangeText={setOtp}
-              keyboardType="number-pad"
-              editable={!loading && otpSent}
-            />
-            <TouchableOpacity 
-              style={[styles.loginButton, loading && styles.disabledButton]} 
-              onPress={handleLogin}
-              disabled={loading}
             >
               {loading ? (
                 <ActivityIndicator color={appColorTheme.white_0} />
@@ -347,34 +300,55 @@ const LoginScreen = () => {
 
         {/* Login Method Tabs */}
         <View style={styles.tabContainer}>
-          <TouchableOpacity 
-            style={[styles.tabButton, activeTab === 'password' && styles.activeTab]}
+          <TouchableOpacity
+            style={[
+              styles.tabButton,
+              activeTab === 'password' && {
+                ...styles.activeTab,
+                borderTopLeftRadius: 12,
+                borderBottomLeftRadius: 12,
+              },
+            ]}
             onPress={() => {
               setActiveTab('password');
               setOtpSent(false);
             }}
           >
-            <Text style={[styles.tabText, activeTab === 'password' && styles.activeTabText]}>Mật khẩu</Text>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === 'password' && styles.activeTabText,
+              ]}
+            >
+              Mật khẩu
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.tabButton, activeTab === 'emailOTP' && styles.activeTab]}
+
+          <TouchableOpacity
+            style={[
+              styles.tabButton,
+              activeTab === 'emailOTP' && {
+                ...styles.activeTab,
+                borderTopRightRadius: 12,
+                borderBottomRightRadius: 12,
+              },
+            ]}
             onPress={() => {
               setActiveTab('emailOTP');
               setOtpSent(false);
             }}
           >
-            <Text style={[styles.tabText, activeTab === 'emailOTP' && styles.activeTabText]}>Email OTP</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.tabButton, activeTab === 'phoneOTP' && styles.activeTab]}
-            onPress={() => {
-              setActiveTab('phoneOTP');
-              setOtpSent(false);
-            }}
-          >
-            <Text style={[styles.tabText, activeTab === 'phoneOTP' && styles.activeTabText]}>Số điện thoại OTP</Text>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === 'emailOTP' && styles.activeTabText,
+              ]}
+            >
+              Email OTP
+            </Text>
           </TouchableOpacity>
         </View>
+
 
         {renderLoginForm()}
 
@@ -383,13 +357,13 @@ const LoginScreen = () => {
           <Text style={styles.registrationText}>
             Bạn chưa có tài khoản?
           </Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.registerButton}
             onPress={() => navigation.navigate('Register')}
           >
             <Text style={styles.registerButtonText}>Đăng ký </Text>
           </TouchableOpacity>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.registerButton}
             onPress={() => navigation.navigate('WoodworkerRegistration')}
           >
@@ -410,10 +384,11 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     padding: 20,
+    justifyContent: 'center',
   },
   logoContainer: {
     alignItems: 'center',
-    marginVertical: 40,
+    marginBottom: 30,
   },
   logo: {
     width: 120,
@@ -430,36 +405,43 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: appColorTheme.black_0,
     marginBottom: 20,
+    textAlign: 'center',
   },
   tabContainer: {
     flexDirection: 'row',
-    marginBottom: 20,
-    borderRadius: 8,
+    marginBottom: 16,
     backgroundColor: appColorTheme.grey_1,
-    padding: 4,
+    borderRadius: 12,
+    overflow: 'hidden',
   },
+  
   tabButton: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 12,
     alignItems: 'center',
-    borderRadius: 6,
+    justifyContent: 'center',
   },
+  
   activeTab: {
     backgroundColor: appColorTheme.white_0,
   },
+  
   tabText: {
     fontSize: 14,
     color: appColorTheme.brown_1,
   },
+  
   activeTabText: {
     color: appColorTheme.brown_0,
     fontWeight: '600',
   },
   inputContainer: {
+    marginBottom: 24,
     gap: 16,
   },
   otpInputContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
   },
   input: {
@@ -475,6 +457,7 @@ const styles = StyleSheet.create({
   sendOTPButton: {
     backgroundColor: appColorTheme.brown_0,
     paddingHorizontal: 16,
+    paddingVertical: 12,
     justifyContent: 'center',
     borderRadius: 8,
   },
@@ -488,7 +471,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 8,
   },
   loginButtonText: {
     color: appColorTheme.white_0,
@@ -496,7 +478,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   registrationContainer: {
-    marginTop: 24,
+    marginTop: 32,
     alignItems: 'center',
     gap: 12,
   },
@@ -511,6 +493,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: appColorTheme.brown_0,
+    width: '100%',
+    alignItems: 'center',
   },
   registerButtonText: {
     color: appColorTheme.brown_0,
@@ -518,7 +502,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   disabledButton: {
-    opacity: 0.7,
+    opacity: 0.6,
   },
 });
 
