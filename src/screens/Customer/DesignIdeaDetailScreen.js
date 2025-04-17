@@ -16,6 +16,7 @@ import axios from 'axios';
 import { getServicePackageInfo } from '../../utils/servicePackageUtils';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../../redux/slice/cartSlice';
+import DesignConfig from '../../components/DesignIdea/DesignConfig';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const BASE_URL = 'http://10.0.2.2:8080';
@@ -34,6 +35,7 @@ const DesignIdeaDetailScreen = ({ route, navigation }) => {
     const [design, setDesign] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [selectedConfig, setSelectedConfig] = useState(null);
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -78,14 +80,27 @@ const DesignIdeaDetailScreen = ({ route, navigation }) => {
         );
     };
 
+    const handleConfigChange = (config) => {
+        setSelectedConfig(config);
+    };
+
     const handleAddToCart = () => {
+        if (!selectedConfig) {
+            Alert.alert('Thông báo', 'Vui lòng chọn cấu hình sản phẩm');
+            return;
+        }
+
         const cartItem = {
             id: design.id,
             name: design.name,
             description: design.description || 'Không có mô tả',
-            price: design.price,
+            price: selectedConfig.price,
             img_urls: Array.isArray(design.img_urls) ? design.img_urls : [design.img_urls],
-            woodworkerName: design.woodworkerProfile?.brandName || 'Không xác định'
+            woodworkerName: design.woodworkerProfile?.brandName || 'Không xác định',
+            configuration: {
+                size: selectedConfig.size,
+                woodType: selectedConfig.woodType
+            }
         };
         dispatch(addToCart(cartItem));
         Alert.alert(
@@ -174,6 +189,12 @@ const DesignIdeaDetailScreen = ({ route, navigation }) => {
                         </View>
                     </View>
 
+                    {/* Cấu hình sản phẩm */}
+                    <DesignConfig 
+                        designId={designId}
+                        onConfigChange={handleConfigChange}
+                    />
+
                     {/* Danh mục */}
                     <View style={styles.categoryContainer}>
                         <Text style={styles.sectionTitle}>Danh mục:</Text>
@@ -203,6 +224,10 @@ const DesignIdeaDetailScreen = ({ route, navigation }) => {
                 <TouchableOpacity 
                     style={styles.buyNowButton}
                     onPress={() => {
+                        if (!selectedConfig) {
+                            Alert.alert('Thông báo', 'Vui lòng chọn cấu hình sản phẩm');
+                            return;
+                        }
                         handleAddToCart();
                         navigation.navigate('Cart');
                     }}
