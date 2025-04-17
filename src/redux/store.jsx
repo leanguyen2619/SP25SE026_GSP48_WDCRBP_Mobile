@@ -8,7 +8,9 @@ import authReducer from './slice/authSlice';
 import cartReducer from './slice/cartSlice';
 import designReducer from './slice/designSlice';
 import transactionReducer from './slice/transactionSlice';
-import ghnSlice from './slice/ghnSlice'; 
+import provinceSlice from './slice/provinceSlice';
+import districtSlice from './slice/districtSlice';
+import wardSlice from './slice/wardSlice';
 
 const store = configureStore({
   reducer: {
@@ -21,7 +23,9 @@ const store = configureStore({
     cart: cartReducer,
     design: designReducer,
     transaction: transactionReducer,
-    ghn: ghnSlice,
+    province: provinceSlice,
+    district: districtSlice,
+    ward: wardSlice,
   },
 });
 
