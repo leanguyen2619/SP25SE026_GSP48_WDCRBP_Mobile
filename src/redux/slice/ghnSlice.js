@@ -1,64 +1,97 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const BASE_URL = 'https://online-gateway.ghn.vn/shiip/public-api/master-data';
+const GHN_TOKEN = '8b1c65fd-6180-11ee-96dc-de6f804954c9';
+const BASE_URL = 'http://10.0.2.2:8080/api/v1/GHNApi';
 
-// 1️⃣ Fetch Provinces
-export const fetchProvinces = createAsyncThunk('ghn/fetchProvinces', async (_, thunkAPI) => {
-  try {
-    const res = await axios.get(`${BASE_URL}/province`);
-    return res.data.data;
-  } catch (err) {
-    return thunkAPI.rejectWithValue('Failed to fetch provinces');
+// Lấy danh sách tỉnh/thành
+export const fetchProvinces = createAsyncThunk(
+  'ghn/fetchProvinces',
+  async (_, thunkAPI) => {
+    try {
+      console.log('Fetching provinces...');
+      const response = await axios.get(`${BASE_URL}/provinces`);
+      console.log('Provinces response:', response.data);
+      
+      // Kiểm tra và xử lý response theo cấu trúc mới
+      if (response.data?.code === 200 && response.data?.data?.data) {
+        console.log('Processed provinces:', response.data.data.data);
+        return response.data.data.data || [];
+      }
+      return thunkAPI.rejectWithValue('Không thể lấy danh sách tỉnh thành');
+    } catch (error) {
+      console.error('Error fetching provinces:', error);
+      return thunkAPI.rejectWithValue(error.message);
+    }
   }
-});
+);
 
-// 2️⃣ Fetch Districts
-export const fetchDistricts = createAsyncThunk('ghn/fetchDistricts', async (_, thunkAPI) => {
-  try {
-    const res = await axios.get(`${BASE_URL}/district`);
-    return res.data.data;
-  } catch (err) {
-    return thunkAPI.rejectWithValue('Failed to fetch districts');
+// Lấy danh sách quận/huyện theo tỉnh/thành
+export const fetchDistricts = createAsyncThunk(
+  'ghn/fetchDistricts',
+  async (provinceId, thunkAPI) => {
+    try {
+      console.log('Fetching districts for province:', provinceId);
+      const response = await axios.get(`${BASE_URL}/districts/${provinceId}`);
+      console.log('Districts response:', response.data);
+      
+      // Kiểm tra và xử lý response theo cấu trúc mới
+      if (response.data?.code === 200 && response.data?.data?.data) {
+        return {
+          provinceId,
+          districts: response.data.data.data || []
+        };
+      }
+      return thunkAPI.rejectWithValue('Không thể lấy danh sách quận huyện');
+    } catch (error) {
+      console.error('Error fetching districts:', error);
+      return thunkAPI.rejectWithValue(error.message);
+    }
   }
-});
+);
 
-// 3️⃣ Fetch Wards by district_id
-export const fetchWardsByDistrict = createAsyncThunk('ghn/fetchWards', async (districtId, thunkAPI) => {
-  try {
-    const res = await axios.get(`${BASE_URL}/ward`, {
-      params: { district_id: districtId },
-    });
-    return {
-      districtId,
-      wards: res.data.data,
-    };
-  } catch (err) {
-    return thunkAPI.rejectWithValue('Failed to fetch wards');
+// Lấy danh sách phường/xã theo quận/huyện
+export const fetchWards = createAsyncThunk(
+  'ghn/fetchWards',
+  async (districtId, thunkAPI) => {
+    try {
+      console.log('Fetching wards for district:', districtId);
+      const response = await axios.get(`${BASE_URL}/wards/${districtId}`);
+      console.log('Wards response:', response.data);
+      
+      // Kiểm tra và xử lý response theo cấu trúc mới
+      if (response.data?.code === 200 && response.data?.data?.data) {
+        return {
+          districtId,
+          wards: response.data.data.data || []
+        };
+      }
+      return thunkAPI.rejectWithValue('Không thể lấy danh sách phường xã');
+    } catch (error) {
+      console.error('Error fetching wards:', error);
+      return thunkAPI.rejectWithValue(error.message);
+    }
   }
-});
+);
 
 const ghnSlice = createSlice({
   name: 'ghn',
   initialState: {
     provinces: [],
-    districts: [],
-    wardsByDistrict: {}, // e.g. { 2021: [ward1, ward2...] }
+    districts: {},  // { provinceId: [districts] }
+    wards: {},      // { districtId: [wards] }
     loading: false,
-    error: null,
+    error: null
   },
   reducers: {
-    clearGHNState: (state) => {
-      state.provinces = [];
-      state.districts = [];
-      state.wardsByDistrict = {};
-      state.loading = false;
-      state.error = null;
-    },
+    clearLocationData: (state) => {
+      state.districts = {};
+      state.wards = {};
+    }
   },
   extraReducers: (builder) => {
     builder
-      // Fetch Provinces
+      // Provinces
       .addCase(fetchProvinces.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -66,42 +99,51 @@ const ghnSlice = createSlice({
       .addCase(fetchProvinces.fulfilled, (state, action) => {
         state.loading = false;
         state.provinces = action.payload;
+        console.log('Provinces loaded:', state.provinces?.length);
       })
       .addCase(fetchProvinces.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        console.error('Failed to load provinces:', action.payload);
       })
 
-      // Fetch Districts
+      // Districts
       .addCase(fetchDistricts.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchDistricts.fulfilled, (state, action) => {
+        if (action.payload?.provinceId && Array.isArray(action.payload.districts)) {
+          state.districts[action.payload.provinceId] = action.payload.districts;
+          console.log('Districts loaded for province:', action.payload.provinceId);
+        }
         state.loading = false;
-        state.districts = action.payload;
       })
       .addCase(fetchDistricts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        console.error('Failed to load districts:', action.payload);
       })
 
-      // Fetch Wards by District
-      .addCase(fetchWardsByDistrict.pending, (state) => {
+      // Wards
+      .addCase(fetchWards.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchWardsByDistrict.fulfilled, (state, action) => {
-        const { districtId, wards } = action.payload;
+      .addCase(fetchWards.fulfilled, (state, action) => {
+        if (action.payload?.districtId && Array.isArray(action.payload.wards)) {
+          state.wards[action.payload.districtId] = action.payload.wards;
+          console.log('Wards loaded for district:', action.payload.districtId);
+        }
         state.loading = false;
-        state.wardsByDistrict[districtId] = wards;
       })
-      .addCase(fetchWardsByDistrict.rejected, (state, action) => {
+      .addCase(fetchWards.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        console.error('Failed to load wards:', action.payload);
       });
-  },
+  }
 });
 
-export const { clearGHNState } = ghnSlice.actions;
+export const { clearLocationData } = ghnSlice.actions;
 export default ghnSlice.reducer;
