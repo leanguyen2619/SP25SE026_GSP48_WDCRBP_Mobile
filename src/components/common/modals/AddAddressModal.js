@@ -73,16 +73,37 @@ const AddAddressModal = ({ isVisible, onClose, userId, onSuccess }) => {
       return;
     }
 
+    const selectedProvince = provinces.find(p => p.ProvinceID === selectedCity);
+    const selectedDistrictObj = districts.find(d => d.DistrictID === selectedDistrict);
+    const selectedWardObj = wards.find(w => w.WardCode === selectedWard);
+
+    console.log('Selected locations:', {
+      province: selectedProvince,
+      district: selectedDistrictObj,
+      ward: selectedWardObj
+    });
+
+    if (!selectedProvince || !selectedDistrictObj || !selectedWardObj) {
+      Alert.alert('Lỗi', 'Không thể lấy thông tin địa chỉ. Vui lòng thử lại.');
+      return;
+    }
+
     const payload = {
       isDefault,
       address,
       wardCode: selectedWard,
+      wardName: selectedWardObj.WardName,
       districtId: selectedDistrict,
+      districtName: selectedDistrictObj.DistrictName,
       cityId: selectedCity,
+      cityName: selectedProvince.ProvinceName,
       userId,
     };
 
+    console.log('Submitting address payload:', payload);
+
     dispatch(createUserAddress(payload)).then((res) => {
+      console.log('Create address response:', res);
       if (res.meta.requestStatus === 'rejected') {
         const cleanMsg = (res.payload || '').replace('Không thể thực thi:', '').trim();
         setErrorMessage(cleanMsg);
@@ -90,6 +111,7 @@ const AddAddressModal = ({ isVisible, onClose, userId, onSuccess }) => {
         return;
       }
       onSuccess?.(); // Refresh list in parent
+      onClose(); // Close modal after success
     });
   };
 

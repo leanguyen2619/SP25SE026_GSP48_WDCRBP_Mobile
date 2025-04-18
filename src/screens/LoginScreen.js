@@ -152,17 +152,14 @@ const LoginScreen = () => {
           return;
         }
 
-        // Sử dụng AuthContext để đăng nhập và lấy role
-        console.log('Calling signIn with token...');
-        const userRole = await signIn(accessToken);
-        console.log('User role after signIn:', userRole);
+        const decodedToken = jwtDecode(accessToken);
+        console.log('Decoded token:', decodedToken);
 
-        // Kiểm tra token đã được lưu
-        const savedToken = await AsyncStorage.getItem('accessToken');
-        console.log('Token saved in AsyncStorage:', savedToken);
+        // Gọi signIn với token và userId
+        await signIn(accessToken, decodedToken.userId);
 
         // Điều hướng dựa trên role
-        switch (userRole) {
+        switch (decodedToken.role) {
           case 'Admin':
             navigation.replace('AdminDashboard');
             break;
