@@ -12,6 +12,7 @@ import provinceSlice from './slice/provinceSlice';
 import districtSlice from './slice/districtSlice';
 import wardSlice from './slice/wardSlice';
 import ghnSlice from './slice/ghnSlice';
+import woodworkerRegisterSlice from './slice/woodworkerRegisterSlice';
 
 const store = configureStore({
   reducer: {
@@ -28,6 +29,7 @@ const store = configureStore({
     district: districtSlice,
     ward: wardSlice,
     ghn: ghnSlice,
+    woodworkerRegister: woodworkerRegisterSlice,
   },
 });
 

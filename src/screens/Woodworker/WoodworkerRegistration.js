@@ -1,130 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  SafeAreaView,
+  ScrollView,
   View,
   Text,
-  StyleSheet,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  SafeAreaView,
   Image,
-  Platform,
+  StyleSheet,
   Alert,
   ActivityIndicator,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
-import { appColorTheme } from '../../theme/colors';
-import { authService } from '../../services/authService';
+import Constants from 'expo-constants';
+import { useNavigation } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
+
 import { addressService } from '../../services/addressService';
-import { extractRealImageUrl } from '../../utils/urlHelpers';
-
-const CITIES = [
-  { id: '1', name: 'Hồ Chí Minh' },
-  { id: '2', name: 'Hà Nội' },
-  { id: '3', name: 'Đà Nẵng' },
-  { id: '4', name: 'Cần Thơ' },
-  { id: '5', name: 'Hải Phòng' },
-  { id: '6', name: 'Bình Dương' },
-  { id: '7', name: 'Đồng Nai' },
-  { id: '8', name: 'Bà Rịa - Vũng Tàu' },
-  { id: '9', name: 'Long An' },
-  { id: '10', name: 'Quảng Ninh' },
-];
-
-const DISTRICTS = {
-  '1': [ // Hồ Chí Minh
-    { id: '1', name: 'Quận 1' },
-    { id: '2', name: 'Quận 3' },
-    { id: '3', name: 'Quận 4' },
-    { id: '4', name: 'Quận 5' },
-    { id: '5', name: 'Quận 6' },
-    { id: '6', name: 'Quận 7' },
-    { id: '7', name: 'Quận 8' },
-    { id: '8', name: 'Quận 10' },
-    { id: '9', name: 'Quận 11' },
-    { id: '10', name: 'Quận Bình Thạnh' },
-    { id: '11', name: 'Quận Gò Vấp' },
-    { id: '12', name: 'Quận Phú Nhuận' },
-    { id: '13', name: 'Quận Tân Bình' },
-    { id: '14', name: 'Quận Tân Phú' },
-  ],
-  '2': [ // Hà Nội
-    { id: '15', name: 'Quận Ba Đình' },
-    { id: '16', name: 'Quận Hoàn Kiếm' },
-    { id: '17', name: 'Quận Hai Bà Trưng' },
-    { id: '18', name: 'Quận Đống Đa' },
-    { id: '19', name: 'Quận Tây Hồ' },
-    { id: '20', name: 'Quận Cầu Giấy' },
-    { id: '21', name: 'Quận Thanh Xuân' },
-    { id: '22', name: 'Quận Hoàng Mai' },
-  ],
-  '3': [ // Đà Nẵng
-    { id: '23', name: 'Quận Hải Châu' },
-    { id: '24', name: 'Quận Thanh Khê' },
-    { id: '25', name: 'Quận Sơn Trà' },
-    { id: '26', name: 'Quận Ngũ Hành Sơn' },
-    { id: '27', name: 'Quận Liên Chiểu' },
-  ],
-};
-
-const WARDS = {
-  '1': [ // Quận 1 - HCM
-    { code: 'W1', name: 'Phường Bến Nghé' },
-    { code: 'W2', name: 'Phường Bến Thành' },
-    { code: 'W3', name: 'Phường Cô Giang' },
-    { code: 'W4', name: 'Phường Cầu Kho' },
-    { code: 'W5', name: 'Phường Cầu Ông Lãnh' },
-  ],
-  '2': [ // Quận 3 - HCM
-    { code: 'W6', name: 'Phường 1' },
-    { code: 'W7', name: 'Phường 2' },
-    { code: 'W8', name: 'Phường 3' },
-    { code: 'W9', name: 'Phường 4' },
-    { code: 'W10', name: 'Phường 5' },
-  ],
-  '10': [ // Quận Bình Thạnh - HCM
-    { code: 'W21', name: 'Phường 1' },
-    { code: 'W22', name: 'Phường 2' },
-    { code: 'W23', name: 'Phường 3' },
-    { code: 'W24', name: 'Phường 5' },
-    { code: 'W25', name: 'Phường 6' },
-    { code: 'W26', name: 'Phường 7' },
-    { code: 'W27', name: 'Phường 11' },
-    { code: 'W28', name: 'Phường 12' },
-    { code: 'W29', name: 'Phường 13' },
-    { code: 'W30', name: 'Phường 14' },
-    { code: 'W31', name: 'Phường 15' },
-    { code: 'W32', name: 'Phường 17' },
-    { code: 'W33', name: 'Phường 19' },
-    { code: 'W34', name: 'Phường 21' },
-    { code: 'W35', name: 'Phường 22' },
-    { code: 'W36', name: 'Phường 24' },
-    { code: 'W37', name: 'Phường 25' },
-    { code: 'W38', name: 'Phường 26' },
-    { code: 'W39', name: 'Phường 27' },
-    { code: 'W40', name: 'Phường 28' },
-  ],
-  '15': [ // Quận Ba Đình - HN
-    { code: 'W11', name: 'Phường Phúc Xá' },
-    { code: 'W12', name: 'Phường Trúc Bạch' },
-    { code: 'W13', name: 'Phường Vĩnh Phúc' },
-    { code: 'W14', name: 'Phường Cống Vị' },
-    { code: 'W15', name: 'Phường Liễu Giai' },
-  ],
-  '23': [ // Quận Hải Châu - ĐN
-    { code: 'W16', name: 'Phường Hải Châu 1' },
-    { code: 'W17', name: 'Phường Hải Châu 2' },
-    { code: 'W18', name: 'Phường Nam Dương' },
-    { code: 'W19', name: 'Phường Phước Ninh' },
-    { code: 'W20', name: 'Phường Hòa Thuận Tây' },
-  ],
-};
+import { registerWoodworker, resetRegisterState } from '../../redux/slice/woodworkerRegisterSlice';
+import { appColorTheme } from '../../theme/colors';
 
 const WoodworkerRegistration = () => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const { loading } = useSelector((state) => state.woodworkerRegister);
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -137,14 +39,15 @@ const WoodworkerRegistration = () => {
     taxCode: '',
     description: '',
     imgUrl: '',
+    image: null,
   });
-  const [isLoading, setIsLoading] = useState(false);
+
   const [cities, setCities] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
-  const [isLoadingCities, setIsLoadingCities] = useState(false);
-  const [isLoadingDistricts, setIsLoadingDistricts] = useState(false);
-  const [isLoadingWards, setIsLoadingWards] = useState(false);
+  const [loadingCities, setLoadingCities] = useState(false);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
+  const [loadingWards, setLoadingWards] = useState(false);
 
   useEffect(() => {
     loadCities();
@@ -152,160 +55,106 @@ const WoodworkerRegistration = () => {
 
   const loadCities = async () => {
     try {
-      setIsLoadingCities(true);
-      const citiesData = await addressService.getCities();
-      setCities(citiesData);
-    } catch (error) {
-      Alert.alert('Lỗi', error.message);
+      setLoadingCities(true);
+      const data = await addressService.getCities();
+      setCities(data);
+    } catch (err) {
+      Alert.alert('Lỗi', err.message);
     } finally {
-      setIsLoadingCities(false);
+      setLoadingCities(false);
     }
   };
 
   const handleCityChange = async (cityId) => {
-    try {
-      setFormData({ ...formData, cityId, districtId: '', wardCode: '' });
-      setDistricts([]);
-      setWards([]);
+    setFormData((prev) => ({ ...prev, cityId, districtId: '', wardCode: '' }));
+    setDistricts([]);
+    setWards([]);
 
-      if (cityId) {
-        setIsLoadingDistricts(true);
-        const districtsData = await addressService.getDistrictsByCity(cityId);
-        setDistricts(districtsData);
-      }
-    } catch (error) {
-      Alert.alert('Lỗi', error.message);
+    try {
+      setLoadingDistricts(true);
+      const data = await addressService.getDistrictsByCity(cityId);
+      setDistricts(data);
+    } catch (err) {
+      Alert.alert('Lỗi', err.message);
     } finally {
-      setIsLoadingDistricts(false);
+      setLoadingDistricts(false);
     }
   };
 
   const handleDistrictChange = async (districtId) => {
-    try {
-      setFormData({ ...formData, districtId, wardCode: '' });
-      setWards([]);
+    setFormData((prev) => ({ ...prev, districtId, wardCode: '' }));
+    setWards([]);
 
-      if (districtId) {
-        setIsLoadingWards(true);
-        const wardsData = await addressService.getWardsByDistrict(districtId);
-        setWards(wardsData);
-      }
-    } catch (error) {
-      Alert.alert('Lỗi', error.message);
+    try {
+      setLoadingWards(true);
+      const data = await addressService.getWardsByDistrict(districtId);
+      setWards(data);
+    } catch (err) {
+      Alert.alert('Lỗi', err.message);
     } finally {
-      setIsLoadingWards(false);
+      setLoadingWards(false);
     }
   };
 
   const pickImage = async () => {
     try {
-      // Hiển thị lựa chọn giữa camera và thư viện ảnh
-      Alert.alert(
-        "Chọn ảnh",
-        "Vui lòng chọn nguồn ảnh",
-        [
-          {
-            text: "Máy ảnh",
-            onPress: async () => {
-              const { status } = await ImagePicker.requestCameraPermissionsAsync();
-              if (status !== 'granted') {
-                alert('Xin lỗi, chúng tôi cần quyền truy cập camera!');
-                return;
-              }
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (permission.status !== 'granted') {
+        Alert.alert('Quyền bị từ chối', 'Ứng dụng cần quyền truy cập thư viện ảnh');
+        return;
+      }
 
-              const result = await ImagePicker.launchCameraAsync({
-                allowsEditing: true,
-                aspect: [4, 3],
-                quality: 1,
-              });
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        base64: true,
+        quality: 0.8,
+      });
 
-              if (!result.canceled && result.assets && result.assets.length > 0) {
-                setFormData({
-                  ...formData,
-                  image: { uri: result.assets[0].uri }
-                });
-              }
-            }
-          },
-          {
-            text: "Thư viện ảnh",
-            onPress: async () => {
-              const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-              if (status !== 'granted') {
-                alert('Xin lỗi, chúng tôi cần quyền truy cập thư viện ảnh!');
-                return;
-              }
+      if (result.canceled || !result.assets || !result.assets[0].base64) {
+        console.log('❌ Người dùng huỷ chọn ảnh hoặc không có ảnh');
+        return;
+      }
 
-              const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                allowsEditing: true,
-                aspect: [4, 3],
-                quality: 1,
-              });
+      const localUri = result.assets[0].uri;
+      setFormData((prev) => ({ ...prev, image: { uri: localUri } }));
+      Alert.alert('Đang tải ảnh...', 'Vui lòng chờ vài giây.');
 
-              if (!result.canceled && result.assets && result.assets.length > 0) {
-                setFormData({
-                  ...formData,
-                  image: { uri: result.assets[0].uri }
-                });
-              }
-            }
-          },
-          {
-            text: "Hủy",
-            style: "cancel"
-          }
-        ]
-      );
+      const base64Image = result.assets[0].base64;
+      const apiKey = Constants.expoConfig.extra.imgbbApiKey;
+
+      const formDataUpload = new FormData();
+      formDataUpload.append('image', base64Image);
+
+      const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+        method: 'POST',
+        body: formDataUpload,
+      });
+
+      const json = await response.json();
+
+      if (json.success) {
+        const uploadedUrl = json.data.url;
+        console.log('✅ Uploaded image URL:', uploadedUrl);
+        setFormData((prev) => ({ ...prev, imgUrl: uploadedUrl }));
+      } else {
+        console.error('❌ Upload failed:', json);
+        Alert.alert('Lỗi', 'Tải ảnh lên thất bại, vui lòng thử lại.');
+      }
     } catch (error) {
-      console.error('Lỗi khi chọn ảnh:', error);
-      alert('Không thể chọn ảnh. Vui lòng thử lại!');
+      console.error('❌ Image picker error:', error);
+      Alert.alert('Lỗi', 'Không thể chọn hoặc tải ảnh.');
     }
   };
 
   const validateForm = () => {
-    if (!formData.fullName.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng nhập họ và tên');
-      return false;
-    }
-    if (!formData.email.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng nhập email');
-      return false;
-    }
-    if (!formData.phone.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng nhập số điện thoại');
-      return false;
-    }
-    if (!formData.workshopName.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng nhập tên xưởng');
-      return false;
-    }
-    if (!formData.cityId) {
-      Alert.alert('Lỗi', 'Vui lòng chọn Tỉnh/Thành phố');
-      return false;
-    }
-    if (!formData.districtId) {
-      Alert.alert('Lỗi', 'Vui lòng chọn Quận/Huyện');
-      return false;
-    }
-    if (!formData.wardCode) {
-      Alert.alert('Lỗi', 'Vui lòng chọn Phường/Xã');
-      return false;
-    }
-    if (!formData.address.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng nhập địa chỉ cụ thể');
-      return false;
-    }
-    if (!formData.taxCode.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng nhập mã số thuế');
-      return false;
-    }
-    if (!formData.description.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng nhập giới thiệu về xưởng');
-      return false;
-    }
-    if (!formData.imgUrl.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng dán link ảnh đại diện cho xưởng');
+    const {
+      fullName, email, phone, workshopName, address,
+      cityId, districtId, wardCode, taxCode, description, imgUrl
+    } = formData;
+
+    if (!fullName || !email || !phone || !workshopName || !address || !cityId ||
+      !districtId || !wardCode || !taxCode || !description || !imgUrl) {
+      Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin và chọn ảnh.');
       return false;
     }
     return true;
@@ -315,8 +164,6 @@ const WoodworkerRegistration = () => {
     if (!validateForm()) return;
 
     try {
-      setIsLoading(true);
-
       const payload = {
         fullName: formData.fullName,
         email: formData.email,
@@ -332,396 +179,118 @@ const WoodworkerRegistration = () => {
         imgUrl: formData.imgUrl,
       };
 
-      console.log('Sending registration data:', payload);
+      await dispatch(registerWoodworker(payload)).unwrap();
 
-      const response = await authService.registerWoodworker(payload);
-      console.log('Registration response:', response);
-
-      if (response.success) {
-        Alert.alert(
-          'Đăng ký thành công', 
-          'Yêu cầu đăng ký của bạn đã được gửi đi. Vui lòng chờ admin duyệt và kiểm tra email để nhận mật khẩu đăng nhập.', 
-          [
-            { 
-              text: 'OK', 
-              onPress: () => navigation.navigate('Login')
-            }
-          ]
-        );
-      } else {
-        Alert.alert('Lỗi', response.message || 'Đã xảy ra lỗi khi đăng ký');
-      }
-
-    } catch (error) {
-      console.error('Registration error:', error);
-      Alert.alert('Lỗi', error.message || 'Đã xảy ra lỗi khi đăng ký');
-    } finally {
-      setIsLoading(false);
+      Alert.alert('Thành công', 'Đăng ký thành công! Kiểm tra email để nhận mật khẩu.', [
+        { text: 'OK', onPress: () => navigation.navigate('Login') },
+      ]);
+      dispatch(resetRegisterState());
+    } catch (err) {
+      Alert.alert('Lỗi', err.message || 'Đăng ký thất bại');
     }
-  };
-
-  const pickerHeaderStyle = {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#8B4513', // Màu nâu cho tiêu đề
-    textTransform: 'uppercase',
-  };
-
-  const pickerItemStyle = {
-    fontSize: 14,
-    color: '#333333',
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={24} color={appColorTheme.black_0} />
-        </TouchableOpacity>
-        <Text>Đăng ký thông tin xưởng mộc</Text>
-        <View style={styles.placeholder} />
-      </View>
-
       <ScrollView style={styles.content}>
-        <Text style={styles.sectionTitle}>Thông tin người đại diện</Text>
+        <Text style={styles.sectionTitle}>Đăng ký xưởng mộc</Text>
 
+        <TextInputField label="Họ và tên" value={formData.fullName} onChange={(text) => setFormData({ ...formData, fullName: text })} />
+        <TextInputField label="Email" keyboardType="email-address" value={formData.email} onChange={(text) => setFormData({ ...formData, email: text })} />
+        <TextInputField label="Số điện thoại" keyboardType="phone-pad" value={formData.phone} onChange={(text) => setFormData({ ...formData, phone: text })} />
+        <TextInputField label="Tên xưởng" value={formData.workshopName} onChange={(text) => setFormData({ ...formData, workshopName: text })} />
+
+        <PickerInput label="Tỉnh/Thành phố" selectedValue={formData.cityId} onChange={handleCityChange} items={cities} loading={loadingCities} />
+        <PickerInput label="Quận/Huyện" selectedValue={formData.districtId} onChange={handleDistrictChange} items={districts} loading={loadingDistricts} enabled={!!formData.cityId} />
+        <PickerInput label="Phường/Xã" selectedValue={formData.wardCode} onChange={(code) => setFormData({ ...formData, wardCode: code })} items={wards} loading={loadingWards} enabled={!!formData.districtId} />
+
+        <TextInputField label="Địa chỉ cụ thể" value={formData.address} onChange={(text) => setFormData({ ...formData, address: text })} />
+        <TextInputField label="Mã số thuế" value={formData.taxCode} onChange={(text) => setFormData({ ...formData, taxCode: text })} />
+        <TextInputField label="Giới thiệu" multiline value={formData.description} onChange={(text) => setFormData({ ...formData, description: text })} />
+
+        {/* Image Upload Field */}
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Họ và tên <Text style={styles.required}>*</Text></Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Nhập họ và tên"
-            value={formData.fullName}
-            onChangeText={(text) => setFormData({ ...formData, fullName: text })}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Email <Text style={styles.required}>*</Text></Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Nhập email"
-            keyboardType="email-address"
-            value={formData.email}
-            onChangeText={(text) => setFormData({ ...formData, email: text })}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Số điện thoại <Text style={styles.required}>*</Text></Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Nhập số điện thoại"
-            keyboardType="phone-pad"
-            value={formData.phone}
-            onChangeText={(text) => setFormData({ ...formData, phone: text })}
-          />
-        </View>
-
-        <Text style={[styles.sectionTitle, styles.marginTop]}>Thông tin xưởng mộc</Text>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Tên xưởng <Text style={styles.required}>*</Text></Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Nhập tên xưởng"
-            value={formData.workshopName}
-            onChangeText={(text) => setFormData({ ...formData, workshopName: text })}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Tỉnh/Thành phố <Text style={styles.required}>*</Text></Text>
-          <View style={styles.pickerContainer}>
-            {isLoadingCities ? (
-              <ActivityIndicator size="small" color={appColorTheme.primary} />
-            ) : (
-              <Picker
-                selectedValue={formData.cityId}
-                onValueChange={handleCityChange}
-                style={styles.picker}
-                itemStyle={styles.pickerItem}
-                mode="dropdown"
-              >
-                <Picker.Item label="Chọn Tỉnh/Thành phố" value="" />
-                {cities.map((city) => (
-                  <Picker.Item 
-                    key={city.id} 
-                    label={city.name} 
-                    value={city.id}
-                  />
-                ))}
-              </Picker>
-            )}
-          </View>
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Quận/Huyện <Text style={styles.required}>*</Text></Text>
-          <View style={[
-            styles.pickerContainer,
-            !formData.cityId && styles.disabledPicker
-          ]}>
-            {isLoadingDistricts ? (
-              <ActivityIndicator size="small" color={appColorTheme.primary} />
-            ) : (
-              <Picker
-                selectedValue={formData.districtId}
-                onValueChange={handleDistrictChange}
-                style={styles.picker}
-                itemStyle={styles.pickerItem}
-                mode="dropdown"
-                enabled={!!formData.cityId}
-              >
-                <Picker.Item label="Chọn Quận/Huyện" value="" />
-                {districts.map((district) => (
-                  <Picker.Item 
-                    key={district.id} 
-                    label={district.name} 
-                    value={district.id}
-                  />
-                ))}
-              </Picker>
-            )}
-          </View>
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Phường/Xã <Text style={styles.required}>*</Text></Text>
-          <View style={[
-            styles.pickerContainer,
-            !formData.districtId && styles.disabledPicker
-          ]}>
-            {isLoadingWards ? (
-              <ActivityIndicator size="small" color={appColorTheme.primary} />
-            ) : (
-              <Picker
-                selectedValue={formData.wardCode}
-                onValueChange={(wardCode) => setFormData({...formData, wardCode})}
-                style={styles.picker}
-                itemStyle={styles.pickerItem}
-                mode="dropdown"
-                enabled={!!formData.districtId}
-              >
-                <Picker.Item label="Chọn Phường/Xã" value="" />
-                {wards.map((ward) => (
-                  <Picker.Item 
-                    key={ward.code} 
-                    label={ward.name} 
-                    value={ward.code}
-                  />
-                ))}
-              </Picker>
-            )}
-          </View>
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Địa chỉ cụ thể <Text style={styles.required}>*</Text></Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Nhập số nhà, tên đường"
-            value={formData.address}
-            onChangeText={(text) => setFormData({ ...formData, address: text })}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Mã số thuế <Text style={styles.required}>*</Text></Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Nhập mã số thuế"
-            value={formData.taxCode}
-            onChangeText={(text) => setFormData({ ...formData, taxCode: text })}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Giới thiệu <Text style={styles.required}>*</Text></Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            placeholder="Giới thiệu về xưởng mộc của bạn"
-            multiline
-            numberOfLines={4}
-            value={formData.description}
-            onChangeText={(text) => setFormData({ ...formData, description: text })}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Link ảnh đại diện cho xưởng <Text style={styles.required}>*</Text></Text>
-          <TextInput
-            style={styles.input}
-            placeholder="https://example.com/image.jpg"
-            value={formData.imgUrl}
-            onChangeText={(text) => setFormData({ ...formData, imgUrl: text })}
-          />
-          <Text style={styles.helperText}>
-            Dán link ảnh trực tiếp (.jpg, .png) hoặc link Google redirect chứa ảnh
+          <Text style={styles.label}>
+            Ảnh đại diện cho xưởng <Text style={styles.required}>*</Text>
           </Text>
+          <TouchableOpacity style={styles.imageUpload} onPress={pickImage}>
+            {formData.image?.uri ? (
+              <Image source={{ uri: formData.image.uri }} style={styles.selectedImage} />
+            ) : (
+              <View style={styles.uploadPlaceholder}>
+                <Icon name="cloud-upload" size={32} color="#888" />
+                <Text style={styles.uploadText}>Chọn ảnh từ thiết bị</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+          {/* 🔒 Removed text below the image per teacher’s instruction */}
         </View>
 
-        {/* Optional preview */}
-        {formData.imgUrl !== '' && (
-          <Image
-            source={{ uri: extractRealImageUrl(formData.imgUrl) }}
-            style={{ width: '100%', height: 200, borderRadius: 8, marginBottom: 16 }}
-            resizeMode="cover"
-            onError={() => Alert.alert('Lỗi', 'Link ảnh không hợp lệ hoặc không thể tải ảnh')}
-          />
-        )}
 
-        <TouchableOpacity
-          style={[
-            styles.submitButton,
-            isLoading && styles.submitButtonDisabled
-          ]}
-          onPress={handleSubmit}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <ActivityIndicator color={appColorTheme.white_0} />
-          ) : (
-            <Text style={styles.submitButtonText}>Đăng ký</Text>
-          )}
+        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit} disabled={loading}>
+          {loading ? <ActivityIndicator color="white" /> : <Text style={styles.submitButtonText}>Đăng ký</Text>}
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
 };
 
+// Reusable components
+const TextInputField = ({ label, value, onChange, ...rest }) => (
+  <View style={styles.inputContainer}>
+    <Text style={styles.label}>{label} <Text style={styles.required}>*</Text></Text>
+    <TextInput style={styles.input} value={value} onChangeText={onChange} {...rest} />
+  </View>
+);
+
+const PickerInput = ({ label, selectedValue, onChange, items, loading, enabled = true }) => (
+  <View style={styles.inputContainer}>
+    <Text style={styles.label}>{label} <Text style={styles.required}>*</Text></Text>
+    <View style={[styles.pickerContainer, !enabled && styles.disabledPicker]}>
+      {loading ? (
+        <ActivityIndicator size="small" />
+      ) : (
+        <Picker selectedValue={selectedValue} onValueChange={onChange} enabled={enabled} style={styles.picker}>
+          <Picker.Item label={`Chọn ${label}`} value="" />
+          {items.map((item) => (
+            <Picker.Item key={item.id || item.code} label={item.name} value={item.id || item.code} />
+          ))}
+        </Picker>
+      )}
+    </View>
+  </View>
+);
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: appColorTheme.white_0,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: appColorTheme.grey_1,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: appColorTheme.black_0,
-  },
-  placeholder: {
-    width: 24,
-  },
-  content: {
-    flex: 1,
-    padding: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: appColorTheme.black_0,
-    marginBottom: 16,
-  },
-  marginTop: {
-    marginTop: 24,
-  },
-  inputContainer: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    marginBottom: 8,
-    color: appColorTheme.black_0,
-  },
-  required: {
-    color: 'red',
-  },
+  container: { flex: 1, backgroundColor: '#fff' },
+  content: { padding: 16 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 16 },
+  inputContainer: { marginBottom: 16 },
+  label: { fontSize: 14, marginBottom: 6 },
+  required: { color: 'red' },
   input: {
-    borderWidth: 1,
-    borderColor: appColorTheme.grey_1,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-  },
-  textArea: {
-    height: 100,
-    textAlignVertical: 'top',
+    borderWidth: 1, borderColor: '#ccc', borderRadius: 8,
+    padding: 12, fontSize: 16
   },
   pickerContainer: {
-    borderWidth: 1,
-    borderColor: appColorTheme.grey_1,
-    borderRadius: 8,
-    marginTop: 5,
-    backgroundColor: appColorTheme.white_0,
-    height: 50,
+    borderWidth: 1, borderColor: '#ccc', borderRadius: 8,
+    overflow: 'hidden'
   },
-  picker: {
-    height: 50,
-    width: '100%',
-    color: appColorTheme.black_0,
-  },
-  pickerItem: {
-    color: appColorTheme.black_0,
-    fontSize: 16,
-  },
-  disabledPicker: {
-    opacity: 0.5,
-  },
+  picker: { height: 50 },
+  disabledPicker: { opacity: 0.5 },
   imageUpload: {
-    width: '100%',
-    height: 200,
-    borderWidth: 2,
-    borderColor: appColorTheme.grey_1,
-    borderStyle: 'dashed',
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 8,
-    overflow: 'hidden',
+    width: '100%', height: 200, borderWidth: 2, borderColor: '#ccc',
+    borderStyle: 'dashed', borderRadius: 8,
+    justifyContent: 'center', alignItems: 'center'
   },
-  selectedImageContainer: {
-    width: '100%',
-    height: '100%',
-    position: 'relative',
-  },
-  selectedImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  removeImageButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    borderRadius: 15,
-    width: 30,
-    height: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  uploadPlaceholder: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  uploadText: {
-    marginTop: 8,
-    color: appColorTheme.grey_0,
-    fontSize: 14,
-  },
+  selectedImage: { width: '100%', height: '100%', borderRadius: 8 },
+  uploadPlaceholder: { justifyContent: 'center', alignItems: 'center' },
+  uploadText: { marginTop: 8, color: '#888' },
   submitButton: {
-    backgroundColor: appColorTheme.brown_0,
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginVertical: 24,
+    backgroundColor: appColorTheme.brown_0 || '#8B4513',
+    padding: 16, borderRadius: 8, alignItems: 'center', marginTop: 20
   },
-  submitButtonText: {
-    color: appColorTheme.white_0,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  submitButtonDisabled: {
-    opacity: 0.7,
-  },
+  submitButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' }
 });
 
 export default WoodworkerRegistration;
