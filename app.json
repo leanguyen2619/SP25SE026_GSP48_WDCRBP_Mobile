@@ -52,6 +52,9 @@
     "scheme": "woodworker",
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "imgbbApiKey": "6baa7400e5d6030826c0332a84daea77"
     }
   }
 }
