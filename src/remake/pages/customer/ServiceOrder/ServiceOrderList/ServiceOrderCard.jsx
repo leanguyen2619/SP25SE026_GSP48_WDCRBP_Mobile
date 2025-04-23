@@ -1,19 +1,11 @@
+import React from 'react';
 import {
-  Button,
+  View,
   Text,
-  Card,
-  CardHeader,
-  CardBody,
-  CardFooter,
-  Badge,
-  Flex,
-  Divider,
-  Grid,
-  GridItem,
-  Heading,
-  Link,
-} from "@chakra-ui/react";
-import { FiEye } from "react-icons/fi";
+  TouchableOpacity,
+  StyleSheet
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import {
   appColorTheme,
   getServiceOrderStatusColor,
@@ -35,107 +27,198 @@ const getServiceTypeDisplayName = (apiValue) => {
 };
 
 const ServiceOrderCard = ({ order, onViewDetails }) => {
+  // Map status colors to React Native colors
+  const getStatusColor = (status) => {
+    const colorScheme = getServiceOrderStatusColor(status);
+    const colorMap = {
+      green: '#38A169',
+      blue: '#3182CE',
+      orange: '#DD6B20',
+      red: '#E53E3E',
+      purple: '#805AD5',
+      gray: '#718096'
+    };
+    return colorMap[colorScheme] || colorMap.gray;
+  };
+
   return (
-    <Card
-      overflow="hidden"
-      variant="outline"
-      boxShadow="sm"
-      borderColor="gray.200"
-      transition="all 0.3s"
-      _hover={{ boxShadow: "md", borderColor: appColorTheme.brown_2 }}
-      width="100%"
-    >
-      <CardHeader bg="gray.50" py={3}>
-        <Flex justifyContent="space-between" alignItems="center">
-          <Heading size="md" fontWeight="bold">
-            Mã đơn: #{order.orderId}
-          </Heading>
+    <View style={styles.card}>
+      <View style={styles.cardHeader}>
+        <Text style={styles.cardTitle}>
+          Mã đơn: #{order.orderId}
+        </Text>
 
-          <Badge
-            colorScheme={getServiceOrderStatusColor(order.status)}
-            px={2}
-            py={1}
-          >
+        <View style={[styles.badge, { backgroundColor: getStatusColor(order.status) + '20' }]}>
+          <Text style={[styles.badgeText, { color: getStatusColor(order.status) }]}>
             {order.status}
-          </Badge>
-        </Flex>
-      </CardHeader>
+          </Text>
+        </View>
+      </View>
 
-      <CardBody>
-        <Grid templateColumns="repeat(2, 1fr)" gap={4}>
+      <View style={styles.cardBody}>
+        <View style={styles.grid}>
           {/* Left Column */}
-          <GridItem>
-            <Flex>
-              <Text fontWeight="medium" minWidth="110px">
+          <View style={styles.gridItem}>
+            <View style={styles.row}>
+              <Text style={styles.label}>
                 Loại dịch vụ:
               </Text>
-              <Text>
+              <Text style={styles.value}>
                 {getServiceTypeDisplayName(
                   order.service?.service?.serviceName || "N/A"
                 )}
               </Text>
-            </Flex>
+            </View>
 
-            <Flex mt={1}>
-              <Text fontWeight="medium" minWidth="110px">
+            <View style={[styles.row, styles.mt1]}>
+              <Text style={styles.label}>
                 Xưởng mộc:
               </Text>
-              <Link
-                href={`/woodworker/${order.service?.wwDto?.woodworkerId}`}
-                target="_blank"
-                color={appColorTheme.brown_2}
-              >
-                <Text>{order.service?.wwDto?.brandName || "N/A"}</Text>
-              </Link>
-            </Flex>
-          </GridItem>
+              <Text style={styles.link}>
+                {order.service?.wwDto?.brandName || "N/A"}
+              </Text>
+            </View>
+          </View>
 
           {/* Right Column */}
-          <GridItem>
-            <Flex>
-              <Text fontWeight="medium" minWidth="110px">
+          <View style={styles.gridItem}>
+            <View style={styles.row}>
+              <Text style={styles.label}>
                 Lắp đặt:
               </Text>
-              <Text>{order.install ? "Có" : "Không"}</Text>
-            </Flex>
+              <Text style={styles.value}>{order.install ? "Có" : "Không"}</Text>
+            </View>
 
-            <Flex mt={1}>
-              <Text fontWeight="medium" minWidth="110px">
+            <View style={[styles.row, styles.mt1]}>
+              <Text style={styles.label}>
                 Ngày tạo:
               </Text>
-              <Text>{formatDateTimeToVietnamese(order.createdAt)}</Text>
-            </Flex>
-          </GridItem>
-        </Grid>
-      </CardBody>
+              <Text style={styles.value}>{formatDateTimeToVietnamese(order.createdAt)}</Text>
+            </View>
+          </View>
+        </View>
+      </View>
 
-      <Divider />
+      <View style={styles.divider} />
 
-      <CardFooter
-        pt={2}
-        pb={3}
-        justifyContent={"space-between"}
-        alignItems={"center"}
-      >
+      <View style={styles.cardFooter}>
         {order.totalAmount && (
-          <Text fontSize="lg" fontWeight="bold" color={appColorTheme.brown_2}>
+          <Text style={styles.totalAmount}>
             {formatPrice(order.totalAmount)}
           </Text>
         )}
 
-        <Button
-          onClick={() => onViewDetails(order.orderId)}
-          color="white"
-          bg={appColorTheme.brown_2}
-          leftIcon={<FiEye />}
-          _hover={{ bg: appColorTheme.brown_1 }}
-          size="sm"
+        <TouchableOpacity
+          onPress={() => onViewDetails(order.orderId)}
+          style={styles.button}
         >
-          Xem chi tiết
-        </Button>
-      </CardFooter>
-    </Card>
+          <Ionicons name="eye-outline" size={18} color="white" style={styles.buttonIcon} />
+          <Text style={styles.buttonText}>
+            Xem chi tiết
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    overflow: 'hidden',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+    marginBottom: 12,
+  },
+  cardHeader: {
+    backgroundColor: '#F7FAFC',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  badge: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  cardBody: {
+    padding: 16,
+  },
+  grid: {
+    flexDirection: 'row',
+  },
+  gridItem: {
+    flex: 1,
+  },
+  row: {
+    flexDirection: 'row',
+    marginBottom: 4,
+  },
+  mt1: {
+    marginTop: 8,
+  },
+  label: {
+    fontWeight: '600',
+    minWidth: 110,
+  },
+  value: {
+    flex: 1,
+  },
+  link: {
+    color: appColorTheme.brown_2,
+    flex: 1,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#E2E8F0',
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  totalAmount: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: appColorTheme.brown_2,
+  },
+  button: {
+    backgroundColor: appColorTheme.brown_2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 4,
+  },
+  buttonIcon: {
+    marginRight: 6,
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 14,
+  }
+});
 
 export default ServiceOrderCard;

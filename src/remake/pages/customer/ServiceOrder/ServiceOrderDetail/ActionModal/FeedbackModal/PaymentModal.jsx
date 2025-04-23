@@ -1,25 +1,15 @@
+import React, { useState } from "react";
 import {
-  Button,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Stack,
+  View,
   Text,
-  Divider,
-  useDisclosure,
-  Box,
-  Grid,
-  GridItem,
-  RadioGroup,
-  Radio,
-} from "@chakra-ui/react";
-import { useState } from "react";
+  TouchableOpacity,
+  StyleSheet,
+  Modal,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
 import { useNotify } from "../../../../../../components/Utility/Notify";
-import { FiCheck, FiCreditCard, FiXCircle } from "react-icons/fi";
+import Icon from "react-native-vector-icons/Feather";
 import CheckboxList from "../../../../../../components/Utility/CheckboxList";
 import {
   appColorTheme,
@@ -32,7 +22,7 @@ import { useCreatePaymentMutation } from "../../../../../../services/paymentApi"
 import { useNavigate } from "react-router-dom";
 
 export default function PaymentModal({ deposit, order, refetch, buttonText }) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
   const notify = useNotify();
   const { auth } = useAuth();
   const navigate = useNavigate();
@@ -42,6 +32,9 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
     useCreatePaymentMutation();
   const [isCheckboxDisabled, setIsCheckboxDisabled] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState("wallet"); // wallet or gateway
+
+  const onOpen = () => setIsOpen(true);
+  const onClose = () => setIsOpen(false);
 
   const isLoading = isWalletLoading || isGatewayLoading;
 
@@ -93,110 +86,290 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
 
   return (
     <>
-      <Button leftIcon={<FiCreditCard />} colorScheme="blue" onClick={onOpen}>
-        {buttonText ? buttonText : `Thanh toán lần #${deposit.depositNumber}`}
-      </Button>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={onOpen}
+        activeOpacity={0.7}
+      >
+        <Icon name="credit-card" size={16} color="white" />
+        <Text style={styles.buttonText}>
+          {buttonText ? buttonText : `Thanh toán lần #${deposit.depositNumber}`}
+        </Text>
+      </TouchableOpacity>
 
       <Modal
-        isOpen={isOpen}
-        onClose={isLoading ? null : onClose}
-        closeOnOverlayClick={false}
-        closeOnEsc={false}
-        size="2xl"
+        visible={isOpen}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={isLoading ? null : onClose}
       >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Thanh toán đặt cọc</ModalHeader>
-          {!isLoading && <ModalCloseButton />}
-          <ModalBody pb={6}>
-            <Stack spacing={4}>
-              <Text fontSize="lg" fontWeight="bold">
-                Chi tiết đặt cọc
-              </Text>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalHeaderText}>Thanh toán đặt cọc</Text>
+              {!isLoading && (
+                <TouchableOpacity onPress={onClose}>
+                  <Icon name="x" size={24} color="#333" />
+                </TouchableOpacity>
+              )}
+            </View>
+            
+            <ScrollView style={styles.modalBody}>
+              <View style={styles.contentContainer}>
+                <Text style={styles.sectionTitle}>Chi tiết đặt cọc</Text>
 
-              <Box p={4} bg="gray.50" borderRadius="md" boxShadow="sm">
-                <Grid templateColumns="150px 1fr" gap={3}>
-                  <GridItem>
-                    <Text fontWeight="semibold">Mã đơn dịch vụ:</Text>
-                  </GridItem>
-                  <GridItem>
-                    <Text>#{order.orderId}</Text>
-                  </GridItem>
+                <View style={styles.infoContainer}>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Mã đơn dịch vụ:</Text>
+                    <Text style={styles.infoValue}>#{order.orderId}</Text>
+                  </View>
 
-                  <GridItem>
-                    <Text fontWeight="semibold">Đặt cọc lần:</Text>
-                  </GridItem>
-                  <GridItem>
-                    <Text>{deposit.depositNumber}</Text>
-                  </GridItem>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Đặt cọc lần:</Text>
+                    <Text style={styles.infoValue}>{deposit.depositNumber}</Text>
+                  </View>
 
-                  <GridItem>
-                    <Text fontWeight="semibold">Phần trăm:</Text>
-                  </GridItem>
-                  <GridItem>
-                    <Text>{deposit.percent}%</Text>
-                  </GridItem>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Phần trăm:</Text>
+                    <Text style={styles.infoValue}>{deposit.percent}%</Text>
+                  </View>
 
-                  <GridItem>
-                    <Text fontWeight="semibold">Số tiền:</Text>
-                  </GridItem>
-                  <GridItem>
-                    <Text fontWeight="bold" color={appColorTheme.brown_2}>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Số tiền:</Text>
+                    <Text style={styles.infoTotal}>
                       {formatPrice(deposit.amount)}
                     </Text>
-                  </GridItem>
-                </Grid>
-              </Box>
+                  </View>
+                </View>
 
-              <Box p={4}>
-                <Text fontSize="md" fontWeight="bold" mb={3}>
-                  Chọn phương thức thanh toán:
-                </Text>
-                <RadioGroup onChange={setPaymentMethod} value={paymentMethod}>
-                  <Stack spacing={4}>
-                    <Radio value="wallet">Thanh toán bằng ví</Radio>
-                    <Radio value="gateway">
-                      Thanh toán qua cổng thanh toán
-                    </Radio>
-                  </Stack>
-                </RadioGroup>
-              </Box>
+                <View style={styles.paymentMethodSection}>
+                  <Text style={styles.sectionTitle}>
+                    Chọn phương thức thanh toán:
+                  </Text>
+                  <View style={styles.radioGroup}>
+                    <TouchableOpacity
+                      style={styles.radioOption}
+                      onPress={() => setPaymentMethod("wallet")}
+                    >
+                      <View style={styles.radioButton}>
+                        {paymentMethod === "wallet" && (
+                          <View style={styles.radioButtonSelected} />
+                        )}
+                      </View>
+                      <Text style={styles.radioLabel}>Thanh toán bằng ví</Text>
+                    </TouchableOpacity>
 
-              <Divider my={2} />
-              <CheckboxList
-                items={checkboxItems}
-                setButtonDisabled={setIsCheckboxDisabled}
-              />
-            </Stack>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              isLoading={isLoading}
-              variant="ghost"
-              mr={3}
-              onClick={onClose}
-              leftIcon={<FiXCircle />}
-              isDisabled={isLoading}
-            >
-              Đóng
-            </Button>
-            <Button
-              colorScheme="blue"
-              onClick={handleSubmit}
-              isLoading={isLoading}
-              isDisabled={isCheckboxDisabled}
-              leftIcon={<FiCheck />}
-              loadingText={
-                paymentMethod === "wallet"
-                  ? "Đang xử lý thanh toán"
-                  : "Đang chuyển hướng"
-              }
-            >
-              Thanh toán
-            </Button>
-          </ModalFooter>
-        </ModalContent>
+                    <TouchableOpacity
+                      style={styles.radioOption}
+                      onPress={() => setPaymentMethod("gateway")}
+                    >
+                      <View style={styles.radioButton}>
+                        {paymentMethod === "gateway" && (
+                          <View style={styles.radioButtonSelected} />
+                        )}
+                      </View>
+                      <Text style={styles.radioLabel}>
+                        Thanh toán qua cổng thanh toán
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <View style={styles.divider} />
+                
+                <CheckboxList
+                  items={checkboxItems}
+                  setButtonDisabled={setIsCheckboxDisabled}
+                />
+              </View>
+            </ScrollView>
+            
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={[
+                  styles.footerButton,
+                  styles.closeButton,
+                  isLoading && styles.disabledButton,
+                ]}
+                onPress={onClose}
+                disabled={isLoading}
+              >
+                <Icon name="x-circle" size={16} color="#333" />
+                <Text style={styles.closeButtonText}>Đóng</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[
+                  styles.footerButton,
+                  styles.confirmButton,
+                  isCheckboxDisabled && styles.disabledButton,
+                ]}
+                onPress={handleSubmit}
+                disabled={isCheckboxDisabled || isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <>
+                    <Icon name="check" size={16} color="white" />
+                    <Text style={styles.confirmButtonText}>Thanh toán</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       </Modal>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  button: {
+    backgroundColor: "#3182CE",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 8,
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "600",
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    height: "80%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  modalHeaderText: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  modalBody: {
+    flex: 1,
+  },
+  contentContainer: {
+    padding: 16,
+    gap: 16,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 8,
+  },
+  infoContainer: {
+    padding: 16,
+    backgroundColor: "#F9FAFB",
+    borderRadius: 8,
+    gap: 12,
+  },
+  infoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  infoLabel: {
+    fontWeight: "600",
+    fontSize: 14,
+    flex: 1,
+  },
+  infoValue: {
+    fontSize: 14,
+    flex: 1,
+    textAlign: "right",
+  },
+  infoTotal: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: appColorTheme.brown_2,
+    flex: 1,
+    textAlign: "right",
+  },
+  paymentMethodSection: {
+    marginTop: 8,
+    padding: 8,
+  },
+  radioGroup: {
+    marginTop: 8,
+    gap: 12,
+  },
+  radioOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    padding: 8,
+  },
+  radioButton: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "#3182CE",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  radioButtonSelected: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#3182CE",
+  },
+  radioLabel: {
+    fontSize: 14,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#E5E7EB",
+    marginVertical: 16,
+  },
+  modalFooter: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    padding: 16,
+    gap: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
+  },
+  footerButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 8,
+  },
+  closeButton: {
+    backgroundColor: "#F3F4F6",
+  },
+  closeButtonText: {
+    color: "#333",
+    fontWeight: "500",
+  },
+  confirmButton: {
+    backgroundColor: "#3182CE",
+  },
+  confirmButtonText: {
+    color: "white",
+    fontWeight: "600",
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+});

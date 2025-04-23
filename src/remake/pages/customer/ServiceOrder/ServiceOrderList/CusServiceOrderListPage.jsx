@@ -1,22 +1,29 @@
-import { Heading, Stack } from "@chakra-ui/react";
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-quartz.css";
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import ServiceOrderList from "./ServiceOrderList.jsx";
 import { appColorTheme } from "../../../../config/appconfig";
 
 export default function CusServiceOrderListPage() {
   return (
-    <Stack spacing={6}>
-      <Heading
-        color={appColorTheme.brown_2}
-        as="h2"
-        fontSize="2xl"
-        fontFamily="Montserrat"
-      >
+    <View style={styles.container}>
+      <Text style={styles.heading}>
         Đơn đặt dịch vụ
-      </Heading>
+      </Text>
 
       <ServiceOrderList />
-    </Stack>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  heading: {
+    color: appColorTheme.brown_2,
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  }
+});
