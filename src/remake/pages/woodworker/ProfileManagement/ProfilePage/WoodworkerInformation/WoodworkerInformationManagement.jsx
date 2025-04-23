@@ -18,6 +18,8 @@ import AddressInput from "../../../../../components/Utility/AddressInput.jsx";
 import CheckboxList from "../../../../../components/Utility/CheckboxList.jsx";
 import { useNotify } from "../../../../../components/Utility/Notify.jsx";
 import { FiCheckCircle } from "react-icons/fi";
+import useAuth from "../../../../../hooks/useAuth.js";
+import { useUpdateWoodworkerProfileMutation } from "../../../../../services/woodworkerApi.js";
 
 export default function WoodworkerInformationManagement({
   woodworker,
@@ -25,33 +27,47 @@ export default function WoodworkerInformationManagement({
   setAddress,
   isAddressUpdate,
   setIsAddressUpdate,
+  refetch,
 }) {
+  const { auth } = useAuth();
+  const woodworkerId = auth?.wwId;
   const [imgUrl, setImgUrl] = useState("");
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const notify = useNotify();
   const [isLoading, setIsLoading] = useState(false);
+  const [updateWoodworkerProfile] = useUpdateWoodworkerProfileMutation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
 
+    // Create the request body
+    const requestBody = {
+      woodworkerId: woodworkerId,
+      brandName: data.brandName,
+      bio: data.bio,
+      businessType: data.businessType,
+    };
+
     // Thêm địa chỉ vào data nếu đang cập nhật
     if (isAddressUpdate && address) {
-      data.address = `${address.street}, ${address.wardName}, ${address.districtName}, ${address.cityName}`;
-      data.cityId = address.cityId;
-      data.districtId = address.districtId;
-      data.wardCode = address.wardCode;
+      requestBody.address = `${address.street}, ${address.wardName}, ${address.districtName}, ${address.cityName}`;
+      requestBody.cityId = address.cityId;
+      requestBody.districtId = address.districtId;
+      requestBody.wardCode = address.wardCode;
     }
 
     // Thêm ảnh vào data nếu có
     if (imgUrl) {
-      data.imgUrl = imgUrl;
+      requestBody.imgUrl = imgUrl;
     }
 
     try {
       setIsLoading(true);
+      await updateWoodworkerProfile(requestBody).unwrap();
       notify("Cập nhật thành công", "Thông tin đã được cập nhật", "success");
+      refetch();
       setIsAddressUpdate(false);
       setButtonDisabled(true);
       setIsLoading(false);

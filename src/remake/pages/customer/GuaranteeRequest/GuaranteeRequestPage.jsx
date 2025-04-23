@@ -55,7 +55,7 @@ export default function GuaranteeRequestPage() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [currentProductStatus, setCurrentProductStatus] = useState("");
   const [currentProductImages, setCurrentProductImages] = useState("");
-  const [isInstall, setIsInstall] = useState(true);
+  const [isInstall, setIsInstall] = useState(false);
   const [note, setNote] = useState("");
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [shippingFee, setShippingFee] = useState(0);

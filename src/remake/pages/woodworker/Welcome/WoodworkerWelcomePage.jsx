@@ -1,70 +1,71 @@
+import React from "react";
 import {
-  Box,
-  Button,
-  Flex,
-  Grid,
-  Heading,
-  Icon,
+  View,
   Text,
-  VStack,
-  useColorModeValue,
-} from "@chakra-ui/react";
-import {
-  FiCreditCard,
-  FiDollarSign,
-  FiFileText,
-  FiHome,
-  FiPenTool,
-  FiSettings,
-  FiStar,
-  FiTool,
-  FiUser,
-} from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  FlatList,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import useAuth from "../../../hooks/useAuth";
 import { appColorTheme } from "../../../config/appconfig";
+import WoodworkerLayout from "../../../layouts/WoodworkerLayout";
+import PublicProfileSwitch from "../../../components/Header/PublicProfileSwitch";
 
-const QuickActionCard = ({ icon, title, description, onClick, color }) => {
-  const bgColor = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.700");
-
+const QuickActionCard = ({ icon, title, description, onPress, color }) => {
   return (
-    <Box
-      p={5}
-      bg={bgColor}
-      borderRadius="lg"
-      borderWidth="1px"
-      borderColor={borderColor}
-      cursor="pointer"
-      _hover={{ transform: "translateY(-2px)", shadow: "md" }}
-      transition="all 0.2s"
-      onClick={onClick}
-    >
-      <VStack spacing={4} align="start">
-        <Box
-          p={3}
-          bg={`${color}.50`}
-          color={color}
-          borderRadius="lg"
-          fontSize="2xl"
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
+      <View style={styles.cardContent}>
+        <View
+          style={[
+            styles.iconContainer,
+            { backgroundColor: getLightColor(color) },
+          ]}
         >
-          <Icon as={icon} />
-        </Box>
-        <VStack align="start" spacing={1}>
-          <Text fontSize="lg" fontWeight="bold">
-            {title}
-          </Text>
-          <Text color="gray.500" fontSize="sm">
-            {description}
-          </Text>
-        </VStack>
-      </VStack>
-    </Box>
+          <FontAwesome5 name={icon} size={24} color={getColor(color)} />
+        </View>
+        <View style={styles.textContainer}>
+          <Text style={styles.cardTitle}>{title}</Text>
+          <Text style={styles.cardDescription}>{description}</Text>
+        </View>
+      </View>
+    </TouchableOpacity>
   );
 };
 
-export default function WoodworkerWelcomePage() {
-  const navigate = useNavigate();
+// Helper functions for colors
+const getColor = (colorName) => {
+  const colors = {
+    blue: "#3182CE",
+    purple: "#805AD5",
+    green: "#38A169",
+    orange: "#DD6B20",
+    red: "#E53E3E",
+    pink: "#D53F8C",
+    cyan: "#00B5D8",
+    teal: "#319795",
+  };
+  return colors[colorName] || "#4A5568";
+};
+
+const getLightColor = (colorName) => {
+  const colors = {
+    blue: "#EBF8FF",
+    purple: "#FAF5FF",
+    green: "#F0FFF4",
+    orange: "#FFFAF0",
+    red: "#FFF5F5",
+    pink: "#FFF5F7",
+    cyan: "#E6FFFA",
+    teal: "#E6FFFA",
+  };
+  return colors[colorName] || "#F7FAFC";
+};
+
+const WoodworkerWelcomePage = () => {
+  const navigation = useNavigation();
   const { auth } = useAuth();
   const packType =
     auth?.woodworker?.servicePackEndDate &&
@@ -74,130 +75,230 @@ export default function WoodworkerWelcomePage() {
 
   const quickActions = [
     {
-      icon: FiFileText,
+      icon: "file-alt",
       title: "Thêm bài đăng mới",
       description: "Đăng tải bài đăng mới của bạn",
       color: "blue",
-      onClick: () => navigate("/ww/post"),
+      onPress: () => navigation.navigate("PostManagement"),
     },
     {
-      icon: FiSettings,
+      icon: "cogs",
       title: "Cài đặt xưởng",
       description: "Cập nhật thông tin xưởng của bạn",
       color: "purple",
-      onClick: () => navigate("/ww/profile"),
+      onPress: () => navigation.navigate("WoodworkerProfile"),
     },
     {
-      icon: FiDollarSign,
+      icon: "dollar-sign",
       title: "Quản lý gói dịch vụ",
       description: "Xem và nâng cấp gói dịch vụ",
       color: "green",
-      onClick: () => navigate("/ww/profile"),
+      onPress: () => navigation.navigate("WoodworkerProfile"),
     },
     {
-      icon: FiUser,
+      icon: "user",
       title: "Quản lý đơn hàng",
       description: "Xem và xử lý đơn hàng",
       color: "orange",
-      onClick: () => navigate("/ww/service-order"),
+      onPress: () => navigation.navigate("WWServiceOrders"),
     },
     {
-      icon: FiStar,
+      icon: "star",
       title: "Xem đánh giá",
       description: "Xem đánh giá của khách hàng",
       color: "red",
-      onClick: () => navigate("/ww/review"),
+      onPress: () => navigation.navigate("ReviewManagement"),
     },
     {
-      icon: FiPenTool,
+      icon: "drafting-compass",
       title: "Thêm thiết kế",
       description: "Thêm thiết kế mới",
       color: "pink",
-      onClick: () => navigate("/ww/design"),
+      onPress: () => navigation.navigate("DesignManagement"),
     },
     {
-      icon: FiCreditCard,
+      icon: "credit-card",
       title: "Xem ví",
       description: "Xem ví của bạn",
       color: "cyan",
-      onClick: () => navigate("/ww/wallet"),
+      onPress: () => navigation.navigate("WWWallet"),
     },
     {
-      icon: FiTool,
+      icon: "tools",
       title: "Xem dịch vụ",
       description: "Xem dịch vụ của bạn",
       color: "teal",
-      onClick: () => navigate("/ww/service"),
+      onPress: () => navigation.navigate("ServiceConfig"),
     },
   ];
 
-  return (
-    <Box p={5}>
-      <Flex
-        direction={{ base: "column", md: "row" }}
-        justify="space-between"
-        align="center"
-        mb={6}
-      >
-        <VStack align="start" spacing={2}>
-          <Heading size="lg">
-            Xin chào, {auth?.woodworker?.brandName || "Xưởng mộc"}
-          </Heading>
-          <Text color="gray.500">
-            Chào mừng bạn đến với trang quản lý xưởng mộc
-          </Text>
-        </VStack>
-        {packType && (
-          <Button
-            bgColor={appColorTheme.brown_2}
-            _hover={{
-              bgColor: appColorTheme.brown_1,
-              color: "white",
-            }}
-            color="white"
-            leftIcon={<FiHome />}
-            onClick={() => navigate(`/woodworker/${auth?.wwId}`)}
-          >
-            Xem xưởng của bạn
-          </Button>
-        )}
-      </Flex>
-
-      {packType ? (
-        <>
-          <Heading size="md" mb={6}>
-            Thao tác nhanh
-          </Heading>
-          <Grid
-            templateColumns={{
-              base: "repeat(1, 1fr)",
-              md: "repeat(2, 1fr)",
-              lg: "repeat(4, 1fr)",
-            }}
-            gap={5}
-          >
-            {quickActions.map((action, index) => (
-              <QuickActionCard key={index} {...action} />
-            ))}
-          </Grid>
-        </>
-      ) : (
-        <>
-          <Heading size="md" mb={6}>
-            Mua gói dịch vụ
-          </Heading>
-
-          <QuickActionCard
-            {...{
-              icon: FiDollarSign,
-              title: "Quản lý gói dịch vụ",
-              description: "Xem và nâng cấp gói dịch vụ",
-              color: "green",
-              onClick: () => navigate("/ww/profile"),
-            }}
-          />
-        </>
-      )}
-    </Box>
+  const renderItem = ({ item }) => (
+    <QuickActionCard
+      icon={item.icon}
+      title={item.title}
+      description={item.description}
+      color={item.color}
+      onPress={item.onPress}
+    />
   );
-}
+
+  return (
+    <WoodworkerLayout>
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerTitle}>
+              Xin chào, {auth?.woodworker?.brandName || "Xưởng mộc"}
+            </Text>
+          </View>
+
+          {packType && (
+            <>
+              <View style={styles.switchContainer}>
+                <PublicProfileSwitch />
+              </View>
+
+              <TouchableOpacity
+                style={styles.viewProfileButton}
+                onPress={() =>
+                  navigation.navigate("WoodworkerDetail", {
+                    id: auth?.wwId,
+                  })
+                }
+              >
+                <FontAwesome5
+                  name="home"
+                  size={16}
+                  color="white"
+                  style={styles.buttonIcon}
+                />
+                <Text style={styles.buttonText}>Xem xưởng của bạn</Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
+
+        {packType ? (
+          <>
+            <Text style={styles.sectionTitle}>Thao tác nhanh</Text>
+            <FlatList
+              data={quickActions}
+              renderItem={renderItem}
+              keyExtractor={(item, index) => index.toString()}
+              numColumns={2}
+              columnWrapperStyle={styles.gridRow}
+              scrollEnabled={false}
+            />
+          </>
+        ) : (
+          <>
+            <Text style={styles.sectionTitle}>Mua gói dịch vụ</Text>
+            <QuickActionCard
+              icon="dollar-sign"
+              title="Quản lý gói dịch vụ"
+              description="Xem và nâng cấp gói dịch vụ"
+              color="green"
+              onPress={() => navigation.navigate("WoodworkerProfile")}
+            />
+          </>
+        )}
+      </ScrollView>
+    </WoodworkerLayout>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: appColorTheme.grey_1,
+    padding: 16,
+  },
+  header: {
+    flexDirection: "column",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+    flexWrap: "wrap",
+  },
+  headerTextContainer: {
+    flexDirection: "column",
+    flex: 1,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: appColorTheme.green_3,
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: "gray",
+  },
+  viewProfileButton: {
+    backgroundColor: appColorTheme.brown_2,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginTop: 16,
+  },
+  buttonIcon: {
+    marginRight: 6,
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 16,
+    color: appColorTheme.green_3,
+  },
+  gridRow: {
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  card: {
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 16,
+    width: "48%",
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  cardContent: {
+    alignItems: "flex-start",
+  },
+  iconContainer: {
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  textContainer: {
+    width: "100%",
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  cardDescription: {
+    fontSize: 12,
+    color: "gray",
+  },
+  switchContainer: {
+    width: "100%",
+    marginTop: 12,
+    backgroundColor: "white",
+    borderRadius: 8,
+    padding: 4,
+  },
+});
+
+export default WoodworkerWelcomePage;

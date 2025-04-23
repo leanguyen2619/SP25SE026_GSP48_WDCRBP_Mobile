@@ -83,7 +83,7 @@ export default function ShippingAndPriceSection({
               <HStack justify="space-between">
                 <Text fontWeight="bold">Tổng phí vận chuyển:</Text>
                 <Text fontWeight="bold" color={appColorTheme.brown_2}>
-                  {formatCurrency(shippingFee)}
+                  {formatCurrency(shippingFee * 2)}
                 </Text>
               </HStack>
             </VStack>

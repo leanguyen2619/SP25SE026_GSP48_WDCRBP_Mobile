@@ -1,22 +1,22 @@
-import { Heading, Stack } from "@chakra-ui/react";
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-quartz.css";
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
 import ServiceOrderList from "./ServiceOrderList.jsx";
 import { appColorTheme } from "../../../../config/appconfig";
+import WoodworkerLayout from "../../../../layouts/WoodworkerLayout";
 
 export default function WWServiceOrderListPage() {
   return (
-    <Stack spacing={6}>
-      <Heading
-        color={appColorTheme.brown_2}
-        as="h2"
-        fontSize="2xl"
-        fontFamily="Montserrat"
-      >
-        Đơn đặt dịch vụ
-      </Heading>
-
-      <ServiceOrderList />
-    </Stack>
+    <WoodworkerLayout>
+      <View style={styles.container}>
+        <ServiceOrderList />
+      </View>
+    </WoodworkerLayout>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 10,
+  },
+});

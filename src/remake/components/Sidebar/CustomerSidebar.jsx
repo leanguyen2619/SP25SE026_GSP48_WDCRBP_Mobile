@@ -19,25 +19,35 @@ export default function CustomerSidebar({ isCollapsed, setIsCollapsed }) {
   };
 
   const navItems = [
-    { label: "Trang chủ", path: "/", icon: "home" },
-    { label: "Đơn hàng", path: "service-order", icon: "shopping-cart" },
-    { label: "BH & Sữa chữa", path: "guarantee-order", icon: "settings" },
-    { label: "Ví", path: "wallet", icon: "credit-card" },
-    { label: "Khiếu nại", path: "complaint", icon: "alert-triangle" },
-    { label: "Hồ sơ", path: "profile", icon: "user" },
+    { label: "Đơn hàng", path: "CustomerServiceOrders", icon: "shopping-cart" },
+    {
+      label: "BH & Sữa chữa",
+      path: "CustomerGuaranteeOrders",
+      icon: "settings",
+    },
+    { label: "Ví", path: "CustomerWallet", icon: "credit-card" },
+    { label: "Khiếu nại", path: "CustomerComplaint", icon: "alert-triangle" },
+    { label: "Hồ sơ", path: "CustomerProfile", icon: "user" },
   ];
+
+  if (isCollapsed) {
+    return (
+      <TouchableOpacity
+        style={styles.toggleButtonCollapsed}
+        onPress={() => setIsCollapsed(false)}
+      >
+        <Feather name="chevron-right" size={24} color="white" />
+      </TouchableOpacity>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <TouchableOpacity
         style={[styles.toggleButton, { backgroundColor: "black" }]}
-        onPress={() => setIsCollapsed(!isCollapsed)}
+        onPress={() => setIsCollapsed(true)}
       >
-        <Feather
-          name={isCollapsed ? "chevron-right" : "chevron-left"}
-          size={24}
-          color="white"
-        />
+        <Feather name="chevron-left" size={24} color="white" />
       </TouchableOpacity>
 
       <ScrollView style={styles.scrollView}>
@@ -49,11 +59,8 @@ export default function CustomerSidebar({ isCollapsed, setIsCollapsed }) {
               key={index}
               style={[
                 styles.menuItem,
-                isCollapsed ? styles.collapsedItem : styles.expandedItem,
-                isActive &&
-                  (isCollapsed
-                    ? styles.activeCollapsedItem
-                    : styles.activeExpandedItem),
+                styles.expandedItem,
+                isActive && styles.activeExpandedItem,
               ]}
               onPress={() =>
                 navigation.navigate(item.path === "/" ? "Home" : item.path)
@@ -65,13 +72,11 @@ export default function CustomerSidebar({ isCollapsed, setIsCollapsed }) {
                 color={isActive ? "white" : appColorTheme.brown_1}
               />
 
-              {!isCollapsed && (
-                <Text
-                  style={[styles.menuText, isActive && styles.activeMenuText]}
-                >
-                  {item.label}
-                </Text>
-              )}
+              <Text
+                style={[styles.menuText, isActive && styles.activeMenuText]}
+              >
+                {item.label}
+              </Text>
             </TouchableOpacity>
           );
         })}
@@ -99,24 +104,28 @@ const styles = StyleSheet.create({
     alignItems: "center",
     zIndex: 999,
   },
+  toggleButtonCollapsed: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    width: 35,
+    height: 35,
+    borderRadius: 20,
+    backgroundColor: "black",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 999,
+  },
   menuItem: {
     marginBottom: 8,
     borderRadius: 10,
     overflow: "hidden",
-  },
-  collapsedItem: {
-    padding: 12,
-    alignItems: "center",
-    justifyContent: "center",
   },
   expandedItem: {
     padding: 16,
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: appColorTheme.grey_0,
-  },
-  activeCollapsedItem: {
-    backgroundColor: appColorTheme.brown_1,
   },
   activeExpandedItem: {
     backgroundColor: appColorTheme.brown_1,

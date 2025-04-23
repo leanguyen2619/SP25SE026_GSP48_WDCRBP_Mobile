@@ -21,6 +21,10 @@ import UnauthorizedPage from "../pages/general/StatusPage/UnauthorizedPage";
 import TermsPage from "../pages/general/Terms/TermsPage";
 import WoodworkersPage from "../pages/general/Woodworker/WoodworkerList/WoodworkersPage";
 import WoodworkerDetailPage from "../pages/general/Woodworker/WoodworkerDetail/WoodworkerDetailPage";
+import WoodworkerWelcomePage from "../pages/woodworker/Welcome/WoodworkerWelcomePage";
+import WWServiceOrderListPage from "../pages/woodworker/ServiceOrder/ServiceOrderList/WWServiceOrderListPage";
+// import WWServiceOrderDetailPage from "../pages/woodworker/ServiceOrder/ServiceOrderDetail/MainPage/WWServiceOrderDetailPage";
+import WoodworkerLayout from "../layouts/WoodworkerLayout";
 
 const Stack = createNativeStackNavigator();
 
@@ -92,10 +96,10 @@ const AppNavigator = () => {
       /> */}
 
       {/* Woodworker */}
-      {/* <Stack.Screen
+      <Stack.Screen
         name="WoodworkerWelcome"
         component={WoodworkerWelcomePage}
-      /> */}
+      />
       {/* <Stack.Screen
         name="DesignManagement"
         component={DesignManagementListPage}
@@ -119,10 +123,14 @@ const AppNavigator = () => {
         name="WoodworkerProfile"
         component={WoodworkerProfileManagementPage}
       /> */}
-      {/* <Stack.Screen name="WWServiceOrders" component={WWServiceOrderListPage} /> */}
+      <Stack.Screen name="WWServiceOrders" component={WWServiceOrderListPage} />
       {/* <Stack.Screen
         name="WWServiceOrderDetail"
-        component={WWServiceOrderDetailPage}
+        component={(props) => (
+          <WoodworkerLayout>
+            <WWServiceOrderDetailPage {...props} />
+          </WoodworkerLayout>
+        )}
       /> */}
       {/* <Stack.Screen
         name="WWGuaranteeOrders"

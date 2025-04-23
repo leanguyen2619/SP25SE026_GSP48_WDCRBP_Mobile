@@ -81,6 +81,22 @@ export const woodworkerApi = createApi({
         body: data,
       }),
     }),
+
+    updateWoodworkerProfile: builder.mutation({
+      query: (data) => ({
+        url: "/api/v1/ww/update-woodworker-profile",
+        method: "PUT",
+        body: data,
+      }),
+    }),
+
+    updateWarrantyPolicy: builder.mutation({
+      query: (data) => ({
+        url: "/api/v1/ww/update-warranty-policy",
+        method: "PUT",
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -94,4 +110,6 @@ export const {
   useUpdateWoodworkerPublicStatusMutation,
   useAddServicePackMutation,
   useAddServicePackByIdMutation,
+  useUpdateWoodworkerProfileMutation,
+  useUpdateWarrantyPolicyMutation,
 } = woodworkerApi;
