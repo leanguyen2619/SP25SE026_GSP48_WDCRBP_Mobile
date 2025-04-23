@@ -1,12 +1,14 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, SafeAreaView } from "react-native";
+import { View, Text, StyleSheet, SafeAreaView, Dimensions } from "react-native";
 import { appColorTheme } from "../config/appconfig.js";
 import CustomerSidebar from "../components/Sidebar/CustomerSidebar.jsx";
 import Header from "../components/Header/Header.jsx";
 import RequireAuth from "../components/Utility/RequireAuth.jsx";
 
 export default function CustomerLayout({ children }) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const { width } = Dimensions.get("window");
+  const isMobile = width < 768;
 
   return (
     <RequireAuth allowedRoles={["Customer"]}>
@@ -16,31 +18,32 @@ export default function CustomerLayout({ children }) {
 
           <View style={styles.content}>
             {/* Sidebar */}
-            <View style={[styles.sidebar, { width: isCollapsed ? 80 : 300 }]}>
-              <Text
-                style={[
-                  styles.sidebarTitle,
-                  { textAlign: isCollapsed ? "center" : "center" },
-                ]}
-              >
-                {!isCollapsed ? "Menu khách hàng" : ""}
-              </Text>
-
+            {!isCollapsed ? (
+              <View style={[styles.sidebar, { width: 300 }]}>
+                <Text style={styles.sidebarTitle}>Menu khách hàng</Text>
+                <CustomerSidebar
+                  isCollapsed={isCollapsed}
+                  setIsCollapsed={setIsCollapsed}
+                />
+              </View>
+            ) : (
               <CustomerSidebar
                 isCollapsed={isCollapsed}
                 setIsCollapsed={setIsCollapsed}
               />
-            </View>
+            )}
 
-            {/* Main Content */}
-            <View
-              style={[
-                styles.mainContent,
-                { marginLeft: isCollapsed ? 80 : 300 },
-              ]}
-            >
-              {children}
-            </View>
+            {/* Main Content - Only show when sidebar is collapsed or on desktop */}
+            {(isCollapsed || !isMobile) && (
+              <View
+                style={[
+                  styles.mainContent,
+                  { marginLeft: isCollapsed ? 0 : 300 },
+                ]}
+              >
+                {children}
+              </View>
+            )}
           </View>
         </View>
       </SafeAreaView>

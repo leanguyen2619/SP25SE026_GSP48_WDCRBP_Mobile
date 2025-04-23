@@ -21,12 +21,6 @@ function AuthPage() {
   const [currentTab, setCurrentTab] = useState("login");
   const [registerEmail, setRegisterEmail] = useState("");
 
-  // Redirect if user is already authenticated
-  if (auth) {
-    navigation.navigate("Home");
-    return null;
-  }
-
   const changeTab = (tab) => {
     setCurrentTab(tab);
   };

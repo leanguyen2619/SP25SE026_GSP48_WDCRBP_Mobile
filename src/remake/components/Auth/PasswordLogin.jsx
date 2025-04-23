@@ -70,19 +70,7 @@ export default function PasswordLogin() {
           break;
         case "Woodworker":
           setAuth(auth);
-          navigation.navigate("WWDashboard");
-          break;
-        case "Admin":
-          setAuth(auth);
-          navigation.navigate("AdminDashboard");
-          break;
-        case "Staff":
-          setAuth(auth);
-          navigation.navigate("StaffDashboard");
-          break;
-        case "Moderator":
-          setAuth(auth);
-          navigation.navigate("ModDashboard");
+          navigation.navigate("WoodworkerWelcome");
           break;
       }
     } catch (err) {

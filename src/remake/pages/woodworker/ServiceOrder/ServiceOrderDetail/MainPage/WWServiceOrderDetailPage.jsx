@@ -1,38 +1,30 @@
-import { useParams } from "react-router-dom";
+import React, { useState } from "react";
 import {
-  Box,
-  Heading,
+  View,
   Text,
-  Spinner,
-  Center,
-  HStack,
-  Spacer,
-  Tabs,
-  TabList,
-  Tab,
-  Flex,
-  Icon,
-  TabPanels,
-  TabPanel,
-} from "@chakra-ui/react";
+  StyleSheet,
+  ActivityIndicator,
+  TouchableOpacity,
+  ScrollView,
+  SafeAreaView,
+} from "react-native";
+import { useRoute } from "@react-navigation/native";
 import { useGetServiceOrderByIdQuery } from "../../../../../services/serviceOrderApi";
 import { appColorTheme } from "../../../../../config/appconfig";
 import useAuth from "../../../../../hooks/useAuth";
 import ActionBar from "../ActionModal/ActionBar/ActionBar.jsx";
-import { FiActivity, FiFile, FiFileText } from "react-icons/fi";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import GeneralInformationTab from "../Tab/GeneralInformationTab.jsx";
 import ProcessTab from "../Tab/ProgressTab.jsx";
 import ContractAndTransactionTab from "../Tab/ContractAndTransactionTab.jsx";
-import { useState } from "react";
 
 export default function WWServiceOrderDetailPage() {
-  const { id } = useParams();
+  const route = useRoute();
+  const id = route.params?.id;
   const { data, isLoading, error, refetch } = useGetServiceOrderByIdQuery(id);
   const order = data?.data;
   const { auth } = useAuth();
   const serviceName = order?.service?.service?.serviceName;
-
-  console.log(JSON.stringify(order, null, 2));
 
   // Track active tab index
   const [activeTabIndex, setActiveTabIndex] = useState(0);
@@ -44,17 +36,19 @@ export default function WWServiceOrderDetailPage() {
 
   if (isLoading) {
     return (
-      <Center h="200px">
-        <Spinner size="xl" color={appColorTheme.brown_2} />
-      </Center>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={appColorTheme.brown_2} />
+      </View>
     );
   }
 
   if (error) {
     return (
-      <Center h="200px">
-        <Text>Đã có lỗi xảy ra khi tải thông tin đơn dịch vụ</Text>
-      </Center>
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>
+          Đã có lỗi xảy ra khi tải thông tin đơn dịch vụ
+        </Text>
+      </View>
     );
   }
 
@@ -63,124 +57,228 @@ export default function WWServiceOrderDetailPage() {
     auth?.wwId != order?.service?.wwDto?.woodworkerId
   ) {
     return (
-      <Center h="200px">
-        <Text>Không có quyền truy cập vào thông tin đơn dịch vụ này</Text>
-      </Center>
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>
+          Không có quyền truy cập vào thông tin đơn dịch vụ này
+        </Text>
+      </View>
     );
   }
 
   return (
-    <Box>
-      <HStack mb={6}>
-        <Box>
-          <HStack spacing={2}>
-            <Heading
-              color={appColorTheme.brown_2}
-              fontSize="2xl"
-              fontFamily="Montserrat"
-            >
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.header}>
+          <View style={styles.headerTitleContainer}>
+            <Text style={styles.headerTitle}>
               Chi tiết đơn #{order.orderId}
-            </Heading>
-
-            <Box
-              top={5}
-              right={5}
-              bgColor={appColorTheme.brown_2}
-              p={2}
-              color="white"
-              borderRadius="15px"
-            >
-              {order?.status || "Đang xử lý"}
-            </Box>
-          </HStack>
+            </Text>
+            <View style={styles.statusBadge}>
+              <Text style={styles.statusText}>
+                {order?.status || "Đang xử lý"}
+              </Text>
+            </View>
+          </View>
 
           {order?.feedback && (
-            <Text mt={2} fontSize="md">
-              <b>Phản hồi của khách hàng:</b> {order?.feedback}
+            <Text style={styles.feedbackText}>
+              <Text style={styles.boldText}>Phản hồi của khách hàng:</Text>{" "}
+              {order?.feedback}
             </Text>
           )}
-        </Box>
 
-        <Spacer />
-
-        <Box>
-          <HStack spacing={4}>
+          <View style={styles.actionBarContainer}>
             <ActionBar
               order={order}
               refetch={refetch}
               status={order?.status}
               feedback={order?.feedback}
             />
-          </HStack>
-        </Box>
-      </HStack>
+          </View>
+        </View>
 
-      <Box color="black">
-        <Tabs
-          variant="unstyled"
-          onChange={handleTabChange}
-          index={activeTabIndex}
-        >
-          <TabList
-            overflowX="auto"
-            display="flex"
-            flexWrap={{ base: "nowrap", md: "wrap" }}
-            whiteSpace="nowrap"
-          >
+        <View style={styles.tabContainer}>
+          <View style={styles.tabHeaderContainer}>
             {[
-              { label: "Chung", icon: FiFileText },
-              { label: "Tiến độ", icon: FiActivity },
+              { label: "Chung", icon: "document-text-outline" },
+              { label: "Tiến độ", icon: "analytics-outline" },
               {
                 label: `${
                   serviceName != "Sale" ? "Hợp đồng & Giao dịch" : "Giao dịch"
                 }`,
-                icon: FiFile,
+                icon: "document-outline",
               },
             ].map((tab, index) => (
-              <Tab
+              <TouchableOpacity
                 key={index}
-                _selected={{
-                  bgColor: "app_brown.0",
-                }}
-                borderBottom="2px solid"
-                borderBottomColor="app_brown.1"
-                borderTopLeftRadius="10px"
-                borderTopRightRadius="10px"
-                mr={1}
+                style={[
+                  styles.tabButton,
+                  activeTabIndex === index && styles.activeTabButton,
+                ]}
+                onPress={() => handleTabChange(index)}
               >
-                <Flex align="center" gap={1}>
-                  <Icon as={tab.icon} />
-                  <Text>{tab.label}</Text>
-                </Flex>
-              </Tab>
+                <View style={styles.tabButtonContent}>
+                  <Ionicons
+                    name={tab.icon}
+                    size={20}
+                    color={
+                      activeTabIndex === index ? appColorTheme.brown_2 : "gray"
+                    }
+                  />
+                  <Text
+                    style={[
+                      styles.tabButtonText,
+                      activeTabIndex === index && styles.activeTabButtonText,
+                    ]}
+                  >
+                    {tab.label}
+                  </Text>
+                </View>
+              </TouchableOpacity>
             ))}
-          </TabList>
+          </View>
 
-          <TabPanels>
-            <TabPanel p={0}>
+          <View style={styles.tabContent}>
+            {activeTabIndex === 0 && (
               <GeneralInformationTab
                 order={order}
                 activeTabIndex={activeTabIndex}
                 isActive={activeTabIndex === 0}
               />
-            </TabPanel>
-            <TabPanel p={0}>
+            )}
+            {activeTabIndex === 1 && (
               <ProcessTab
                 order={order}
                 activeTabIndex={activeTabIndex}
                 isActive={activeTabIndex === 1}
               />
-            </TabPanel>
-            <TabPanel p={0}>
+            )}
+            {activeTabIndex === 2 && (
               <ContractAndTransactionTab
                 order={order}
                 activeTabIndex={activeTabIndex}
                 isActive={activeTabIndex === 2}
               />
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
-      </Box>
-    </Box>
+            )}
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: appColorTheme.grey_1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    color: "red",
+    textAlign: "center",
+  },
+  header: {
+    padding: 16,
+    backgroundColor: "white",
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  headerTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: appColorTheme.brown_2,
+    flex: 1,
+  },
+  statusBadge: {
+    backgroundColor: appColorTheme.brown_2,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 15,
+  },
+  statusText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  feedbackText: {
+    fontSize: 14,
+    marginTop: 8,
+    marginBottom: 12,
+  },
+  boldText: {
+    fontWeight: "bold",
+  },
+  actionBarContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 8,
+  },
+  tabContainer: {
+    flex: 1,
+    backgroundColor: "white",
+    margin: 10,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  tabHeaderContainer: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderBottomWidth: 2,
+    borderBottomColor: "transparent",
+  },
+  activeTabButton: {
+    borderBottomColor: appColorTheme.brown_2,
+    backgroundColor: appColorTheme.brown_0,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+  },
+  tabButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tabButtonText: {
+    marginLeft: 5,
+    color: "gray",
+    fontSize: 14,
+  },
+  activeTabButtonText: {
+    color: appColorTheme.brown_2,
+    fontWeight: "bold",
+  },
+  tabContent: {
+    padding: 15,
+  },
+});

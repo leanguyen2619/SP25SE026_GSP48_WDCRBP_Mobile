@@ -67,7 +67,7 @@ export default function ProductSelectionModal({
                             (
                               product.designIdeaVariantDetail?.img_urls ||
                               product.finishImgUrls
-                            )?.split(";")[0]
+                            )?.split(",")[0]
                           }
                           alt={product.category?.categoryName}
                           borderRadius="md"

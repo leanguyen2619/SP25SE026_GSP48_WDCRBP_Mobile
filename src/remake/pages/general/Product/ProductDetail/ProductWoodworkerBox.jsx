@@ -16,21 +16,23 @@ export default function ProductWoodworkerBox({ product }) {
   };
 
   return (
-    <PackageFrame packageType={product?.packType}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Image
-            source={{
-              uri:
-                product?.woodworkerImgUrl ||
-                "https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png",
-            }}
-            style={styles.profileImage}
-          />
+    <View style={styles.container}>
+      <PackageFrame packageType={product?.packType}>
+        <View style={styles.contentContainer}>
+          <View style={styles.imageContainer}>
+            <Image
+              source={{
+                uri:
+                  product?.woodworkerImgUrl ||
+                  "https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png",
+              }}
+              style={styles.image}
+            />
+          </View>
 
           <View style={styles.infoContainer}>
-            <View style={styles.nameRatingRow}>
-              <Text style={styles.brandName}>
+            <View style={styles.headerContainer}>
+              <Text style={styles.title}>
                 {product?.woodworkerName || "Xưởng mộc"}
               </Text>
               <StarReview
@@ -39,72 +41,81 @@ export default function ProductWoodworkerBox({ product }) {
               />
             </View>
 
-            <View style={styles.infoRow}>
+            <View style={styles.detailRow}>
               <Text style={styles.label}>Địa chỉ xưởng:</Text>
               <Text style={styles.value}>
                 {product?.address || "Chưa cập nhật"}
               </Text>
             </View>
 
-            <View style={styles.infoRow}>
+            <View style={styles.detailRow}>
               <Text style={styles.label}>Loại hình kinh doanh:</Text>
               <Text style={styles.value}>
                 {product?.businessType || "Chưa cập nhật"}
               </Text>
             </View>
 
-            <View style={styles.infoRow}>
+            <View style={styles.detailRow}>
               <Text style={styles.label}>Loại xưởng:</Text>
               <Text style={styles.value}>
                 {getPackTypeLabel(product?.packType) || "Chưa cập nhật"}
               </Text>
             </View>
 
-            <TouchableOpacity
-              style={styles.viewButton}
-              onPress={handleViewWoodworker}
-            >
-              <Text style={styles.viewButtonText}>Xem xưởng</Text>
-            </TouchableOpacity>
+            <View style={styles.linkContainer}>
+              <TouchableOpacity
+                onPress={handleViewWoodworker}
+                style={styles.linkButton}
+              >
+                <Text style={styles.linkText}>Xem xưởng</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
-    </PackageFrame>
+      </PackageFrame>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "white",
+    marginTop: 16,
+  },
+  contentContainer: {
+    flexDirection: "column",
     borderRadius: 10,
     padding: 16,
+    backgroundColor: "white",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-  },
-  header: {
-    flexDirection: "row",
     gap: 16,
   },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+  imageContainer: {
+    alignItems: "center",
+  },
+  image: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
   },
   infoContainer: {
     flex: 1,
+    gap: 10,
   },
-  nameRatingRow: {
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 8,
   },
-  brandName: {
-    fontSize: 18,
+  title: {
     fontWeight: "bold",
-    marginBottom: 4,
+    fontSize: 18,
   },
-  infoRow: {
+  detailRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     marginBottom: 4,
@@ -116,11 +127,15 @@ const styles = StyleSheet.create({
   value: {
     flex: 1,
   },
-  viewButton: {
-    alignSelf: "flex-end",
+  linkContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
     marginTop: 8,
   },
-  viewButtonText: {
+  linkButton: {
+    padding: 8,
+  },
+  linkText: {
     color: appColorTheme.brown_2,
     textDecorationLine: "underline",
   },

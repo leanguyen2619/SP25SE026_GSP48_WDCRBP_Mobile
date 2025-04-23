@@ -29,34 +29,65 @@ export default function WoodworkerSideBar({ isCollapsed, setIsCollapsed }) {
   const navItems = [
     {
       label: "Đơn hàng",
-      path: "service-order",
+      path: "WWServiceOrders",
       icon: "shopping-cart",
       needPack: true,
     },
     {
       label: "BH & Sữa chữa",
-      path: "guarantee-order",
+      path: "WWGuaranteeOrders",
       icon: "settings",
       needPack: true,
     },
-    { label: "Dịch vụ", path: "service", icon: "tool", needPack: true },
-    { label: "Thiết kế", path: "design", icon: "edit-2", needPack: true },
-    { label: "Sản phẩm", path: "product", icon: "box", needPack: true },
-    { label: "Bài đăng", path: "post", icon: "file-text", needPack: true },
+    { label: "Dịch vụ", path: "ServiceConfig", icon: "tool", needPack: true },
+    {
+      label: "Thiết kế",
+      path: "DesignManagement",
+      icon: "edit-2",
+      needPack: true,
+    },
+    {
+      label: "Sản phẩm",
+      path: "ProductManagement",
+      icon: "box",
+      needPack: true,
+    },
+    {
+      label: "Bài đăng",
+      path: "PostManagement",
+      icon: "file-text",
+      needPack: true,
+    },
     {
       label: "Khiếu nại",
-      path: "complaint",
+      path: "WWComplaintManagement",
       icon: "alert-triangle",
       needPack: true,
     },
-    { label: "Đánh giá", path: "review", icon: "star", needPack: true },
-    { label: "Ví", path: "wallet", icon: "credit-card" },
-    { label: "Hồ sơ", path: "profile", icon: "user" },
+    {
+      label: "Đánh giá",
+      path: "ReviewManagement",
+      icon: "star",
+      needPack: true,
+    },
+    { label: "Ví", path: "WWWallet", icon: "credit-card" },
+    { label: "Hồ sơ", path: "WoodworkerProfile", icon: "user" },
   ];
 
   const isPathActive = (path) => {
     return route.name.toLowerCase().includes(path.toLowerCase());
   };
+
+  if (isCollapsed) {
+    return (
+      <TouchableOpacity
+        style={styles.toggleButtonCollapsed}
+        onPress={() => setIsCollapsed(false)}
+      >
+        <Feather name="chevron-right" size={24} color="white" />
+      </TouchableOpacity>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -65,13 +96,9 @@ export default function WoodworkerSideBar({ isCollapsed, setIsCollapsed }) {
           styles.toggleButton,
           { backgroundColor: appColorTheme.green_3 },
         ]}
-        onPress={() => setIsCollapsed(!isCollapsed)}
+        onPress={() => setIsCollapsed(true)}
       >
-        <Feather
-          name={isCollapsed ? "chevron-right" : "chevron-left"}
-          size={24}
-          color="white"
-        />
+        <Feather name="chevron-left" size={24} color="white" />
       </TouchableOpacity>
 
       <ScrollView style={styles.scrollView}>
@@ -94,13 +121,12 @@ export default function WoodworkerSideBar({ isCollapsed, setIsCollapsed }) {
               key={index}
               style={[
                 styles.menuItem,
-                isCollapsed ? styles.collapsedItem : styles.expandedItem,
-                isActive &&
-                  (isCollapsed
-                    ? styles.activeCollapsedItem
-                    : styles.activeExpandedItem),
+                styles.expandedItem,
+                isActive && styles.activeExpandedItem,
               ]}
-              onPress={() => navigation.navigate(item.path)}
+              onPress={() => {
+                navigation.navigate(item.path);
+              }}
             >
               <Feather
                 name={item.icon}
@@ -108,13 +134,11 @@ export default function WoodworkerSideBar({ isCollapsed, setIsCollapsed }) {
                 color={isActive ? "white" : appColorTheme.green_3}
               />
 
-              {!isCollapsed && (
-                <Text
-                  style={[styles.menuText, isActive && styles.activeMenuText]}
-                >
-                  {item.label}
-                </Text>
-              )}
+              <Text
+                style={[styles.menuText, isActive && styles.activeMenuText]}
+              >
+                {item.label}
+              </Text>
             </TouchableOpacity>
           );
         })}
@@ -144,24 +168,28 @@ const styles = StyleSheet.create({
     alignItems: "center",
     zIndex: 999,
   },
+  toggleButtonCollapsed: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    width: 35,
+    height: 35,
+    borderRadius: 20,
+    backgroundColor: appColorTheme.green_3,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 999,
+  },
   menuItem: {
     marginBottom: 8,
     borderRadius: 10,
     overflow: "hidden",
-  },
-  collapsedItem: {
-    padding: 12,
-    alignItems: "center",
-    justifyContent: "center",
   },
   expandedItem: {
     padding: 16,
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "rgba(154, 230, 180, 0.2)",
-  },
-  activeCollapsedItem: {
-    backgroundColor: appColorTheme.green_2,
   },
   activeExpandedItem: {
     backgroundColor: appColorTheme.green_3,

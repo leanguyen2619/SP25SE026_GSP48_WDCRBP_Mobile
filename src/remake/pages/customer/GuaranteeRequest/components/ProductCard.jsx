@@ -37,7 +37,7 @@ export default function ProductCard({
                       (
                         selectedProduct.designIdeaVariantDetail?.img_urls ||
                         selectedProduct.finishImgUrls
-                      )?.split(";")[0]
+                      )?.split(",")[0]
                     }
                     alt={selectedProduct.category?.categoryName}
                     borderRadius="md"

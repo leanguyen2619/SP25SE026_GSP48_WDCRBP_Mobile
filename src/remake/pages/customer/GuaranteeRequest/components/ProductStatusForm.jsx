@@ -23,6 +23,7 @@ export default function ProductStatusForm({
   setGuaranteeError,
   isGuarantee,
   setIsGuarantee,
+  woodworkerId,
 }) {
   // Toggle between guarantee and repair
   const toggleGuaranteeMode = () => {
@@ -67,6 +68,7 @@ export default function ProductStatusForm({
 
       {isWarrantyValid && isGuarantee && (
         <GuaranteeErrorSelection
+          woodworkerId={woodworkerId}
           guaranteeError={guaranteeError}
           setGuaranteeError={setGuaranteeError}
         />

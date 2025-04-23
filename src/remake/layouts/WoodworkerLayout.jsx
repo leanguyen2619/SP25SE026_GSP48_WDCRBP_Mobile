@@ -5,6 +5,7 @@ import {
   StyleSheet,
   SafeAreaView,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import { useGetWoodworkerByUserIdQuery } from "../services/woodworkerApi.js";
 import { appColorTheme } from "../config/appconfig.js";
@@ -14,7 +15,9 @@ import Header from "../components/Header/Header.jsx";
 import RequireAuth from "../components/Utility/RequireAuth.jsx";
 
 export default function WoodworkerLayout({ children }) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const { width } = Dimensions.get("window");
+  const isMobile = width < 768;
 
   const { auth, setAuth } = useAuth();
   const {
@@ -59,31 +62,32 @@ export default function WoodworkerLayout({ children }) {
 
           <View style={styles.content}>
             {/* Sidebar */}
-            <View style={[styles.sidebar, { width: isCollapsed ? 80 : 300 }]}>
-              <Text
-                style={[
-                  styles.sidebarTitle,
-                  { textAlign: isCollapsed ? "center" : "center" },
-                ]}
-              >
-                {!isCollapsed ? "Menu xưởng mộc" : ""}
-              </Text>
-
+            {!isCollapsed ? (
+              <View style={[styles.sidebar, { width: 300 }]}>
+                <Text style={styles.sidebarTitle}>Menu xưởng mộc</Text>
+                <WoodworkerSideBar
+                  isCollapsed={isCollapsed}
+                  setIsCollapsed={setIsCollapsed}
+                />
+              </View>
+            ) : (
               <WoodworkerSideBar
                 isCollapsed={isCollapsed}
                 setIsCollapsed={setIsCollapsed}
               />
-            </View>
+            )}
 
-            {/* Main Content */}
-            <View
-              style={[
-                styles.mainContent,
-                { marginLeft: isCollapsed ? 80 : 300 },
-              ]}
-            >
-              {children}
-            </View>
+            {/* Main Content - Only show when sidebar is collapsed or on desktop */}
+            {(isCollapsed || !isMobile) && (
+              <View
+                style={[
+                  styles.mainContent,
+                  { marginLeft: isCollapsed ? 0 : 300 },
+                ]}
+              >
+                {children}
+              </View>
+            )}
           </View>
 
           {/* Footer */}
