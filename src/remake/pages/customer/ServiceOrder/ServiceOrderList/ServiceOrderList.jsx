@@ -1,18 +1,19 @@
+import React, { useMemo, useState, useEffect } from "react";
 import {
-  Box,
-  Spinner,
+  View,
   Text,
-  Select,
-  Flex,
-  HStack,
-  Stack,
-} from "@chakra-ui/react";
-import { useMemo, useState, useEffect } from "react";
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView
+} from "react-native";
+import { Picker } from '@react-native-picker/picker';
 import {
   appColorTheme,
   serviceOrderStatusConstants,
 } from "../../../../config/appconfig";
-import { useNavigate } from "react-router-dom";
+import { useNavigation } from "@react-navigation/native";
 import { useGetServiceOrdersQuery } from "../../../../services/serviceOrderApi";
 import useAuth from "../../../../hooks/useAuth";
 import ServiceOrderCard from "./ServiceOrderCard";
@@ -28,7 +29,7 @@ const serviceTypeMap = {
 // Component to render order items (will be passed to Pagination)
 const ServiceOrderListItems = ({ data, onViewDetails }) => {
   return (
-    <Stack spacing={4}>
+    <View style={styles.list}>
       {data.length > 0 ? (
         data.map((order) => (
           <ServiceOrderCard
@@ -38,17 +39,17 @@ const ServiceOrderListItems = ({ data, onViewDetails }) => {
           />
         ))
       ) : (
-        <Box textAlign="center" py={10}>
-          <Text fontSize="lg">Không có đơn hàng nào phù hợp với bộ lọc.</Text>
-        </Box>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>Không có đơn hàng nào phù hợp với bộ lọc.</Text>
+        </View>
       )}
-    </Stack>
+    </View>
   );
 };
 
 export default function ServiceOrderList() {
   const { auth } = useAuth();
-  const navigate = useNavigate();
+  const navigation = useNavigation();
   const [statusFilter, setStatusFilter] = useState("");
   const [serviceTypeFilter, setServiceTypeFilter] = useState("");
   const [sortOption, setSortOption] = useState("orderIdDesc");
@@ -109,116 +110,156 @@ export default function ServiceOrderList() {
     setFilteredData(sorted);
   }, [statusFilter, serviceTypeFilter, sortOption, apiResponse]);
 
-  // Handle filter changes
-  const handleStatusFilterChange = (e) => {
-    setStatusFilter(e.target.value);
-  };
-
-  const handleServiceTypeFilterChange = (e) => {
-    setServiceTypeFilter(e.target.value);
-  };
-
-  const handleSortChange = (e) => {
-    setSortOption(e.target.value);
-  };
-
   const handleViewDetails = (orderId) => {
-    navigate(`${orderId}`);
+    navigation.navigate('ServiceOrderDetail', { orderId });
   };
 
   if (isLoading) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="500px"
-      >
-        <Spinner size="xl" color={appColorTheme.brown_2} />
-      </Box>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={appColorTheme.brown_2} />
+      </View>
     );
   }
 
   if (error) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="500px"
-      >
-        <Text color="red.500">
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>
           Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại.
         </Text>
-      </Box>
+      </View>
     );
   }
 
   return (
-    <Box>
-      <Flex mb={4} gap={4} flexWrap="wrap">
-        <HStack>
-          <Text fontWeight="medium">Lọc theo loại dịch vụ:</Text>
-          <Select
-            width="200px"
-            bgColor="white"
-            value={serviceTypeFilter}
-            onChange={handleServiceTypeFilterChange}
-          >
-            <option value="">Tất cả dịch vụ</option>
-            <option value="Tùy chỉnh">Tùy chỉnh</option>
-            <option value="Cá nhân hóa">Cá nhân hóa</option>
-            <option value="Mua hàng">Mua hàng</option>
-          </Select>
-        </HStack>
+    <View style={styles.container}>
+      <ScrollView style={styles.filterContainer} horizontal showsHorizontalScrollIndicator={false}>
+        <View style={styles.filterSection}>
+          <Text style={styles.filterLabel}>Loại dịch vụ:</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={serviceTypeFilter}
+              style={styles.picker}
+              onValueChange={(itemValue) => setServiceTypeFilter(itemValue)}
+            >
+              <Picker.Item label="Tất cả dịch vụ" value="" />
+              <Picker.Item label="Tùy chỉnh" value="Tùy chỉnh" />
+              <Picker.Item label="Cá nhân hóa" value="Cá nhân hóa" />
+              <Picker.Item label="Mua hàng" value="Mua hàng" />
+            </Picker>
+          </View>
+        </View>
 
-        <HStack>
-          <Text fontWeight="medium">Lọc theo trạng thái:</Text>
-          <Select
-            width="300px"
-            bgColor="white"
-            value={statusFilter}
-            onChange={handleStatusFilterChange}
-          >
-            <option value="">Tất cả trạng thái</option>
-            {statusValues.map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
-          </Select>
-        </HStack>
+        <View style={styles.filterSection}>
+          <Text style={styles.filterLabel}>Trạng thái:</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={statusFilter}
+              style={styles.picker}
+              onValueChange={(itemValue) => setStatusFilter(itemValue)}
+            >
+              <Picker.Item label="Tất cả trạng thái" value="" />
+              {statusValues.map((status) => (
+                <Picker.Item key={status} label={status} value={status} />
+              ))}
+            </Picker>
+          </View>
+        </View>
 
-        <HStack>
-          <Text fontWeight="medium">Sắp xếp theo:</Text>
-          <Select
-            width="250px"
-            bgColor="white"
-            value={sortOption}
-            onChange={handleSortChange}
-          >
-            <option value="orderIdDesc">Mã giảm dần</option>
-            <option value="orderIdAsc">Mã tăng dần</option>
-          </Select>
-        </HStack>
-      </Flex>
+        <View style={styles.filterSection}>
+          <Text style={styles.filterLabel}>Sắp xếp theo:</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={sortOption}
+              style={styles.picker}
+              onValueChange={(itemValue) => setSortOption(itemValue)}
+            >
+              <Picker.Item label="Mã giảm dần" value="orderIdDesc" />
+              <Picker.Item label="Mã tăng dần" value="orderIdAsc" />
+            </Picker>
+          </View>
+        </View>
+      </ScrollView>
 
-      {filteredData.length === 0 ? (
-        <Box textAlign="center" py={10}>
-          <Text fontSize="lg">Không có đơn hàng nào phù hợp với bộ lọc.</Text>
-        </Box>
-      ) : (
-        <Pagination
-          dataList={filteredData}
-          DisplayComponent={(props) => (
-            <ServiceOrderListItems
-              {...props}
+      {filteredData.length > 0 ? (
+        <FlatList
+          data={filteredData}
+          keyExtractor={(item) => item.orderId.toString()}
+          renderItem={({ item }) => (
+            <ServiceOrderCard
+              order={item}
               onViewDetails={handleViewDetails}
             />
           )}
-          itemsPerPage={10}
+          contentContainerStyle={styles.list}
         />
+      ) : (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>Không có đơn hàng nào phù hợp với bộ lọc.</Text>
+        </View>
       )}
-    </Box>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 50,
+  },
+  errorContainer: {
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 16,
+  },
+  filterContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#F7FAFC',
+    marginBottom: 16,
+  },
+  filterSection: {
+    marginRight: 16,
+    minWidth: 180,
+  },
+  filterLabel: {
+    fontWeight: '600',
+    marginBottom: 4,
+    color: '#4A5568',
+  },
+  pickerContainer: {
+    backgroundColor: 'white',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    overflow: 'hidden',
+  },
+  picker: {
+    height: 40,
+    width: 200,
+  },
+  list: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  emptyContainer: {
+    padding: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#718096',
+    textAlign: 'center',
+  }
+});

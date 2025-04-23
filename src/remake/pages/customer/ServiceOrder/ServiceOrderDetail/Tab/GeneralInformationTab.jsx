@@ -1,17 +1,15 @@
+import React from 'react';
 import {
-  Box,
-  Heading,
-  HStack,
-  SimpleGrid,
-  Stack,
+  View,
   Text,
-  Link as ChakraLink,
-  Spacer,
-} from "@chakra-ui/react";
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Linking
+} from 'react-native';
 import {
   appColorTheme,
   getServiceTypeLabel,
-  service,
 } from "../../../../../config/appconfig.js";
 import {
   formatDateTimeString,
@@ -22,11 +20,11 @@ import StarRating from "../../../../../components/Utility/StarRating.jsx";
 import PersonalizationProductList from "./PersonalizationProductList.jsx";
 import SaleProductList from "./SaleProductList.jsx";
 
-export default function GeneralInformationTab({ order }) {
+export default function GeneralInformationTab({ order, isActive }) {
   const serviceName = order?.service?.service?.serviceName;
 
   return (
-    <Box>
+    <ScrollView style={styles.container}>
       {serviceName == "Personalization" && (
         <PersonalizationProductList
           orderId={order?.orderId}
@@ -49,180 +47,257 @@ export default function GeneralInformationTab({ order }) {
         />
       )}
 
-      <SimpleGrid
-        mt={6}
-        columns={{
-          base: 1,
-          xl: 2,
-        }}
-        spacing={6}
-      >
-        <Box p={5} bgColor="white" boxShadow="md" borderRadius="10px">
-          <Box>
-            <Heading fontWeight="bold" as="h3" fontSize="20px" mb={6}>
-              Thông tin đơn hàng
-            </Heading>
+      <View style={styles.gridContainer}>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>
+            Thông tin đơn hàng
+          </Text>
 
-            <Stack spacing={4}>
-              <HStack>
-                <Text fontWeight="bold">Mã đơn hàng:</Text>
-                <Text>{order?.orderId || "Chưa cập nhật"}</Text>
-              </HStack>
+          <View style={styles.infoContainer}>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Mã đơn hàng:</Text>
+              <Text style={styles.infoValue}>{order?.orderId || "Chưa cập nhật"}</Text>
+            </View>
 
-              <HStack>
-                <Text fontWeight="bold">Loại dịch vụ:</Text>
-                <Text>
-                  {getServiceTypeLabel(order?.service?.service?.serviceName)}
-                </Text>
-              </HStack>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Loại dịch vụ:</Text>
+              <Text style={styles.infoValue}>
+                {getServiceTypeLabel(order?.service?.service?.serviceName)}
+              </Text>
+            </View>
 
-              <HStack>
-                <Text fontWeight="bold">Ngày đặt:</Text>
-                <Text>
-                  {order?.createdAt
-                    ? formatDateTimeString(new Date(order.createdAt))
-                    : "Chưa cập nhật"}
-                </Text>
-              </HStack>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Ngày đặt:</Text>
+              <Text style={styles.infoValue}>
+                {order?.createdAt
+                  ? formatDateTimeString(new Date(order.createdAt))
+                  : "Chưa cập nhật"}
+              </Text>
+            </View>
 
-              <HStack>
-                <Text fontWeight="bold">Số lượng sản phẩm:</Text>
-                <Text>{order?.quantity || "Chưa cập nhật"}</Text>
-              </HStack>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Số lượng sản phẩm:</Text>
+              <Text style={styles.infoValue}>{order?.quantity || "Chưa cập nhật"}</Text>
+            </View>
 
-              <HStack>
-                <Text fontWeight="bold">Yêu cầu lắp đặt bởi xưởng:</Text>
-                <Text>
-                  {order?.install ? "Có lắp đặt" : "Không cần lắp đặt"}
-                </Text>
-              </HStack>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Yêu cầu lắp đặt bởi xưởng:</Text>
+              <Text style={styles.infoValue}>
+                {order?.install ? "Có lắp đặt" : "Không cần lắp đặt"}
+              </Text>
+            </View>
 
-              <Box>
-                <Text fontWeight="bold">Ghi chú:</Text>
-                <Text>{order?.description || "Không có ghi chú"}</Text>
-              </Box>
-            </Stack>
-          </Box>
-        </Box>
+            <View style={styles.noteContainer}>
+              <Text style={styles.infoLabel}>Ghi chú:</Text>
+              <Text style={styles.infoValue}>{order?.description || "Không có ghi chú"}</Text>
+            </View>
+          </View>
+        </View>
 
         {serviceName != "Sale" && (
-          <Box bgColor="white" boxShadow="md" p={5} borderRadius="10px">
-            <Heading fontWeight="bold" as="h3" fontSize="20px" mb={4}>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>
               Thông tin lịch hẹn tư vấn bàn hợp đồng
-            </Heading>
+            </Text>
 
-            <Stack spacing={4}>
+            <View style={styles.infoContainer}>
               {order?.consultantAppointment ? (
                 <>
-                  <HStack>
-                    <Text fontWeight="bold">Hình thức:</Text>
-                    <Text>{order.consultantAppointment.form}</Text>
-                  </HStack>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Hình thức:</Text>
+                    <Text style={styles.infoValue}>{order.consultantAppointment.form}</Text>
+                  </View>
 
-                  <HStack>
-                    <Text fontWeight="bold">Địa điểm:</Text>
-                    <Text>{order.consultantAppointment.meetAddress}</Text>
-                  </HStack>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Địa điểm:</Text>
+                    <Text style={styles.infoValue}>{order.consultantAppointment.meetAddress}</Text>
+                  </View>
 
-                  <HStack>
-                    <Text fontWeight="bold">Ngày giờ hẹn:</Text>
-                    <Text>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Ngày giờ hẹn:</Text>
+                    <Text style={styles.infoValue}>
                       {formatDateTimeToVietnamese(
                         new Date(order.consultantAppointment.dateTime)
                       )}
                     </Text>
-                  </HStack>
+                  </View>
 
-                  <HStack>
-                    <Text fontWeight="bold">Mô tả:</Text>
-                    <Text>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Mô tả:</Text>
+                    <Text style={styles.infoValue}>
                       {order.consultantAppointment.content || "Không có mô tả"}
                     </Text>
-                  </HStack>
+                  </View>
                 </>
               ) : (
-                <Text color="gray.500">Không có lịch hẹn tư vấn</Text>
+                <Text style={styles.emptyText}>Không có lịch hẹn tư vấn</Text>
               )}
-            </Stack>
-          </Box>
+            </View>
+          </View>
         )}
-      </SimpleGrid>
+      </View>
 
-      <Box bgColor="white" boxShadow="md" p={5} borderRadius="10px" mt={6}>
-        <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={20}>
-          <Box>
-            <Stack spacing={3}>
-              <Heading fontWeight="bold" as="h3" fontSize="20px" mb={4}>
+      <View style={styles.card}>
+        <View style={styles.doubleColumnContainer}>
+          <View style={styles.column}>
+            <View style={styles.infoContainer}>
+              <Text style={styles.cardTitle}>
                 Thông tin xưởng mộc
-              </Heading>
+              </Text>
 
-              <Text>
-                <b>Tên xưởng mộc:</b>{" "}
+              <Text style={styles.infoText}>
+                <Text style={styles.bold}>Tên xưởng mộc:</Text>{" "}
                 {order?.service?.wwDto?.brandName || "Chưa cập nhật"}
               </Text>
 
-              <Text>
-                <b>Địa chỉ:</b>{" "}
+              <Text style={styles.infoText}>
+                <Text style={styles.bold}>Địa chỉ:</Text>{" "}
                 {order?.service?.wwDto?.address || "Chưa cập nhật"}
               </Text>
 
-              <HStack>
-                <Spacer />
-                <ChakraLink
-                  target="_blank"
-                  href={`/woodworker/${order?.service?.wwDto?.woodworkerId}`}
+              <View style={styles.linkContainer}>
+                <TouchableOpacity
+                  onPress={() => Linking.openURL(`/woodworker/${order?.service?.wwDto?.woodworkerId}`)}
                 >
-                  <Text
-                    color={appColorTheme.brown_2}
-                    _hover={{ textDecoration: "underline" }}
-                  >
+                  <Text style={styles.linkText}>
                     Xem xưởng
                   </Text>
-                </ChakraLink>
-              </HStack>
-            </Stack>
-          </Box>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
 
-          <Box>
+          <View style={styles.column}>
             {order?.review ? (
               <>
                 {order?.review?.status ? (
                   <>
-                    <Stack spacing={3}>
-                      <Heading fontWeight="bold" as="h3" fontSize="20px" mb={4}>
+                    <View style={styles.infoContainer}>
+                      <Text style={styles.cardTitle}>
                         Đánh giá
-                      </Heading>
+                      </Text>
 
-                      <HStack>
-                        <Text fontWeight="bold">Số sao:</Text>
+                      <View style={styles.ratingRow}>
+                        <Text style={styles.infoLabel}>Số sao:</Text>
                         <StarRating rating={order.review.rating} />
-                      </HStack>
+                      </View>
 
-                      <HStack>
-                        <Text fontWeight="bold">Bình luận:</Text>
-                        <Text>{order.review.comment}</Text>
-                      </HStack>
+                      <View style={styles.infoRow}>
+                        <Text style={styles.infoLabel}>Chất lượng thiết kế:</Text>
+                        <Text style={styles.infoValue}>{order.review.designQuality} / 5</Text>
+                      </View>
 
-                      <HStack>
-                        <Text fontWeight="bold">Ngày đăng:</Text>
-                        <Text>
-                          {formatDateTimeString(
-                            new Date(order.review.createdAt)
-                          )}
+                      <View style={styles.infoRow}>
+                        <Text style={styles.infoLabel}>Chất lượng sản phẩm:</Text>
+                        <Text style={styles.infoValue}>{order.review.productQuality} / 5</Text>
+                      </View>
+
+                      <View style={styles.infoRow}>
+                        <Text style={styles.infoLabel}>Chất lượng dịch vụ:</Text>
+                        <Text style={styles.infoValue}>{order.review.serviceQuality} / 5</Text>
+                      </View>
+
+                      <View style={styles.commentContainer}>
+                        <Text style={styles.infoLabel}>Bình luận:</Text>
+                        <Text style={styles.infoValue}>
+                          {order.review.comment || "Không có bình luận"}
                         </Text>
-                      </HStack>
-                    </Stack>
+                      </View>
+                    </View>
                   </>
                 ) : (
-                  <Text color="gray.500">(Đánh giá chưa được duyệt)</Text>
+                  <Text style={styles.emptyText}>Đánh giá đang chờ duyệt</Text>
                 )}
               </>
-            ) : (
-              <Text color="gray.500">(Chưa có đánh giá)</Text>
-            )}
-          </Box>
-        </SimpleGrid>
-      </Box>
-    </Box>
+            ) : null}
+          </View>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  gridContainer: {
+    marginVertical: 16,
+    paddingHorizontal: 16,
+  },
+  doubleColumnContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  column: {
+    flex: 1,
+    minWidth: 250,
+    paddingRight: 10,
+  },
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  infoContainer: {
+    marginBottom: 8,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    marginBottom: 12,
+    flexWrap: 'wrap',
+  },
+  infoLabel: {
+    fontWeight: 'bold',
+    marginRight: 8,
+    minWidth: 120,
+  },
+  infoValue: {
+    flex: 1,
+  },
+  infoText: {
+    marginBottom: 12,
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
+  noteContainer: {
+    marginTop: 8,
+  },
+  linkContainer: {
+    alignItems: 'flex-end',
+    marginTop: 8,
+  },
+  linkText: {
+    color: appColorTheme.brown_2,
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  commentContainer: {
+    marginTop: 8,
+  },
+  emptyText: {
+    color: '#718096',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginVertical: 20,
+  }
+});

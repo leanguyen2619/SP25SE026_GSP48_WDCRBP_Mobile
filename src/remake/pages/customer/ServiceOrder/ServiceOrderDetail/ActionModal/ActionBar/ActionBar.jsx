@@ -1,4 +1,5 @@
-import { HStack, Text } from "@chakra-ui/react";
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
 import { serviceOrderStatusConstants } from "../../../../../../config/appconfig.js";
 import FeedbackModal from "../FeedbackModal/FeedbackModal.jsx";
 import CancelModal from "../FeedbackModal/CancelModal.jsx";
@@ -143,7 +144,7 @@ export default function ActionBar({
     showCancelButton = false;
 
     return (
-      <HStack spacing={4} justify="flex-end">
+      <View style={styles.actionButtons}>
         {showFeedbackButton && (
           <FeedbackModal serviceOrderId={order?.orderId} refetch={refetch} />
         )}
@@ -195,9 +196,19 @@ export default function ActionBar({
             userId={auth?.userId}
           />
         )}
-      </HStack>
+      </View>
     );
   };
 
   return renderActionButtons();
 }
+
+const styles = StyleSheet.create({
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+  }
+});

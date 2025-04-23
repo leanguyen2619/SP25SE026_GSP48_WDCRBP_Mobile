@@ -1,26 +1,17 @@
+import React, { useState } from "react";
 import {
-  Button,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Stack,
+  View,
   Text,
-  Divider,
-  useDisclosure,
-  Box,
-  Grid,
-  GridItem,
-  Spinner,
-  Center,
-  Link,
-} from "@chakra-ui/react";
-import { useState } from "react";
+  Modal,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  ScrollView,
+  ActivityIndicator,
+  Linking,
+} from "react-native";
 import { useNotify } from "../../../../../../components/Utility/Notify";
-import { FiCheck, FiCheckCircle, FiXCircle } from "react-icons/fi";
+import Icon from "react-native-vector-icons/Feather";
 import CheckboxList from "../../../../../../components/Utility/CheckboxList";
 import { appColorTheme } from "../../../../../../config/appconfig";
 import { format } from "date-fns";
@@ -38,7 +29,7 @@ export default function ContractConfirmModal({
   refetch,
   refetchDeposit,
 }) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
   const notify = useNotify();
   const { auth } = useAuth();
   const [isCheckboxDisabled, setIsCheckboxDisabled] = useState(true);
@@ -49,6 +40,9 @@ export default function ContractConfirmModal({
   const [savedSignature, setSavedSignature] = useState(false);
   const [localSignatureBlob, setLocalSignatureBlob] = useState(null);
   const [signatureDataUrl, setSignatureDataUrl] = useState(null);
+
+  const onOpen = () => setIsOpen(true);
+  const onClose = () => setIsOpen(false);
 
   // Get contract data
   const {
@@ -153,144 +147,328 @@ export default function ContractConfirmModal({
 
   return (
     <>
-      <Button leftIcon={<FiCheckCircle />} colorScheme="green" onClick={onOpen}>
-        {buttonText}
-      </Button>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={onOpen}
+        activeOpacity={0.7}
+      >
+        <Icon name="check-circle" size={16} color="white" />
+        <Text style={styles.buttonText}>{buttonText}</Text>
+      </TouchableOpacity>
 
       <Modal
-        isOpen={isOpen}
-        onClose={onClose}
-        closeOnOverlayClick={false}
-        closeOnEsc={false}
-        size="6xl"
+        visible={isOpen}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={!submitLoading ? onClose : null}
       >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>{buttonText}</ModalHeader>
-          {!submitLoading && <ModalCloseButton />}
-          <ModalBody pb={6}>
-            <Stack spacing={4}>
-              {contractLoading ? (
-                <Center p={4}>
-                  <Spinner size="lg" color={appColorTheme.brown_2} />
-                </Center>
-              ) : contractError ? (
-                <Box p={4} bg="red.50" borderRadius="md">
-                  <Text color="red.500">Không thể tải thông tin hợp đồng</Text>
-                </Box>
-              ) : contract ? (
-                <Box p={4} bg="gray.50" borderRadius="md" boxShadow="sm">
-                  <Grid templateColumns="180px 1fr" gap={3}>
-                    <GridItem>
-                      <Text fontWeight="semibold">Mã hợp đồng:</Text>
-                    </GridItem>
-                    <GridItem>
-                      <Text>{contract.contractId}</Text>
-                    </GridItem>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalHeaderText}>{buttonText}</Text>
+              {!submitLoading && (
+                <TouchableOpacity onPress={onClose}>
+                  <Icon name="x" size={24} color="#333" />
+                </TouchableOpacity>
+              )}
+            </View>
 
-                    <GridItem>
-                      <Link
-                        href={`/contract/${serviceOrderId}`}
-                        target="_blank"
-                        color={appColorTheme.brown_2}
+            <ScrollView style={styles.modalBody}>
+              <View style={styles.contentContainer}>
+                {contractLoading ? (
+                  <View style={styles.loadingContainer}>
+                    <ActivityIndicator
+                      size="large"
+                      color={appColorTheme.brown_2}
+                    />
+                  </View>
+                ) : contractError ? (
+                  <View style={styles.errorContainer}>
+                    <Text style={styles.errorText}>
+                      Không thể tải thông tin hợp đồng
+                    </Text>
+                  </View>
+                ) : contract ? (
+                  <View style={styles.contractInfoContainer}>
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>Mã hợp đồng:</Text>
+                      <Text style={styles.infoValue}>{contract.contractId}</Text>
+                    </View>
+
+                    <View style={styles.infoRow}>
+                      <TouchableOpacity
+                        onPress={() =>
+                          Linking.openURL(`/contract/${serviceOrderId}`)
+                        }
                       >
-                        Xem chi tiết
-                      </Link>
-                    </GridItem>
-                    <GridItem></GridItem>
+                        <Text style={styles.linkText}>Xem chi tiết</Text>
+                      </TouchableOpacity>
+                    </View>
 
-                    <GridItem>
-                      <Text fontWeight="semibold">Ngày hoàn thành:</Text>
-                    </GridItem>
-                    <GridItem>
-                      <Text>{formatDate(contract.completeDate)}</Text>
-                    </GridItem>
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>Ngày hoàn thành:</Text>
+                      <Text style={styles.infoValue}>
+                        {formatDate(contract.completeDate)}
+                      </Text>
+                    </View>
 
-                    <GridItem>
-                      <Text fontWeight="semibold">Tổng tiền thanh toán:</Text>
-                    </GridItem>
-                    <GridItem>
-                      <Text fontWeight="bold" color={appColorTheme.brown_2}>
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>Tổng tiền thanh toán:</Text>
+                      <Text style={styles.infoTotal}>
                         {contract.contractTotalAmount?.toLocaleString("vi-VN")}{" "}
                         VNĐ
                       </Text>
-                    </GridItem>
+                    </View>
 
-                    <GridItem>
-                      <Text fontWeight="semibold">Thợ thực hiện:</Text>
-                    </GridItem>
-                    <GridItem>
-                      <Text>{contract.woodworker?.username}</Text>
-                    </GridItem>
-                  </Grid>
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>Thợ thực hiện:</Text>
+                      <Text style={styles.infoValue}>
+                        {contract.woodworker?.username}
+                      </Text>
+                    </View>
 
-                  <Box mt={4}>
-                    <Text fontWeight="semibold">Chữ ký thợ:</Text>
-                    {contract.woodworkerSignature ? (
-                      <Box mt={2}>
-                        <img
-                          src={contract.woodworkerSignature}
-                          alt="Chữ ký thợ"
-                          style={{ maxWidth: "200px" }}
+                    <View style={styles.signatureContainer}>
+                      <Text style={styles.infoLabel}>Chữ ký thợ:</Text>
+                      {contract.woodworkerSignature ? (
+                        <Image
+                          source={{ uri: contract.woodworkerSignature }}
+                          style={styles.signatureImage}
+                          resizeMode="contain"
                         />
-                      </Box>
-                    ) : (
-                      <Text>Chưa có chữ ký</Text>
-                    )}
-                  </Box>
-                </Box>
-              ) : (
-                <Box p={4} bg="orange.50" borderRadius="md">
-                  <Text>Không tìm thấy thông tin hợp đồng</Text>
-                </Box>
-              )}
+                      ) : (
+                        <Text style={styles.infoValue}>Chưa có chữ ký</Text>
+                      )}
+                    </View>
+                  </View>
+                ) : (
+                  <View style={styles.warningContainer}>
+                    <Text style={styles.warningText}>
+                      Không tìm thấy thông tin hợp đồng
+                    </Text>
+                  </View>
+                )}
 
-              {/* Add customer signature section */}
-              {!contractLoading && contract && (
-                <Box p={4} bg="gray.50" borderRadius="md" boxShadow="sm">
-                  <Text fontSize="md" fontWeight="bold" mb={3}>
-                    Ký tên xác nhận hợp đồng
-                  </Text>
+                {/* Add customer signature section */}
+                {!contractLoading && contract && (
+                  <View style={styles.signSection}>
+                    <Text style={styles.sectionTitle}>
+                      Ký tên xác nhận hợp đồng
+                    </Text>
 
-                  <SignatureComponent
-                    onSaveSignature={handleSaveSignature}
-                    savedSignature={savedSignature}
-                    title="Chữ ký của bạn"
-                    showSizeControls={true}
-                  />
-                </Box>
-              )}
+                    <SignatureComponent
+                      onSaveSignature={handleSaveSignature}
+                      savedSignature={savedSignature}
+                      title="Chữ ký của bạn"
+                      showSizeControls={true}
+                    />
+                  </View>
+                )}
 
-              <Divider my={2} />
-              <CheckboxList
-                items={checkboxItems}
-                setButtonDisabled={setIsCheckboxDisabled}
-              />
-            </Stack>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              isLoading={isLoading}
-              variant="ghost"
-              mr={3}
-              onClick={onClose}
-              leftIcon={<FiXCircle />}
-              isDisabled={isLoading}
-            >
-              Đóng
-            </Button>
-            <Button
-              colorScheme="green"
-              onClick={handleSubmit}
-              isLoading={submitLoading}
-              isDisabled={isCheckboxDisabled || !contract || contractLoading}
-              leftIcon={<FiCheck />}
-            >
-              Xác nhận hợp đồng
-            </Button>
-          </ModalFooter>
-        </ModalContent>
+                <View style={styles.divider} />
+                
+                <CheckboxList
+                  items={checkboxItems}
+                  setButtonDisabled={setIsCheckboxDisabled}
+                />
+              </View>
+            </ScrollView>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={[
+                  styles.footerButton,
+                  styles.closeButton,
+                  isLoading && styles.disabledButton,
+                ]}
+                onPress={onClose}
+                disabled={isLoading}
+              >
+                <Icon name="x-circle" size={16} color="#333" />
+                <Text style={styles.closeButtonText}>Đóng</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[
+                  styles.footerButton,
+                  styles.confirmButton,
+                  (isCheckboxDisabled || !contract || contractLoading) &&
+                    styles.disabledButton,
+                ]}
+                onPress={handleSubmit}
+                disabled={
+                  isCheckboxDisabled || !contract || contractLoading || submitLoading
+                }
+              >
+                {submitLoading ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <>
+                    <Icon name="check" size={16} color="white" />
+                    <Text style={styles.confirmButtonText}>
+                      Xác nhận hợp đồng
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       </Modal>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  button: {
+    backgroundColor: "green",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 8,
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "600",
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    height: "90%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  modalHeaderText: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  modalBody: {
+    flex: 1,
+  },
+  contentContainer: {
+    padding: 16,
+    gap: 16,
+  },
+  loadingContainer: {
+    padding: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  errorContainer: {
+    padding: 16,
+    backgroundColor: "#FEE2E2",
+    borderRadius: 8,
+  },
+  errorText: {
+    color: "#DC2626",
+  },
+  contractInfoContainer: {
+    padding: 16,
+    backgroundColor: "#F9FAFB",
+    borderRadius: 8,
+    gap: 12,
+  },
+  warningContainer: {
+    padding: 16,
+    backgroundColor: "#FFEDD5",
+    borderRadius: 8,
+  },
+  warningText: {
+    color: "#9A3412",
+  },
+  infoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  infoLabel: {
+    fontWeight: "600",
+    fontSize: 14,
+    flex: 2,
+  },
+  infoValue: {
+    fontSize: 14,
+    flex: 3,
+  },
+  infoTotal: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: appColorTheme.brown_2,
+    flex: 3,
+  },
+  linkText: {
+    color: appColorTheme.brown_2,
+    textDecorationLine: "underline",
+  },
+  signatureContainer: {
+    marginTop: 8,
+  },
+  signatureImage: {
+    width: 200,
+    height: 80,
+    marginTop: 8,
+  },
+  signSection: {
+    padding: 16,
+    backgroundColor: "#F9FAFB",
+    borderRadius: 8,
+    marginTop: 16,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 12,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#E5E7EB",
+    marginVertical: 16,
+  },
+  modalFooter: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    padding: 16,
+    gap: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
+  },
+  footerButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 8,
+  },
+  closeButton: {
+    backgroundColor: "#F3F4F6",
+  },
+  closeButtonText: {
+    color: "#333",
+    fontWeight: "500",
+  },
+  confirmButton: {
+    backgroundColor: "green",
+  },
+  confirmButtonText: {
+    color: "white",
+    fontWeight: "600",
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+});

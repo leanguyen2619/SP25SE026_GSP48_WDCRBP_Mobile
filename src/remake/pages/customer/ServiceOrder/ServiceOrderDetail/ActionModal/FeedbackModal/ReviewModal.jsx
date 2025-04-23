@@ -1,42 +1,73 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
-  Button,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  useDisclosure,
-  FormControl,
-  FormLabel,
-  Textarea,
-  HStack,
-  Icon,
+  View,
   Text,
-  Alert,
-  AlertIcon,
-} from "@chakra-ui/react";
-import { FiStar, FiCheck, FiXCircle } from "react-icons/fi";
+  TouchableOpacity,
+  Modal,
+  TextInput,
+  StyleSheet,
+  ActivityIndicator,
+  ScrollView,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useCreateReviewMutation } from "../../../../../../services/reviewApi";
 import { useNotify } from "../../../../../../components/Utility/Notify";
 
-export default function ReviewModal({ serviceOrderId, userId, refetch }) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [rating, setRating] = useState(5);
+// Rating Stars Component
+const RatingStars = ({ rating, setRating, size = 28 }) => {
   const [hoveredRating, setHoveredRating] = useState(0);
+  
+  const renderStars = () => {
+    return [1, 2, 3, 4, 5].map((star) => (
+      <TouchableOpacity
+        key={star}
+        onPress={() => setRating(star)}
+        style={styles.starContainer}
+      >
+        <Ionicons
+          name={star <= rating ? "star" : "star-outline"}
+          size={size}
+          color={star <= rating ? "#F6E05E" : "#CBD5E0"}
+        />
+      </TouchableOpacity>
+    ));
+  };
+  
+  const getRatingText = () => {
+    switch(rating) {
+      case 1: return "Rất không hài lòng";
+      case 2: return "Không hài lòng";
+      case 3: return "Bình thường";
+      case 4: return "Hài lòng";
+      case 5: return "Rất hài lòng";
+      default: return "";
+    }
+  };
+  
+  return (
+    <View style={styles.ratingContainer}>
+      <View style={styles.starsContainer}>
+        {renderStars()}
+      </View>
+      <Text style={styles.ratingText}>{getRatingText()}</Text>
+    </View>
+  );
+};
+
+// Info Alert Component
+const InfoAlert = ({ message }) => (
+  <View style={styles.infoAlert}>
+    <Ionicons name="information-circle" size={24} color="#3182CE" />
+    <Text style={styles.infoAlertText}>{message}</Text>
+  </View>
+);
+
+export default function ReviewModal({ serviceOrderId, userId, refetch }) {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [createReview, { isLoading }] = useCreateReviewMutation();
   const notify = useNotify();
-
-  const handleStarClick = (selectedRating) => {
-    setRating(selectedRating);
-  };
-
-  const handleStarHover = (hoveredRating) => {
-    setHoveredRating(hoveredRating);
-  };
 
   const handleSubmitReview = async () => {
     if (!comment.trim()) {
@@ -54,7 +85,7 @@ export default function ReviewModal({ serviceOrderId, userId, refetch }) {
 
       await createReview(reviewData).unwrap();
       notify("Thành công", "Đánh giá của bạn đã được gửi", "success");
-      onClose();
+      setModalVisible(false);
       if (refetch) refetch();
     } catch (error) {
       notify(
@@ -65,93 +96,213 @@ export default function ReviewModal({ serviceOrderId, userId, refetch }) {
     }
   };
 
+  const closeModal = () => {
+    if (!isLoading) {
+      setModalVisible(false);
+    }
+  };
+
   return (
     <>
-      <Button onClick={onOpen} colorScheme="green" leftIcon={<FiStar />}>
-        Đánh giá
-      </Button>
+      <TouchableOpacity
+        style={styles.reviewButton}
+        onPress={() => setModalVisible(true)}
+      >
+        <Ionicons name="star" size={20} color="white" />
+        <Text style={styles.reviewButtonText}>Đánh giá</Text>
+      </TouchableOpacity>
 
       <Modal
-        closeOnEsc={false}
-        closeOnOverlayClick={false}
-        isOpen={isOpen}
-        onClose={onClose}
-        size="lg"
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={closeModal}
       >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Đánh giá đơn hàng</ModalHeader>
-          {!isLoading && <ModalCloseButton />}
-          <ModalBody pb={6}>
-            <FormControl mb={6}>
-              <FormLabel fontWeight="bold">Đánh giá:</FormLabel>
-              <HStack spacing={2} my={2}>
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Icon
-                    key={star}
-                    as={FiStar}
-                    boxSize={8}
-                    cursor="pointer"
-                    color={
-                      star <= (hoveredRating || rating)
-                        ? "yellow.400"
-                        : "gray.300"
-                    }
-                    fill={
-                      star <= (hoveredRating || rating) ? "yellow.400" : "none"
-                    }
-                    onClick={() => handleStarClick(star)}
-                    onMouseEnter={() => handleStarHover(star)}
-                    onMouseLeave={() => setHoveredRating(0)}
-                  />
-                ))}
-              </HStack>
-              <Text fontSize="sm" color="gray.500" mt={1}>
-                {rating === 1 && "Rất không hài lòng"}
-                {rating === 2 && "Không hài lòng"}
-                {rating === 3 && "Bình thường"}
-                {rating === 4 && "Hài lòng"}
-                {rating === 5 && "Rất hài lòng"}
-              </Text>
-            </FormControl>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalHeaderText}>Đánh giá đơn hàng</Text>
+              {!isLoading && (
+                <TouchableOpacity onPress={closeModal}>
+                  <Ionicons name="close" size={24} color="#333" />
+                </TouchableOpacity>
+              )}
+            </View>
 
-            <FormControl>
-              <FormLabel fontWeight="bold">Nội dung đánh giá:</FormLabel>
-              <Textarea
-                placeholder="Chia sẻ trải nghiệm của bạn với đơn hàng này..."
-                rows={5}
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-              />
-            </FormControl>
+            <ScrollView style={styles.modalBody}>
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Đánh giá:</Text>
+                <RatingStars rating={rating} setRating={setRating} />
+              </View>
 
-            <Alert status="info" mt={4}>
-              <AlertIcon />
-              Đánh giá của bạn sẽ giúp cải thiện chất lượng dịch vụ.
-            </Alert>
-          </ModalBody>
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Nội dung đánh giá:</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Chia sẻ trải nghiệm của bạn với đơn hàng này..."
+                  value={comment}
+                  onChangeText={setComment}
+                  multiline={true}
+                  numberOfLines={5}
+                />
+              </View>
 
-          <ModalFooter>
-            <Button
-              leftIcon={<FiXCircle />}
-              onClick={onClose}
-              mr={3}
-              isLoading={isLoading}
-              variant="ghost"
-            >
-              Đóng
-            </Button>
-            <Button
-              colorScheme="blue"
-              onClick={handleSubmitReview}
-              isLoading={isLoading}
-              leftIcon={<FiCheck />}
-            >
-              Gửi đánh giá
-            </Button>
-          </ModalFooter>
-        </ModalContent>
+              <InfoAlert message="Đánh giá của bạn sẽ giúp cải thiện chất lượng dịch vụ." />
+            </ScrollView>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={[styles.footerButton, styles.closeButton]}
+                onPress={closeModal}
+                disabled={isLoading}
+              >
+                <Ionicons name="close-circle" size={20} color="#333" />
+                <Text style={styles.closeButtonText}>Đóng</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.footerButton,
+                  styles.submitButton,
+                  !comment.trim() && styles.disabledButton
+                ]}
+                onPress={handleSubmitReview}
+                disabled={isLoading || !comment.trim()}
+              >
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <>
+                    <Ionicons name="checkmark" size={20} color="white" />
+                    <Text style={styles.submitButtonText}>Gửi đánh giá</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       </Modal>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  reviewButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#48BB78",
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    justifyContent: "center",
+  },
+  reviewButtonText: {
+    color: "white",
+    marginLeft: 8,
+    fontWeight: "600",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    borderRadius: 10,
+    width: "90%",
+    maxHeight: "80%",
+    overflow: "hidden",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+  },
+  modalHeaderText: {
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  modalBody: {
+    padding: 16,
+  },
+  formGroup: {
+    marginBottom: 16,
+  },
+  label: {
+    fontWeight: "600",
+    marginBottom: 8,
+  },
+  ratingContainer: {
+    marginVertical: 10,
+  },
+  starsContainer: {
+    flexDirection: "row",
+    marginBottom: 4,
+  },
+  starContainer: {
+    marginRight: 8,
+  },
+  ratingText: {
+    fontSize: 14,
+    color: "#718096",
+    marginTop: 4,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: "#CBD5E0",
+    borderRadius: 6,
+    padding: 10,
+    minHeight: 100,
+    textAlignVertical: "top",
+  },
+  infoAlert: {
+    flexDirection: "row",
+    backgroundColor: "#EBF8FF",
+    padding: 12,
+    borderRadius: 6,
+    alignItems: "center",
+    marginVertical: 12,
+  },
+  infoAlertText: {
+    marginLeft: 8,
+    color: "#2C5282",
+    flex: 1,
+  },
+  modalFooter: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#E2E8F0",
+  },
+  footerButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    marginLeft: 8,
+  },
+  closeButton: {
+    backgroundColor: "#EDF2F7",
+  },
+  closeButtonText: {
+    marginLeft: 4,
+    color: "#1A202C",
+  },
+  submitButton: {
+    backgroundColor: "#4299E1",
+  },
+  submitButtonText: {
+    marginLeft: 4,
+    color: "white",
+    fontWeight: "600",
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+});
