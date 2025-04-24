@@ -1,17 +1,13 @@
 import {
   Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalCloseButton,
-  Button,
-  FormControl,
-  Checkbox,
-  Stack,
-} from "@chakra-ui/react";
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
 import { useState, useEffect } from "react";
-import { EditIcon } from "@chakra-ui/icons";
+import { MaterialIcons } from "@expo/vector-icons";
 import AddressInput from "../../../../components/Utility/AddressInput";
 import CheckboxList from "../../../../components/Utility/CheckboxList";
 import { useNotify } from "../../../../components/Utility/Notify";
@@ -61,8 +57,7 @@ export default function UpdateAddressModal({
     return true;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     if (!validateForm()) return;
 
     const formattedAddress = `${addressData.street}, ${addressData.wardName}, ${addressData.districtName}, ${addressData.cityName}`;
@@ -78,34 +73,53 @@ export default function UpdateAddressModal({
     onSubmit(formData);
   };
 
+  if (!isOpen) return null;
+
   return (
     <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      size="4xl"
-      closeOnOverlayClick={false}
-      closeOnEsc={false}
+      visible={isOpen}
+      animationType="slide"
+      transparent={true}
+      onRequestClose={onClose}
     >
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>Cập nhật địa chỉ</ModalHeader>
-        {!isLoading && <ModalCloseButton />}
-        <ModalBody pb={6}>
-          <form onSubmit={handleSubmit}>
-            <Stack spacing={4}>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Cập nhật địa chỉ</Text>
+            {!isLoading && (
+              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                <MaterialIcons name="close" size={24} color="#000" />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <ScrollView style={styles.modalBody}>
+            <View style={styles.formContainer}>
               <AddressInput
                 value={addressData}
                 onChange={handleAddressChange}
               />
 
-              <FormControl mb={6}>
-                <Checkbox
-                  isChecked={isDefault}
-                  onChange={(e) => setIsDefault(e.target.checked)}
+              <View style={styles.checkboxContainer}>
+                <TouchableOpacity
+                  style={styles.checkbox}
+                  onPress={() => setIsDefault(!isDefault)}
                 >
-                  Đặt làm địa chỉ mặc định
-                </Checkbox>
-              </FormControl>
+                  <View
+                    style={[
+                      styles.checkboxIcon,
+                      isDefault && styles.checkboxIconChecked,
+                    ]}
+                  >
+                    {isDefault && (
+                      <MaterialIcons name="check" size={16} color="white" />
+                    )}
+                  </View>
+                  <Text style={styles.checkboxLabel}>
+                    Đặt làm địa chỉ mặc định
+                  </Text>
+                </TouchableOpacity>
+              </View>
 
               <CheckboxList
                 items={[
@@ -118,19 +132,100 @@ export default function UpdateAddressModal({
                 setButtonDisabled={setButtonDisabled}
               />
 
-              <Button
-                type="submit"
-                colorScheme="blue"
-                isLoading={isLoading}
-                isDisabled={buttonDisabled}
-                leftIcon={<EditIcon />}
+              <TouchableOpacity
+                style={[
+                  styles.submitButton,
+                  (buttonDisabled || isLoading) && styles.disabledButton,
+                ]}
+                onPress={handleSubmit}
+                disabled={buttonDisabled || isLoading}
               >
-                Cập nhật
-              </Button>
-            </Stack>
-          </form>
-        </ModalBody>
-      </ModalContent>
+                <MaterialIcons name="edit" size={20} color="white" />
+                <Text style={styles.submitButtonText}>Cập nhật</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </View>
+      </View>
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "95%",
+    maxHeight: "90%",
+    backgroundColor: "white",
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  closeButton: {
+    padding: 5,
+  },
+  modalBody: {
+    padding: 16,
+  },
+  formContainer: {
+    gap: 20,
+  },
+  checkboxContainer: {
+    marginBottom: 20,
+    marginTop: 10,
+  },
+  checkbox: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  checkboxIcon: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: "#3182CE",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 8,
+  },
+  checkboxIconChecked: {
+    backgroundColor: "#3182CE",
+  },
+  checkboxLabel: {
+    fontSize: 16,
+  },
+  submitButton: {
+    flexDirection: "row",
+    backgroundColor: "#3182CE",
+    padding: 15,
+    borderRadius: 5,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  disabledButton: {
+    backgroundColor: "#A0AEC0",
+    opacity: 0.7,
+  },
+  submitButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    marginLeft: 8,
+  },
+});

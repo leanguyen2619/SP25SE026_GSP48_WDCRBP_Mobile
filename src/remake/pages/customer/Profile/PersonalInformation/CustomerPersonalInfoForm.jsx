@@ -1,21 +1,18 @@
 import {
-  Box,
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  Stack,
-  Spinner,
-  GridItem,
-  Heading,
-} from "@chakra-ui/react";
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  ScrollView,
+} from "react-native";
 import { useState } from "react";
 import { appColorTheme } from "../../../../config/appconfig.js";
 import CheckboxList from "../../../../components/Utility/CheckboxList.jsx";
 import { useUpdateUserInformationMutation } from "../../../../services/userApi.js";
 import useAuth from "../../../../hooks/useAuth.js";
 import { useNotify } from "../../../../components/Utility/Notify.jsx";
-import { FiCheckCircle } from "react-icons/fi";
 import PasswordInput from "../../../../components/Input/PasswordInput.jsx";
 import { validateCustomerPersonalInfo } from "../../../../validations/index.js";
 
@@ -33,15 +30,14 @@ export default function CustomerPersonalInfoForm({ userData, refetch }) {
     setShowPasswordField(!disabled);
   };
 
-  const handlePersonalInfoSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
+  const handlePersonalInfoSubmit = async () => {
+    // Collecting form data manually from component state
     const data = {
       userId: auth.userId,
-      fullName: formData.get("fullName"),
-      email: formData.get("email"),
-      phone: formData.get("phone"),
-      password: formData.get("password"),
+      fullName: fullNameValue,
+      email: emailValue,
+      phone: phoneValue,
+      password: passwordValue,
       isUpdating: !personalInfoDisabled,
     };
 
@@ -70,49 +66,56 @@ export default function CustomerPersonalInfoForm({ userData, refetch }) {
     }
   };
 
+  // States for form fields
+  const [fullNameValue, setFullNameValue] = useState(userData?.username || "");
+  const [emailValue, setEmailValue] = useState(userData?.email || "");
+  const [phoneValue, setPhoneValue] = useState(userData?.phone || "");
+  const [passwordValue, setPasswordValue] = useState("");
+
   return (
-    <form onSubmit={handlePersonalInfoSubmit}>
-      <Box mb={6}>
-        <Heading as="h3" fontSize="18px" fontFamily="Montserrat" mb={6}>
-          Thông tin cá nhân
-        </Heading>
+    <ScrollView style={styles.container}>
+      <View style={styles.section}>
+        <Text style={styles.heading}>Thông tin cá nhân</Text>
 
-        <Stack spacing={6}>
-          <FormControl isRequired>
-            <FormLabel>Tên của bạn</FormLabel>
-            <Input
-              name="fullName"
-              defaultValue={userData?.username || ""}
-              placeholder="Nhập họ và tên"
-              bg="white"
-            />
-          </FormControl>
-          <FormControl isRequired>
-            <FormLabel>Email</FormLabel>
-            <Input
-              name="email"
-              type="email"
-              defaultValue={userData?.email || ""}
-              isReadOnly
-              bgColor={appColorTheme.grey_2}
-              placeholder="Nhập email"
-            />
-          </FormControl>
-          <FormControl isRequired>
-            <FormLabel>Số điện thoại</FormLabel>
-            <Input
-              name="phone"
-              defaultValue={userData?.phone || ""}
-              placeholder="Nhập số điện thoại"
-              bg="white"
-            />
-          </FormControl>
-        </Stack>
-      </Box>
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Tên của bạn</Text>
+          <TextInput
+            style={styles.input}
+            value={fullNameValue}
+            onChangeText={setFullNameValue}
+            placeholder="Nhập họ và tên"
+            editable={!personalInfoDisabled}
+          />
+        </View>
 
-      <Box mb={6}>
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={[styles.input, styles.readonlyInput]}
+            value={emailValue}
+            onChangeText={setEmailValue}
+            placeholder="Nhập email"
+            keyboardType="email-address"
+            editable={false}
+          />
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Số điện thoại</Text>
+          <TextInput
+            style={styles.input}
+            value={phoneValue}
+            onChangeText={setPhoneValue}
+            placeholder="Nhập số điện thoại"
+            keyboardType="phone-pad"
+            editable={!personalInfoDisabled}
+          />
+        </View>
+      </View>
+
+      <View style={styles.section}>
         {isLoading ? (
-          <Spinner />
+          <ActivityIndicator size="small" color={appColorTheme.brown_2} />
         ) : (
           <CheckboxList
             items={[
@@ -124,36 +127,79 @@ export default function CustomerPersonalInfoForm({ userData, refetch }) {
             setButtonDisabled={handleCheckboxChange}
           />
         )}
-      </Box>
+      </View>
 
       {showPasswordField && (
-        <Box mt={2} mb={6}>
-          <GridItem>
-            <PasswordInput
-              label="Mật khẩu xác nhận"
-              name="password"
-              placeholder="Nhập mật khẩu để xác nhận thay đổi"
-              isRequired
-            />
-          </GridItem>
-        </Box>
+        <View style={styles.section}>
+          <PasswordInput
+            label="Mật khẩu xác nhận"
+            value={passwordValue}
+            onChangeText={setPasswordValue}
+            placeholder="Nhập mật khẩu để xác nhận thay đổi"
+            isRequired
+          />
+        </View>
       )}
 
-      <Button
-        _hover={{ backgroundColor: appColorTheme.brown_1, color: "white" }}
-        px="30px"
-        py="20px"
-        bgColor={appColorTheme.brown_2}
-        color="white"
-        borderRadius="40px"
-        zIndex="1"
-        type="submit"
-        isDisabled={personalInfoDisabled}
-        leftIcon={<FiCheckCircle />}
-        isLoading={isLoading}
+      <TouchableOpacity
+        style={[styles.button, personalInfoDisabled && styles.disabledButton]}
+        onPress={handlePersonalInfoSubmit}
+        disabled={personalInfoDisabled || isLoading}
       >
-        Cập nhật thông tin
-      </Button>
-    </form>
+        {isLoading ? (
+          <ActivityIndicator size="small" color="white" />
+        ) : (
+          <Text style={styles.buttonText}>Cập nhật thông tin</Text>
+        )}
+      </TouchableOpacity>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  section: {
+    marginBottom: 24,
+  },
+  heading: {
+    fontSize: 18,
+    fontFamily: "Montserrat",
+    fontWeight: "700",
+    marginBottom: 24,
+  },
+  formGroup: {
+    marginBottom: 24,
+  },
+  label: {
+    marginBottom: 8,
+    fontWeight: "500",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: "white",
+  },
+  readonlyInput: {
+    backgroundColor: appColorTheme.grey_2,
+  },
+  button: {
+    backgroundColor: appColorTheme.brown_2,
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 40,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "600",
+  },
+});

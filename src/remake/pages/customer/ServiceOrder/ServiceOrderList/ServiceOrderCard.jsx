@@ -1,11 +1,6 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import {
   appColorTheme,
   getServiceOrderStatusColor,
@@ -31,12 +26,12 @@ const ServiceOrderCard = ({ order, onViewDetails }) => {
   const getStatusColor = (status) => {
     const colorScheme = getServiceOrderStatusColor(status);
     const colorMap = {
-      green: '#38A169',
-      blue: '#3182CE',
-      orange: '#DD6B20',
-      red: '#E53E3E',
-      purple: '#805AD5',
-      gray: '#718096'
+      green: "#38A169",
+      blue: "#3182CE",
+      orange: "#DD6B20",
+      red: "#E53E3E",
+      purple: "#805AD5",
+      gray: "#718096",
     };
     return colorMap[colorScheme] || colorMap.gray;
   };
@@ -44,58 +39,54 @@ const ServiceOrderCard = ({ order, onViewDetails }) => {
   return (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
-        <Text style={styles.cardTitle}>
-          Mã đơn: #{order.orderId}
-        </Text>
-
-        <View style={[styles.badge, { backgroundColor: getStatusColor(order.status) + '20' }]}>
-          <Text style={[styles.badgeText, { color: getStatusColor(order.status) }]}>
-            {order.status}
-          </Text>
-        </View>
+        <Text style={styles.cardTitle}>Mã đơn: #{order.orderId}</Text>
       </View>
 
       <View style={styles.cardBody}>
-        <View style={styles.grid}>
-          {/* Left Column */}
-          <View style={styles.gridItem}>
-            <View style={styles.row}>
-              <Text style={styles.label}>
-                Loại dịch vụ:
-              </Text>
-              <Text style={styles.value}>
-                {getServiceTypeDisplayName(
-                  order.service?.service?.serviceName || "N/A"
-                )}
-              </Text>
-            </View>
-
-            <View style={[styles.row, styles.mt1]}>
-              <Text style={styles.label}>
-                Xưởng mộc:
-              </Text>
-              <Text style={styles.link}>
-                {order.service?.wwDto?.brandName || "N/A"}
-              </Text>
-            </View>
+        <View style={styles.infoRow}>
+          <View
+            style={[
+              styles.badge,
+              { backgroundColor: getStatusColor(order.status) + "20" },
+            ]}
+          >
+            <Text
+              style={[
+                styles.badgeText,
+                { color: getStatusColor(order.status) },
+              ]}
+            >
+              {order.status}
+            </Text>
           </View>
+        </View>
 
-          {/* Right Column */}
-          <View style={styles.gridItem}>
-            <View style={styles.row}>
-              <Text style={styles.label}>
-                Lắp đặt:
-              </Text>
-              <Text style={styles.value}>{order.install ? "Có" : "Không"}</Text>
-            </View>
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Loại dịch vụ:</Text>
+          <Text style={styles.value}>
+            {getServiceTypeDisplayName(
+              order.service?.service?.serviceName || "N/A"
+            )}
+          </Text>
+        </View>
 
-            <View style={[styles.row, styles.mt1]}>
-              <Text style={styles.label}>
-                Ngày tạo:
-              </Text>
-              <Text style={styles.value}>{formatDateTimeToVietnamese(order.createdAt)}</Text>
-            </View>
-          </View>
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Xưởng mộc:</Text>
+          <Text style={styles.link}>
+            {order.service?.wwDto?.brandName || "N/A"}
+          </Text>
+        </View>
+
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Lắp đặt:</Text>
+          <Text style={styles.value}>{order.install ? "Có" : "Không"}</Text>
+        </View>
+
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Ngày tạo:</Text>
+          <Text style={styles.value}>
+            {formatDateTimeToVietnamese(order.createdAt)}
+          </Text>
         </View>
       </View>
 
@@ -112,10 +103,13 @@ const ServiceOrderCard = ({ order, onViewDetails }) => {
           onPress={() => onViewDetails(order.orderId)}
           style={styles.button}
         >
-          <Ionicons name="eye-outline" size={18} color="white" style={styles.buttonIcon} />
-          <Text style={styles.buttonText}>
-            Xem chi tiết
-          </Text>
+          <Ionicons
+            name="eye-outline"
+            size={18}
+            color="white"
+            style={styles.buttonIcon}
+          />
+          <Text style={styles.buttonText}>Xem chi tiết</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -124,11 +118,11 @@ const ServiceOrderCard = ({ order, onViewDetails }) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    overflow: 'hidden',
+    borderColor: "#E2E8F0",
+    overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -140,16 +134,13 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   cardHeader: {
-    backgroundColor: '#F7FAFC',
+    backgroundColor: "#F7FAFC",
     paddingVertical: 12,
     paddingHorizontal: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
   },
   cardTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   badge: {
     paddingVertical: 4,
@@ -158,27 +149,19 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   cardBody: {
     padding: 16,
   },
-  grid: {
-    flexDirection: 'row',
-  },
-  gridItem: {
-    flex: 1,
-  },
-  row: {
-    flexDirection: 'row',
-    marginBottom: 4,
-  },
-  mt1: {
-    marginTop: 8,
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
   },
   label: {
-    fontWeight: '600',
-    minWidth: 110,
+    fontWeight: "600",
+    minWidth: 100,
   },
   value: {
     flex: 1,
@@ -189,24 +172,24 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: "#E2E8F0",
   },
   cardFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: 12,
     paddingHorizontal: 16,
   },
   totalAmount: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: appColorTheme.brown_2,
   },
   button: {
     backgroundColor: appColorTheme.brown_2,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 4,
@@ -215,10 +198,10 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   buttonText: {
-    color: 'white',
-    fontWeight: '600',
+    color: "white",
+    fontWeight: "600",
     fontSize: 14,
-  }
+  },
 });
 
 export default ServiceOrderCard;

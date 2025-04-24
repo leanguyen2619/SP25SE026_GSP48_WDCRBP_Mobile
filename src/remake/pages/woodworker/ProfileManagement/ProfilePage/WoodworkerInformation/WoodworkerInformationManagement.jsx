@@ -48,10 +48,11 @@ export default function WoodworkerInformationManagement({
       brandName: data.brandName,
       bio: data.bio,
       businessType: data.businessType,
+      imgUrl: woodworker.imgUrl,
     };
 
     // Thêm địa chỉ vào data nếu đang cập nhật
-    if (isAddressUpdate && address) {
+    if (address) {
       requestBody.address = `${address.street}, ${address.wardName}, ${address.districtName}, ${address.cityName}`;
       requestBody.cityId = address.cityId;
       requestBody.districtId = address.districtId;

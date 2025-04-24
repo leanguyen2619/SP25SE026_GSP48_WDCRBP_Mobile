@@ -1,51 +1,129 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
-  Box,
-  Flex,
-  Heading,
-  HStack,
-  Stack,
+  View,
   Text,
-  Badge,
-  Divider,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  Spinner,
-  Center,
-} from "@chakra-ui/react";
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  ActivityIndicator,
+  Dimensions,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { appColorTheme } from "../../../../../config/appconfig.js";
 import { formatPrice } from "../../../../../utils/utils.js";
-import ImageListSelector from "../../../../../components/Utility/ImageListSelector.jsx";
 import { useGetByServiceOrderMutation } from "../../../../../services/quotationApi";
 
+const windowWidth = Dimensions.get("window").width;
+
+// Tech Spec Item Component
 const TechSpecItem = ({ name, value, optionType }) => {
-  // For file type specs, use ImageListSelector
+  // For file type specs, use ImageGallery
   if (optionType === "file" && value) {
     return (
-      <Box mb={4}>
-        <Text fontWeight="bold" mb={2}>
-          {name}:
-        </Text>
-        <ImageListSelector imgUrls={value} imgH={150} />
-      </Box>
+      <View style={styles.specFileContainer}>
+        <Text style={styles.specName}>{name}:</Text>
+        <ImageGallery imgUrls={value} />
+      </View>
     );
   }
 
   // For other types, show as normal text
   return (
-    <HStack justify="space-between" w="100%" mb={2}>
-      <Text fontWeight="bold">{name}:</Text>
-      <Text>{value || "Không có"}</Text>
-    </HStack>
+    <View style={styles.techSpecItem}>
+      <Text style={styles.specName}>{name}:</Text>
+      <Text style={styles.specValue}>{value || "Không có"}</Text>
+    </View>
+  );
+};
+
+// Custom Accordion Component
+const AccordionItem = ({ title, children, badge, price, defaultExpanded = false }) => {
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+
+  return (
+    <View style={styles.accordionItem}>
+      <TouchableOpacity
+        style={[styles.accordionButton, isExpanded && styles.accordionButtonExpanded]}
+        onPress={() => setIsExpanded(!isExpanded)}
+      >
+        <View style={styles.accordionHeaderContent}>
+          <View style={styles.accordionTitleContainer}>
+            <View style={styles.titleContainer}>
+              <Text style={styles.accordionTitle}>{title}</Text>
+              {badge && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{badge}</Text>
+                </View>
+              )}
+            </View>
+          </View>
+          {price && <Text style={styles.priceText}>{price}</Text>}
+          <Ionicons
+            name={isExpanded ? "chevron-up" : "chevron-down"}
+            size={24}
+            color="#333"
+          />
+        </View>
+      </TouchableOpacity>
+      {isExpanded && <View style={styles.accordionPanel}>{children}</View>}
+    </View>
+  );
+};
+
+// Image Gallery Component
+const ImageGallery = ({ imgUrls }) => {
+  if (!imgUrls) return null;
+  
+  const urls = imgUrls.split(",").filter(url => url.trim() !== "");
+  
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={styles.imageGallery}
+    >
+      {urls.map((url, index) => (
+        <Image
+          key={index}
+          source={{ uri: url }}
+          style={styles.galleryImage}
+          resizeMode="cover"
+        />
+      ))}
+    </ScrollView>
+  );
+};
+
+// Table Component for Quotation Details
+const QuotationTable = ({ details }) => {
+  const calculateTotalPrice = () => {
+    return details.reduce((total, detail) => total + (detail.costAmount || 0), 0) || 0;
+  };
+
+  return (
+    <View style={styles.tableContainer}>
+      <View style={styles.tableHeader}>
+        <Text style={[styles.tableHeaderCell, { flex: 0.5 }]}>STT</Text>
+        <Text style={[styles.tableHeaderCell, { flex: 1.5 }]}>Loại chi phí</Text>
+        <Text style={[styles.tableHeaderCell, { flex: 1 }]}>Số lượng</Text>
+        <Text style={[styles.tableHeaderCell, { flex: 1 }]}>Chi phí</Text>
+      </View>
+      
+      {details.map((detail, index) => (
+        <View key={index} style={styles.tableRow}>
+          <Text style={[styles.tableCell, { flex: 0.5 }]}>{index + 1}</Text>
+          <Text style={[styles.tableCell, { flex: 1.5 }]}>{detail.costType}</Text>
+          <Text style={[styles.tableCell, { flex: 1 }]}>{detail.quantityRequired}</Text>
+          <Text style={[styles.tableCell, { flex: 1 }]}>{formatPrice(detail.costAmount)}</Text>
+        </View>
+      ))}
+      
+      <View style={styles.tableTotalRow}>
+        <Text style={[styles.tableTotalLabel, { flex: 3 }]}>Tổng chi phí:</Text>
+        <Text style={[styles.tableTotalValue, { flex: 1 }]}>{formatPrice(calculateTotalPrice())}</Text>
+      </View>
+    </View>
   );
 };
 
@@ -79,14 +157,6 @@ export default function PersonalizationProductList({
     fetchQuotations();
   }, [orderId, getByServiceOrder]);
 
-  // Helper function to calculate total price for a product's quotation details
-  const calculateTotalPrice = (details) => {
-    return (
-      details?.reduce((total, detail) => total + (detail.costAmount || 0), 0) ||
-      0
-    );
-  };
-
   // Helper function to find quotation details for a specific product
   const findQuotationDetails = (productId) => {
     const productQuotation = quotationData.find(
@@ -96,12 +166,10 @@ export default function PersonalizationProductList({
   };
 
   return (
-    <Box p={5} bgColor="white" boxShadow="md" borderRadius="10px">
-      <Heading fontWeight="bold" fontSize="20px" mb={6}>
-        Thông tin sản phẩm
-      </Heading>
+    <View style={styles.container}>
+      <Text style={styles.heading}>Thông tin sản phẩm</Text>
 
-      <Accordion allowMultiple>
+      <ScrollView style={styles.productList}>
         {products.map((product) => {
           const personalDetail = product.personalProductDetail;
           const techSpecList = personalDetail?.techSpecList || [];
@@ -112,181 +180,281 @@ export default function PersonalizationProductList({
           return (
             <AccordionItem
               key={product.requestedProductId}
-              border="1px solid #ddd"
-              bg="white"
-              borderRadius="10px"
-              mb={4}
+              title={`#${product.requestedProductId}. ${product.category?.categoryName} x ${product.quantity}`}
+              badge={product.category?.categoryName || "Không phân loại"}
+              price={product.totalAmount > 0 ? formatPrice(product.totalAmount) : null}
             >
-              <AccordionButton
-                _expanded={{ bg: appColorTheme.brown_0 }}
-                borderRadius="10px"
-              >
-                <Box flex="1" textAlign="left">
-                  <HStack>
-                    <Box>
-                      <Text fontWeight="bold">
-                        #{product.requestedProductId}.{" "}
-                        {product.category?.categoryName} x {product.quantity}
-                      </Text>
-                      <Badge colorScheme="purple">
-                        {product.category?.categoryName || "Không phân loại"}
-                      </Badge>
-                    </Box>
-                    {product.totalAmount > 0 && (
-                      <Text
-                        fontSize="xl"
-                        color={appColorTheme.brown_2}
-                        fontWeight="bold"
-                        marginLeft="auto"
-                      >
-                        {formatPrice(product.totalAmount)}
-                      </Text>
-                    )}
-                  </HStack>
-                </Box>
-                <AccordionIcon />
-              </AccordionButton>
+              <View style={styles.productDetailsContainer}>
+                {/* Quotation Details */}
+                <View style={styles.sectionContainer}>
+                  <Text style={styles.sectionTitle}>
+                    Chi tiết báo giá:
+                  </Text>
 
-              <AccordionPanel pb={4}>
-                <Stack spacing={4}>
-                  {/* Quotation Details */}
-                  <Box mt={4}>
-                    <Text
-                      color={appColorTheme.brown_2}
-                      fontWeight="bold"
-                      fontSize="lg"
-                      my={3}
-                    >
-                      Chi tiết báo giá:
+                  {isLoadingQuotations ? (
+                    <View style={styles.loadingContainer}>
+                      <ActivityIndicator size="small" color={appColorTheme.brown_2} />
+                    </View>
+                  ) : quotationDetails.length > 0 ? (
+                    <QuotationTable details={quotationDetails} />
+                  ) : (
+                    <Text style={styles.emptyMessage}>
+                      Chưa có báo giá cho sản phẩm này
                     </Text>
-
-                    {isLoadingQuotations ? (
-                      <Center p={4}>
-                        <Spinner size="md" />
-                      </Center>
-                    ) : quotationDetails.length > 0 ? (
-                      <Box overflowX="auto">
-                        <Table variant="simple" size="lg">
-                          <Thead>
-                            <Tr>
-                              <Th>STT</Th>
-                              <Th>Loại chi phí</Th>
-                              <Th>Số lượng cần dùng</Th>
-                              <Th>Chi phí</Th>
-                            </Tr>
-                          </Thead>
-                          <Tbody>
-                            {quotationDetails.map((detail, index) => (
-                              <Tr key={index}>
-                                <Td>{index + 1}</Td>
-                                <Td>{detail.costType}</Td>
-                                <Td>{detail.quantityRequired}</Td>
-                                <Td>{formatPrice(detail.costAmount)}</Td>
-                              </Tr>
-                            ))}
-                            <Tr>
-                              <Td
-                                colSpan={3}
-                                textAlign="right"
-                                fontWeight="bold"
-                              >
-                                Tổng chi phí:
-                              </Td>
-                              <Td fontWeight="bold">
-                                {formatPrice(
-                                  calculateTotalPrice(quotationDetails)
-                                )}
-                              </Td>
-                            </Tr>
-                          </Tbody>
-                        </Table>
-                      </Box>
-                    ) : (
-                      <Text color="gray.500">
-                        Chưa có báo giá cho sản phẩm này
-                      </Text>
-                    )}
-                  </Box>
-
-                  {/* Finish Images if available */}
-                  {product?.finishImgUrls && (
-                    <Box mt={4}>
-                      <Text
-                        color={appColorTheme.brown_2}
-                        fontWeight="bold"
-                        fontSize="lg"
-                        my={3}
-                      >
-                        Ảnh hoàn thành sản phẩm:
-                      </Text>
-                      <ImageListSelector
-                        imgUrls={product.finishImgUrls}
-                        imgH={200}
-                      />
-                    </Box>
                   )}
+                </View>
 
-                  {/* Design Images if available */}
-                  {personalDetail?.designUrls && (
-                    <Box mt={4}>
-                      <Text
-                        color={appColorTheme.brown_2}
-                        fontWeight="bold"
-                        fontSize="lg"
-                        my={3}
-                      >
-                        Thiết kế:
-                      </Text>
-                      <ImageListSelector
-                        imgUrls={personalDetail.designUrls}
-                        imgH={200}
-                      />
-                    </Box>
-                  )}
-
-                  {/* Technical Specifications */}
-                  <Box>
-                    <Text
-                      color={appColorTheme.brown_2}
-                      fontWeight="bold"
-                      fontSize="lg"
-                      my={3}
-                    >
-                      Thông số kỹ thuật:
+                {/* Finish Images if available */}
+                {product?.finishImgUrls && (
+                  <View style={styles.sectionContainer}>
+                    <Text style={styles.sectionTitle}>
+                      Ảnh hoàn thành sản phẩm:
                     </Text>
-                    <Stack spacing={2} divider={<Divider />}>
+                    <ImageGallery imgUrls={product.finishImgUrls} />
+                  </View>
+                )}
+
+                {/* Design Images if available */}
+                {personalDetail?.designUrls && (
+                  <View style={styles.sectionContainer}>
+                    <Text style={styles.sectionTitle}>
+                      Thiết kế:
+                    </Text>
+                    <ImageGallery imgUrls={personalDetail.designUrls} />
+                  </View>
+                )}
+
+                {/* Technical Specifications */}
+                <View style={styles.sectionContainer}>
+                  <Text style={styles.sectionTitle}>
+                    Thông số kỹ thuật:
+                  </Text>
+                  
+                  {techSpecList.length > 0 ? (
+                    <View style={styles.techSpecsContainer}>
                       {techSpecList.map((spec, index) => (
-                        <TechSpecItem
-                          key={index}
-                          name={spec.name}
-                          value={spec.value}
-                          optionType={spec.optionType}
-                        />
+                        <React.Fragment key={index}>
+                          <TechSpecItem
+                            name={spec.name}
+                            value={spec.value}
+                            optionType={spec.optionType}
+                          />
+                          {index < techSpecList.length - 1 && <View style={styles.divider} />}
+                        </React.Fragment>
                       ))}
-                    </Stack>
-                  </Box>
-                </Stack>
-              </AccordionPanel>
+                    </View>
+                  ) : (
+                    <Text style={styles.emptyMessage}>
+                      Không có thông số kỹ thuật
+                    </Text>
+                  )}
+                </View>
+              </View>
             </AccordionItem>
           );
         })}
-      </Accordion>
+      </ScrollView>
 
       {totalAmount > 0 && (
-        <Flex alignItems="center" my={4} p={5} bgColor={appColorTheme.grey_0}>
-          <Text mr={4} fontSize="20px">
-            Thành tiền:
-          </Text>
-          <Text
-            ml="auto"
-            fontSize="30px"
-            color={appColorTheme.brown_2}
-            fontWeight="bold"
-          >
-            {formatPrice(totalAmount)}
-          </Text>
-        </Flex>
+        <View style={styles.totalRow}>
+          <Text style={styles.totalLabel}>Thành tiền:</Text>
+          <Text style={styles.totalValue}>{formatPrice(totalAmount)}</Text>
+        </View>
       )}
-    </Box>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  heading: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 16,
+  },
+  productList: {
+    maxHeight: 500,
+  },
+  accordionItem: {
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 10,
+    marginBottom: 12,
+    overflow: "hidden",
+  },
+  accordionButton: {
+    padding: 12,
+    backgroundColor: "white",
+    borderRadius: 10,
+  },
+  accordionButtonExpanded: {
+    backgroundColor: appColorTheme.brown_0,
+  },
+  accordionHeaderContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  accordionTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  titleContainer: {
+    flex: 1,
+  },
+  accordionTitle: {
+    fontWeight: "bold",
+    flex: 1,
+  },
+  badge: {
+    backgroundColor: "#805AD5",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+    alignSelf: "flex-start",
+    marginTop: 4,
+  },
+  badgeText: {
+    color: "white",
+    fontSize: 12,
+  },
+  priceText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: appColorTheme.brown_2,
+    marginHorizontal: 8,
+  },
+  accordionPanel: {
+    padding: 12,
+  },
+  productDetailsContainer: {
+    marginTop: 8,
+  },
+  sectionContainer: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 12,
+    color: appColorTheme.brown_2,
+  },
+  techSpecsContainer: {
+    backgroundColor: "#F7FAFC",
+    borderRadius: 8,
+    padding: 12,
+  },
+  techSpecItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 6,
+  },
+  specFileContainer: {
+    marginBottom: 10,
+  },
+  specName: {
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  specValue: {
+    flex: 1,
+    textAlign: "right",
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#E2E8F0",
+    marginVertical: 8,
+  },
+  imageGallery: {
+    marginTop: 8,
+  },
+  galleryImage: {
+    width: windowWidth * 0.6,
+    height: 200,
+    marginRight: 8,
+    borderRadius: 8,
+  },
+  loadingContainer: {
+    padding: 20,
+    alignItems: "center",
+  },
+  emptyMessage: {
+    padding: 12,
+    color: "#718096",
+    fontStyle: "italic",
+  },
+  tableContainer: {
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 8,
+    overflow: "hidden",
+    marginTop: 8,
+  },
+  tableHeader: {
+    flexDirection: "row",
+    backgroundColor: "#F7FAFC",
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+  },
+  tableHeaderCell: {
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  tableRow: {
+    flexDirection: "row",
+    borderTopWidth: 1,
+    borderTopColor: "#E2E8F0",
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+  },
+  tableCell: {
+    fontSize: 14,
+  },
+  tableTotalRow: {
+    flexDirection: "row",
+    borderTopWidth: 1,
+    borderTopColor: "#E2E8F0",
+    backgroundColor: "#F7FAFC",
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+  },
+  tableTotalLabel: {
+    fontWeight: "bold",
+    textAlign: "right",
+    paddingRight: 8,
+  },
+  tableTotalValue: {
+    fontWeight: "bold",
+    color: appColorTheme.brown_2,
+  },
+  totalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    backgroundColor: appColorTheme.grey_0,
+    borderRadius: 8,
+    marginTop: 12,
+  },
+  totalLabel: {
+    fontSize: 18,
+    fontWeight: "500",
+  },
+  totalValue: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: appColorTheme.brown_2,
+  },
+});

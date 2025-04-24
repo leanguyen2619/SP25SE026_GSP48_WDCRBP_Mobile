@@ -29,12 +29,11 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingBottom: 40,
-    paddingTop: 40,
+    paddingTop: 20,
     minHeight: "70%",
   },
   container: {
-    width: "90%",
-    maxWidth: 1400,
+    width: "95%",
     alignSelf: "center",
   },
 });

@@ -1,19 +1,16 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useRoute } from "@react-navigation/native";
 import {
-  Box,
+  View,
   Text,
-  HStack,
-  Circle,
-  Stack,
-  Spinner,
-  Center,
-  SimpleGrid,
-  Heading,
-  Divider,
-  Link,
+  ScrollView,
+  StyleSheet,
+  ActivityIndicator,
+  TouchableOpacity,
   Image,
-} from "@chakra-ui/react";
+  Linking,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import {
   appColorTheme,
   serviceOrderStatusConstants,
@@ -29,7 +26,8 @@ import {
 import ghnLogo from "../../../../../assets/images/ghnLogo.webp";
 
 export default function ProgressTab({ order, activeTabIndex, isActive }) {
-  const { id } = useParams();
+  const route = useRoute();
+  const id = route.params?.id || order?.serviceOrderId;
   const [trackingData, setTrackingData] = useState({});
 
   const {
@@ -135,18 +133,18 @@ export default function ProgressTab({ order, activeTabIndex, isActive }) {
   // Display loading state
   if (isLoadingProgress || isLoadingShipment) {
     return (
-      <Center h="200px">
-        <Spinner size="xl" color={appColorTheme.brown_2} />
-      </Center>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={appColorTheme.brown_2} />
+      </View>
     );
   }
 
   // Display error state
   if (progressError || shipmentError) {
     return (
-      <Center h="200px">
+      <View style={styles.errorContainer}>
         <Text>Đã có lỗi xảy ra khi tải thông tin</Text>
-      </Center>
+      </View>
     );
   }
 
@@ -157,223 +155,316 @@ export default function ProgressTab({ order, activeTabIndex, isActive }) {
   });
 
   return (
-    <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-      {/* Left Column - Progress Timeline */}
-      <Box bg="white" borderRadius="10px" p={5} boxShadow="md">
-        <Heading as="h3" size="md" mb={4}>
-          Tiến độ đơn hàng
-        </Heading>
+    <ScrollView style={styles.container}>
+      {/* Progress Timeline */}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Tiến độ đơn hàng</Text>
 
         {progressItems.length === 0 ? (
-          <Center p={8}>
-            <Text fontSize="lg" color="gray.500">
-              Chưa có thông tin tiến độ
-            </Text>
-          </Center>
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>Chưa có thông tin tiến độ</Text>
+          </View>
         ) : isOrderCancelled ? (
           // If order is cancelled, only display actual progress from API
-          <Stack spacing={6} position="relative">
+          <View style={styles.timelineContainer}>
             {progressItems.map((progress, index) => (
-              <HStack align="start" key={progress.progressId} spacing={4}>
-                <Box position="relative">
-                  <Circle
-                    size="32px"
-                    bg={appColorTheme.brown_2}
-                    color="white"
-                    fontWeight="bold"
-                  >
-                    {index + 1}
-                  </Circle>
+              <View key={progress.progressId} style={styles.timelineItem}>
+                <View style={styles.timelineIconContainer}>
+                  <View style={styles.timelineIcon}>
+                    <Text style={styles.timelineIconText}>{index + 1}</Text>
+                  </View>
                   {index < progressItems.length - 1 && (
-                    <Box
-                      position="absolute"
-                      top="32px"
-                      left="50%"
-                      transform="translateX(-50%)"
-                      width="2px"
-                      height="70px"
-                      bg="gray.300"
-                    />
+                    <View style={styles.timelineLine} />
                   )}
-                </Box>
+                </View>
 
-                <Box flex="1">
-                  <Text fontWeight="bold">{progress.status}</Text>
-                </Box>
-
-                <Text whiteSpace="nowrap">
-                  {formatDateTimeString(new Date(progress.createdTime))}
-                </Text>
-              </HStack>
+                <View style={styles.timelineContent}>
+                  <Text style={styles.timelineTitle}>{progress.status}</Text>
+                  <Text style={styles.timelineDate}>
+                    {formatDateTimeString(new Date(progress.createdTime))}
+                  </Text>
+                </View>
+              </View>
             ))}
-          </Stack>
+          </View>
         ) : (
           // If order is not cancelled, display the full predefined flow with opacity
-          <Stack spacing={6} position="relative">
+          <View style={styles.timelineContainer}>
             {progressSteps.map((status, index) => {
               const progress = progressItems.find((p) => p.status === status);
               const isCompleted = !!progress;
 
               return (
-                <HStack
-                  align="start"
-                  key={index}
-                  spacing={4}
-                  opacity={isCompleted ? 1 : 0.5}
+                <View 
+                  key={index} 
+                  style={[
+                    styles.timelineItem, 
+                    { opacity: isCompleted ? 1 : 0.5 }
+                  ]}
                 >
-                  <Box position="relative">
-                    <Circle
-                      size="32px"
-                      bg={appColorTheme.brown_2}
-                      color="white"
-                      fontWeight="bold"
-                    >
-                      {index + 1}
-                    </Circle>
+                  <View style={styles.timelineIconContainer}>
+                    <View style={styles.timelineIcon}>
+                      <Text style={styles.timelineIconText}>{index + 1}</Text>
+                    </View>
                     {index < progressSteps.length - 1 && (
-                      <Box
-                        position="absolute"
-                        top="32px"
-                        left="50%"
-                        transform="translateX(-50%)"
-                        width="2px"
-                        height="70px"
-                        bg={isCompleted ? "gray.300" : "gray.100"}
+                      <View 
+                        style={[
+                          styles.timelineLine,
+                          { backgroundColor: isCompleted ? '#CBD5E0' : '#EDF2F7' }
+                        ]} 
                       />
                     )}
-                  </Box>
+                  </View>
 
-                  <Box flex="1">
-                    <Text fontWeight={isCompleted ? "bold" : "normal"}>
+                  <View style={styles.timelineContent}>
+                    <Text 
+                      style={[
+                        styles.timelineTitle,
+                        { fontWeight: isCompleted ? 'bold' : 'normal' }
+                      ]}
+                    >
                       {status}
                     </Text>
-                  </Box>
-
-                  <Text whiteSpace="nowrap">
-                    {progress
-                      ? formatDateTimeString(new Date(progress.createdTime))
-                      : ""}
-                  </Text>
-                </HStack>
+                    {progress && (
+                      <Text style={styles.timelineDate}>
+                        {formatDateTimeString(new Date(progress.createdTime))}
+                      </Text>
+                    )}
+                  </View>
+                </View>
               );
             })}
-          </Stack>
+          </View>
         )}
-      </Box>
+      </View>
 
-      {/* Right Column - Shipment Information */}
-      <Box bg="white" borderRadius="10px" p={5} boxShadow="md">
-        <Heading as="h3" size="md" mb={4}>
-          Thông tin vận chuyển
-        </Heading>
+      {/* Shipment Information */}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Thông tin vận chuyển</Text>
 
         {shipmentItems.length === 0 ? (
-          <Center p={8}>
-            <Text fontSize="lg" color="gray.500">
-              Chưa có thông tin vận chuyển
-            </Text>
-          </Center>
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>Chưa có thông tin vận chuyển</Text>
+          </View>
         ) : (
-          <Stack spacing={10}>
+          <View style={styles.shipmentContainer}>
             {shipmentItems.map((shipment) => (
-              <Box key={shipment.shipmentId}>
-                <Stack spacing={3} divider={<Divider />}>
-                  {shipment.shipType && (
-                    <HStack>
-                      {shipment.shipType.toLowerCase().includes("ghn") && (
-                        <Image
-                          src={ghnLogo}
-                          alt="GHN Logo"
-                          height="25px"
-                          objectFit="contain"
-                          ml={2}
-                        />
-                      )}
-                      <Text
-                        color={appColorTheme.brown_2}
-                        fontWeight="bold"
-                        fontSize="18px"
-                      >
-                        {shipment.shipType}
-                      </Text>
-                    </HStack>
-                  )}
-
-                  <HStack alignItems="flex-start">
-                    <Text fontWeight="bold" minW="120px">
-                      Địa chỉ giao:
+              <View key={shipment.shipmentId} style={styles.shipmentItem}>
+                {shipment.shipType && (
+                  <View style={styles.shipmentHeader}>
+                    {shipment.shipType.toLowerCase().includes("ghn") && (
+                      <Image
+                        source={ghnLogo}
+                        style={styles.shipmentLogo}
+                        resizeMode="contain"
+                      />
+                    )}
+                    <Text style={styles.shipmentType}>
+                      {shipment.shipType}
                     </Text>
-                    <Text>{shipment.toAddress || "Chưa cập nhật"}</Text>
-                  </HStack>
+                  </View>
+                )}
 
-                  {shipment.fromAddress && (
-                    <HStack alignItems="flex-start">
-                      <Text fontWeight="bold" minW="120px">
-                        Địa chỉ lấy hàng:
-                      </Text>
-                      <Text>{shipment.fromAddress}</Text>
-                    </HStack>
-                  )}
+                <View style={styles.shipmentInfoRow}>
+                  <Text style={styles.shipmentInfoLabel}>Địa chỉ giao:</Text>
+                  <Text style={styles.shipmentInfoValue}>
+                    {shipment.toAddress || "Chưa cập nhật"}
+                  </Text>
+                </View>
 
-                  {shipment.shippingUnit && (
-                    <HStack>
-                      <Text fontWeight="bold" minW="120px">
-                        Đơn vị vận chuyển:
-                      </Text>
-                      <Text>{shipment.shippingUnit}</Text>
-                    </HStack>
-                  )}
+                {shipment.fromAddress && (
+                  <View style={styles.shipmentInfoRow}>
+                    <Text style={styles.shipmentInfoLabel}>Địa chỉ lấy hàng:</Text>
+                    <Text style={styles.shipmentInfoValue}>{shipment.fromAddress}</Text>
+                  </View>
+                )}
 
-                  {shipment.orderCode && shipment.orderCode !== "string" && (
-                    <Stack mt={5}>
-                      <HStack>
-                        <Text fontWeight="bold" minW="120px">
-                          Mã vận đơn:
-                        </Text>
-                        <Text>{shipment.orderCode}</Text>
-                      </HStack>
-                      <Link
-                        target="_blank"
-                        href={`https://donhang.ghn.vn/?order_code=${shipment.orderCode}`}
-                        color={appColorTheme.brown_2}
-                        mb={2}
-                      >
-                        Tra cứu
-                      </Link>
-                      <HStack>
-                        <Text fontWeight="bold" minW="120px">
-                          Ngày giao dự kiến:
-                        </Text>
-                        <Text>
-                          {trackingData[shipment.orderCode]?.leadtime
-                            ? formatDateString(
-                                new Date(
-                                  trackingData[shipment.orderCode].leadtime
-                                )
+                {shipment.shippingUnit && (
+                  <View style={styles.shipmentInfoRow}>
+                    <Text style={styles.shipmentInfoLabel}>Đơn vị vận chuyển:</Text>
+                    <Text style={styles.shipmentInfoValue}>{shipment.shippingUnit}</Text>
+                  </View>
+                )}
+
+                {shipment.orderCode && shipment.orderCode !== "string" && (
+                  <View style={styles.shipmentTrackingContainer}>
+                    <View style={styles.shipmentInfoRow}>
+                      <Text style={styles.shipmentInfoLabel}>Mã vận đơn:</Text>
+                      <Text style={styles.shipmentInfoValue}>{shipment.orderCode}</Text>
+                    </View>
+                    
+                    <TouchableOpacity
+                      style={styles.trackingLink}
+                      onPress={() => Linking.openURL(`https://donhang.ghn.vn/?order_code=${shipment.orderCode}`)}
+                    >
+                      <Text style={styles.trackingLinkText}>Tra cứu</Text>
+                    </TouchableOpacity>
+                    
+                    <View style={styles.shipmentInfoRow}>
+                      <Text style={styles.shipmentInfoLabel}>Ngày giao dự kiến:</Text>
+                      <Text style={styles.shipmentInfoValue}>
+                        {trackingData[shipment.orderCode]?.leadtime
+                          ? formatDateString(
+                              new Date(
+                                trackingData[shipment.orderCode].leadtime
                               )
-                            : "Không có thông tin"}
-                        </Text>
-                      </HStack>
-                      <HStack>
-                        <Text fontWeight="bold" minW="120px">
-                          Trạng thái vận chuyển:
-                        </Text>
-                        <Text>
-                          {trackingData[shipment.orderCode]?.status
-                            ? translateShippingStatus(
-                                trackingData[shipment.orderCode].status
-                              )
-                            : "Không có thông tin"}
-                        </Text>
-                      </HStack>
-                    </Stack>
-                  )}
-                </Stack>
-              </Box>
+                            )
+                          : "Không có thông tin"}
+                      </Text>
+                    </View>
+                    
+                    <View style={styles.shipmentInfoRow}>
+                      <Text style={styles.shipmentInfoLabel}>Trạng thái vận chuyển:</Text>
+                      <Text style={styles.shipmentInfoValue}>
+                        {trackingData[shipment.orderCode]?.status
+                          ? translateShippingStatus(
+                              trackingData[shipment.orderCode].status
+                            )
+                          : "Không có thông tin"}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+              </View>
             ))}
-          </Stack>
+          </View>
         )}
-      </Box>
-    </SimpleGrid>
+      </View>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 10,
+    backgroundColor: '#f5f5f5',
+  },
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 200,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 200,
+  },
+  emptyContainer: {
+    padding: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: 'gray',
+  },
+  timelineContainer: {
+    marginTop: 8,
+  },
+  timelineItem: {
+    flexDirection: 'row',
+    marginBottom: 24,
+  },
+  timelineIconContainer: {
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  timelineIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: appColorTheme.brown_2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  timelineIconText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  timelineLine: {
+    position: 'absolute',
+    top: 32,
+    width: 2,
+    height: 70,
+    backgroundColor: '#CBD5E0',
+    alignSelf: 'center',
+  },
+  timelineContent: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  timelineTitle: {
+    flex: 1,
+    fontWeight: 'bold',
+  },
+  timelineDate: {
+    color: '#4A5568',
+  },
+  shipmentContainer: {
+    marginTop: 8,
+  },
+  shipmentItem: {
+    marginBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+    paddingBottom: 16,
+  },
+  shipmentHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  shipmentLogo: {
+    height: 25,
+    width: 50,
+    marginRight: 8,
+  },
+  shipmentType: {
+    color: appColorTheme.brown_2,
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  shipmentInfoRow: {
+    flexDirection: 'row',
+    marginBottom: 8,
+    alignItems: 'flex-start',
+  },
+  shipmentInfoLabel: {
+    fontWeight: 'bold',
+    width: 120,
+  },
+  shipmentInfoValue: {
+    flex: 1,
+  },
+  shipmentTrackingContainer: {
+    marginTop: 16,
+  },
+  trackingLink: {
+    marginVertical: 8,
+  },
+  trackingLinkText: {
+    color: appColorTheme.brown_2,
+    textDecorationLine: 'underline',
+  },
+});

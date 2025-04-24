@@ -14,7 +14,11 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.woodworker.app"
+      "bundleIdentifier": "com.woodworker.app",
+      "associatedDomains": [
+        "applinks:woodworkcrafts.com",
+        "applinks:app.woodworkcrafts.com"
+      ]
     },
     "android": {
       "adaptiveIcon": {
@@ -33,6 +37,22 @@
         },
         {
           "action": "VIEW",
+          "data": [
+            {
+              "scheme": "https",
+              "host": "*.woodworkcrafts.com",
+              "pathPrefix": "/payment-success"
+            },
+            {
+              "scheme": "https",
+              "host": "woodworkcrafts.com",
+              "pathPrefix": "/payment-success"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        },
+        {
+          "action": "VIEW",
           "data": {
             "scheme": "woodworker",
             "host": "service-pack-success"
@@ -46,10 +66,18 @@
             "host": "wallet-topup-success"
           },
           "category": ["BROWSABLE", "DEFAULT"]
+        },
+        {
+          "action": "VIEW",
+          "data": {
+            "scheme": "woodworkcrafts",
+            "host": "payment-success"
+          },
+          "category": ["BROWSABLE", "DEFAULT"]
         }
       ]
     },
-    "scheme": "woodworker",
+    "scheme": "woodworkcrafts",
     "web": {
       "favicon": "./assets/favicon.png"
     },
