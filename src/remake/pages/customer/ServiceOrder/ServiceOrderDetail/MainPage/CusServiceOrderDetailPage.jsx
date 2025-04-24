@@ -1,7 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { useRoute } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
+import { useRoute } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 import { useGetServiceOrderByIdQuery } from "../../../../../services/serviceOrderApi";
 import { appColorTheme } from "../../../../../config/appconfig";
 import useAuth from "../../../../../hooks/useAuth";
@@ -14,7 +21,14 @@ import { useGetAllOrderDepositByOrderIdQuery } from "../../../../../services/ord
 export default function CusServiceOrderDetailPage() {
   const route = useRoute();
   const { orderId } = route.params;
-  const { data, isLoading, error, refetch } = useGetServiceOrderByIdQuery(orderId);
+  const { data, isLoading, error, refetch } = useGetServiceOrderByIdQuery(
+    orderId,
+    {
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
+    }
+  );
   const order = data?.data;
   const {
     data: depositsResponse,
@@ -45,7 +59,9 @@ export default function CusServiceOrderDetailPage() {
   if (error || depositsError) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Đã có lỗi xảy ra khi tải thông tin đơn dịch vụ</Text>
+        <Text style={styles.errorText}>
+          Đã có lỗi xảy ra khi tải thông tin đơn dịch vụ
+        </Text>
       </View>
     );
   }
@@ -56,7 +72,9 @@ export default function CusServiceOrderDetailPage() {
   ) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Không có quyền truy cập vào thông tin đơn dịch vụ này</Text>
+        <Text style={styles.errorText}>
+          Không có quyền truy cập vào thông tin đơn dịch vụ này
+        </Text>
       </View>
     );
   }
@@ -65,9 +83,7 @@ export default function CusServiceOrderDetailPage() {
     { label: "Chung", icon: "document-text-outline" },
     { label: "Tiến độ", icon: "pulse-outline" },
     {
-      label: `${
-        serviceName != "Sale" ? "Hợp đồng & Giao dịch" : "Giao dịch"
-      }`,
+      label: serviceName != "Sale" ? "HĐ & GD" : "Giao dịch",
       icon: "document-outline",
     },
   ];
@@ -77,10 +93,10 @@ export default function CusServiceOrderDetailPage() {
       <View style={styles.header}>
         <View style={styles.titleContainer}>
           <View style={styles.titleRow}>
-            <Text style={styles.title}>
-              Chi tiết đơn #{order.orderId}
-            </Text>
+            <Text style={styles.title}>Chi tiết đơn #{order.orderId}</Text>
+          </View>
 
+          <View style={styles.statusContainer}>
             <View style={styles.statusBadge}>
               <Text style={styles.statusText}>
                 {order?.status || "Đang xử lý"}
@@ -90,7 +106,8 @@ export default function CusServiceOrderDetailPage() {
 
           {order?.feedback && (
             <Text style={styles.feedback}>
-              <Text style={styles.boldText}>Phản hồi của bạn:</Text> {order?.feedback}
+              <Text style={styles.boldText}>Phản hồi của bạn:</Text>{" "}
+              {order?.feedback}
             </Text>
           )}
         </View>
@@ -108,37 +125,34 @@ export default function CusServiceOrderDetailPage() {
       </View>
 
       <View style={styles.tabsContainer}>
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tabList}
-        >
+        <View style={styles.tabHeaderContainer}>
           {tabs.map((tab, index) => (
             <TouchableOpacity
               key={index}
               style={[
-                styles.tab,
-                activeTabIndex === index && styles.activeTab
+                styles.tabButton,
+                activeTabIndex === index && styles.activeTabButton,
               ]}
               onPress={() => handleTabChange(index)}
             >
-              <Ionicons 
-                name={tab.icon} 
-                size={20} 
-                color={activeTabIndex === index ? appColorTheme.brown_2 : '#4A5568'} 
-                style={styles.tabIcon} 
+              <Ionicons
+                name={tab.icon}
+                size={16}
+                color={
+                  activeTabIndex === index ? appColorTheme.brown_2 : "#4A5568"
+                }
               />
-              <Text 
+              <Text
                 style={[
-                  styles.tabText,
-                  activeTabIndex === index && styles.activeTabText
+                  styles.tabLabel,
+                  activeTabIndex === index && styles.activeTabLabel,
                 ]}
               >
                 {tab.label}
               </Text>
             </TouchableOpacity>
           ))}
-        </ScrollView>
+        </View>
 
         <View style={styles.tabContent}>
           {activeTabIndex === 0 && (
@@ -171,54 +185,57 @@ export default function CusServiceOrderDetailPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: "#f8f9fa",
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
   errorText: {
-    color: 'red',
-    textAlign: 'center',
+    color: "red",
+    textAlign: "center",
     fontSize: 16,
   },
   header: {
     padding: 16,
-    backgroundColor: 'white',
-    marginBottom: 16,
+    backgroundColor: "white",
+    marginBottom: 0,
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
+    borderBottomColor: "#E2E8F0",
   },
   titleContainer: {
     marginBottom: 16,
   },
   titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 8,
   },
   title: {
     color: appColorTheme.brown_2,
     fontSize: 22,
-    fontWeight: 'bold',
-    marginRight: 12,
+    fontWeight: "bold",
+  },
+  statusContainer: {
+    marginBottom: 12,
   },
   statusBadge: {
     backgroundColor: appColorTheme.brown_2,
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 15,
+    alignSelf: "flex-start",
   },
   statusText: {
-    color: 'white',
-    fontWeight: '600',
+    color: "white",
+    fontWeight: "600",
     fontSize: 12,
   },
   feedback: {
@@ -226,47 +243,53 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   boldText: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   actionContainer: {
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
   },
   tabsContainer: {
     flex: 1,
   },
-  tabList: {
-    backgroundColor: 'white',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+  tabHeaderContainer: {
+    flexDirection: "row",
+    backgroundColor: "white",
+    paddingHorizontal: 8,
+    paddingTop: 8,
+    paddingBottom: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+    marginBottom: 0,
   },
-  tab: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 16,
+  tabButton: {
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 8,
     paddingHorizontal: 12,
-    borderBottomWidth: 3,
-    borderBottomColor: 'transparent',
+    borderBottomWidth: 2,
+    borderBottomColor: "#E2E8F0",
+    marginRight: 8,
+    flex: 1,
+    justifyContent: "center",
   },
-  activeTab: {
+  activeTabButton: {
     backgroundColor: appColorTheme.brown_0,
     borderBottomColor: appColorTheme.brown_1,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
   },
-  tabIcon: {
-    marginRight: 6,
-  },
-  tabText: {
+  tabLabel: {
+    marginLeft: 4,
     fontSize: 14,
-    color: '#4A5568',
-    fontWeight: '500',
+    color: "#4A5568",
   },
-  activeTabText: {
+  activeTabLabel: {
     color: appColorTheme.brown_2,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   tabContent: {
     flex: 1,
+    paddingTop: 8,
+    paddingHorizontal: 0,
   },
 });

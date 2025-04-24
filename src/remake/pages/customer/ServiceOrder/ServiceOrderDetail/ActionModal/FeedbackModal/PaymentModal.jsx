@@ -7,6 +7,7 @@ import {
   Modal,
   ScrollView,
   ActivityIndicator,
+  Linking,
 } from "react-native";
 import { useNotify } from "../../../../../../components/Utility/Notify";
 import Icon from "react-native-vector-icons/Feather";
@@ -19,13 +20,13 @@ import { formatPrice } from "../../../../../../utils/utils";
 import useAuth from "../../../../../../hooks/useAuth";
 import { useOrderPaymentMutation } from "../../../../../../services/walletApi";
 import { useCreatePaymentMutation } from "../../../../../../services/paymentApi";
-import { useNavigate } from "react-router-dom";
+import { useNavigation } from "@react-navigation/native";
 
 export default function PaymentModal({ deposit, order, refetch, buttonText }) {
   const [isOpen, setIsOpen] = useState(false);
   const notify = useNotify();
   const { auth } = useAuth();
-  const navigate = useNavigate();
+  const navigation = useNavigation();
   const [orderPayment, { isLoading: isWalletLoading }] =
     useOrderPaymentMutation();
   const [createPayment, { isLoading: isGatewayLoading }] =
@@ -52,7 +53,7 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
         orderDepositId: deposit?.orderDepositId,
         transactionType: "",
         email: auth.sub,
-        returnUrl: `${window.location.origin}/payment-success`,
+        returnUrl: "woodworkcrafts://payment-success",
       };
 
       if (paymentMethod === "wallet") {
@@ -60,20 +61,31 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
         postData.transactionType = transactionTypeConstants.THANH_TOAN_BANG_VI;
         await orderPayment(postData).unwrap();
 
-        navigate(
-          `/success?title=Thanh toán thành công&desc=Bạn đã thanh toán cho đơn hàng thành công&path=/cus/service-order/${order.orderId}&buttonText=Xem đơn hàng`,
-          { replace: true }
-        );
+        navigation.navigate("Success", {
+          title: "Thanh toán thành công",
+          desc: "Bạn đã thanh toán cho đơn hàng thành công",
+          path: `/cus/service-order/${order.orderId}`,
+          buttonText: "Xem đơn hàng",
+        });
 
         onClose();
         refetch(); // Refresh data
       } else {
         postData.transactionType = transactionTypeConstants.THANH_TOAN_QUA_CONG;
         const response = await createPayment(postData).unwrap();
+        const paymentUrl = response.url || response.data.url;
 
         onClose();
 
-        window.location.href = response.url || response.data.url;
+        if (paymentUrl) {
+          await Linking.openURL(paymentUrl);
+        } else {
+          notify(
+            "Thanh toán thất bại",
+            "Không nhận được URL thanh toán",
+            "error"
+          );
+        }
       }
     } catch (err) {
       notify(
@@ -113,7 +125,7 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
                 </TouchableOpacity>
               )}
             </View>
-            
+
             <ScrollView style={styles.modalBody}>
               <View style={styles.contentContainer}>
                 <Text style={styles.sectionTitle}>Chi tiết đặt cọc</Text>
@@ -126,7 +138,9 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
 
                   <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>Đặt cọc lần:</Text>
-                    <Text style={styles.infoValue}>{deposit.depositNumber}</Text>
+                    <Text style={styles.infoValue}>
+                      {deposit.depositNumber}
+                    </Text>
                   </View>
 
                   <View style={styles.infoRow}>
@@ -176,14 +190,14 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
                 </View>
 
                 <View style={styles.divider} />
-                
+
                 <CheckboxList
                   items={checkboxItems}
                   setButtonDisabled={setIsCheckboxDisabled}
                 />
               </View>
             </ScrollView>
-            
+
             <View style={styles.modalFooter}>
               <TouchableOpacity
                 style={[
@@ -197,7 +211,7 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
                 <Icon name="x-circle" size={16} color="#333" />
                 <Text style={styles.closeButtonText}>Đóng</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 style={[
                   styles.footerButton,

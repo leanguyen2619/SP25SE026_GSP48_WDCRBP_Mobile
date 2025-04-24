@@ -89,5 +89,3 @@ export const store = configureStore({
       complaintApi.middleware
     ),
 });
-
-setupListeners(store.dispatch);

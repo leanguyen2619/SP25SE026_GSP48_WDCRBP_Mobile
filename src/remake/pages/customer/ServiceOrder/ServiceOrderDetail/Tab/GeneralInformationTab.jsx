@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Linking
-} from 'react-native';
+  Linking,
+} from "react-native";
 import {
   appColorTheme,
   getServiceTypeLabel,
@@ -24,7 +24,7 @@ export default function GeneralInformationTab({ order, isActive }) {
   const serviceName = order?.service?.service?.serviceName;
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} nestedScrollEnabled={true}>
       {serviceName == "Personalization" && (
         <PersonalizationProductList
           orderId={order?.orderId}
@@ -49,14 +49,14 @@ export default function GeneralInformationTab({ order, isActive }) {
 
       <View style={styles.gridContainer}>
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>
-            Thông tin đơn hàng
-          </Text>
+          <Text style={styles.cardTitle}>Thông tin đơn hàng</Text>
 
           <View style={styles.infoContainer}>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Mã đơn hàng:</Text>
-              <Text style={styles.infoValue}>{order?.orderId || "Chưa cập nhật"}</Text>
+              <Text style={styles.infoValue}>
+                {order?.orderId || "Chưa cập nhật"}
+              </Text>
             </View>
 
             <View style={styles.infoRow}>
@@ -77,7 +77,9 @@ export default function GeneralInformationTab({ order, isActive }) {
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Số lượng sản phẩm:</Text>
-              <Text style={styles.infoValue}>{order?.quantity || "Chưa cập nhật"}</Text>
+              <Text style={styles.infoValue}>
+                {order?.quantity || "Chưa cập nhật"}
+              </Text>
             </View>
 
             <View style={styles.infoRow}>
@@ -89,7 +91,9 @@ export default function GeneralInformationTab({ order, isActive }) {
 
             <View style={styles.noteContainer}>
               <Text style={styles.infoLabel}>Ghi chú:</Text>
-              <Text style={styles.infoValue}>{order?.description || "Không có ghi chú"}</Text>
+              <Text style={styles.infoValue}>
+                {order?.description || "Không có ghi chú"}
+              </Text>
             </View>
           </View>
         </View>
@@ -105,12 +109,16 @@ export default function GeneralInformationTab({ order, isActive }) {
                 <>
                   <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>Hình thức:</Text>
-                    <Text style={styles.infoValue}>{order.consultantAppointment.form}</Text>
+                    <Text style={styles.infoValue}>
+                      {order.consultantAppointment.form}
+                    </Text>
                   </View>
 
                   <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>Địa điểm:</Text>
-                    <Text style={styles.infoValue}>{order.consultantAppointment.meetAddress}</Text>
+                    <Text style={styles.infoValue}>
+                      {order.consultantAppointment.meetAddress}
+                    </Text>
                   </View>
 
                   <View style={styles.infoRow}>
@@ -137,13 +145,11 @@ export default function GeneralInformationTab({ order, isActive }) {
         )}
       </View>
 
-      <View style={styles.card}>
+      <View style={styles.cardFullWidth}>
         <View style={styles.doubleColumnContainer}>
           <View style={styles.column}>
             <View style={styles.infoContainer}>
-              <Text style={styles.cardTitle}>
-                Thông tin xưởng mộc
-              </Text>
+              <Text style={styles.cardTitle}>Thông tin xưởng mộc</Text>
 
               <Text style={styles.infoText}>
                 <Text style={styles.bold}>Tên xưởng mộc:</Text>{" "}
@@ -157,11 +163,13 @@ export default function GeneralInformationTab({ order, isActive }) {
 
               <View style={styles.linkContainer}>
                 <TouchableOpacity
-                  onPress={() => Linking.openURL(`/woodworker/${order?.service?.wwDto?.woodworkerId}`)}
+                  onPress={() =>
+                    Linking.openURL(
+                      `/woodworker/${order?.service?.wwDto?.woodworkerId}`
+                    )
+                  }
                 >
-                  <Text style={styles.linkText}>
-                    Xem xưởng
-                  </Text>
+                  <Text style={styles.linkText}>Xem xưởng</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -173,28 +181,11 @@ export default function GeneralInformationTab({ order, isActive }) {
                 {order?.review?.status ? (
                   <>
                     <View style={styles.infoContainer}>
-                      <Text style={styles.cardTitle}>
-                        Đánh giá
-                      </Text>
+                      <Text style={styles.cardTitle}>Đánh giá</Text>
 
                       <View style={styles.ratingRow}>
                         <Text style={styles.infoLabel}>Số sao:</Text>
                         <StarRating rating={order.review.rating} />
-                      </View>
-
-                      <View style={styles.infoRow}>
-                        <Text style={styles.infoLabel}>Chất lượng thiết kế:</Text>
-                        <Text style={styles.infoValue}>{order.review.designQuality} / 5</Text>
-                      </View>
-
-                      <View style={styles.infoRow}>
-                        <Text style={styles.infoLabel}>Chất lượng sản phẩm:</Text>
-                        <Text style={styles.infoValue}>{order.review.productQuality} / 5</Text>
-                      </View>
-
-                      <View style={styles.infoRow}>
-                        <Text style={styles.infoLabel}>Chất lượng dịch vụ:</Text>
-                        <Text style={styles.infoValue}>{order.review.serviceQuality} / 5</Text>
                       </View>
 
                       <View style={styles.commentContainer}>
@@ -220,15 +211,17 @@ export default function GeneralInformationTab({ order, isActive }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
+    paddingHorizontal: 0,
+    paddingTop: 0,
   },
   gridContainer: {
-    marginVertical: 16,
-    paddingHorizontal: 16,
+    marginTop: 0,
+    marginBottom: 16,
   },
   doubleColumnContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
   },
   column: {
     flex: 1,
@@ -236,11 +229,12 @@ const styles = StyleSheet.create({
     paddingRight: 10,
   },
   card: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 10,
     padding: 16,
+    marginHorizontal: 0,
     marginBottom: 16,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -251,19 +245,19 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 16,
   },
   infoContainer: {
     marginBottom: 8,
   },
   infoRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginBottom: 12,
-    flexWrap: 'wrap',
+    flexWrap: "wrap",
   },
   infoLabel: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginRight: 8,
     minWidth: 120,
   },
@@ -274,30 +268,44 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   bold: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   noteContainer: {
     marginTop: 8,
   },
   linkContainer: {
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
     marginTop: 8,
   },
   linkText: {
     color: appColorTheme.brown_2,
   },
   ratingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 12,
   },
   commentContainer: {
     marginTop: 8,
   },
   emptyText: {
-    color: '#718096',
-    fontStyle: 'italic',
-    textAlign: 'center',
+    color: "#718096",
+    fontStyle: "italic",
+    textAlign: "center",
     marginVertical: 20,
-  }
+  },
+  cardFullWidth: {
+    backgroundColor: "white",
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+    borderRadius: 0,
+  },
 });

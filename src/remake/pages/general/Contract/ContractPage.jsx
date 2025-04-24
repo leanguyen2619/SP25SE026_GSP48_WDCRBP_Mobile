@@ -31,18 +31,6 @@ export default function ContractPage() {
     error,
   } = useGetContractByServiceOrderIdQuery(id);
 
-  // Handle share/export functionality
-  const handleShare = async () => {
-    try {
-      await Share.share({
-        message: "Hợp đồng số " + contractResponse?.data?.contractId,
-        title: "Chia sẻ hợp đồng",
-      });
-    } catch (error) {
-      Alert.alert("Lỗi", "Không thể chia sẻ hợp đồng");
-    }
-  };
-
   // Handle loading state
   if (isLoading) {
     return (
@@ -105,10 +93,6 @@ export default function ContractPage() {
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.pageTitle}>Hợp đồng cung ứng dịch vụ</Text>
-          <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-            <Ionicons name="share-outline" size={22} color="white" />
-            <Text style={styles.shareButtonText}>Chia sẻ</Text>
-          </TouchableOpacity>
         </View>
 
         <View style={styles.contractContainer}>

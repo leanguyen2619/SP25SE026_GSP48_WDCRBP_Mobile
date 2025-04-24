@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, SafeAreaView, Dimensions } from "react-native";
 import { appColorTheme } from "../config/appconfig.js";
 import CustomerSidebar from "../components/Sidebar/CustomerSidebar.jsx";
 import Header from "../components/Header/Header.jsx";
-import RequireAuth from "../components/Utility/RequireAuth.jsx";
 
 export default function CustomerLayout({ children }) {
   const [isCollapsed, setIsCollapsed] = useState(true);
@@ -11,43 +10,41 @@ export default function CustomerLayout({ children }) {
   const isMobile = width < 768;
 
   return (
-    <RequireAuth allowedRoles={["Customer"]}>
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.container}>
-          <Header />
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <Header />
 
-          <View style={styles.content}>
-            {/* Sidebar */}
-            {!isCollapsed ? (
-              <View style={[styles.sidebar, { width: 300 }]}>
-                <Text style={styles.sidebarTitle}>Menu khách hàng</Text>
-                <CustomerSidebar
-                  isCollapsed={isCollapsed}
-                  setIsCollapsed={setIsCollapsed}
-                />
-              </View>
-            ) : (
+        <View style={styles.content}>
+          {/* Sidebar */}
+          {!isCollapsed ? (
+            <View style={[styles.sidebar, { width: 300 }]}>
+              <Text style={styles.sidebarTitle}>Menu khách hàng</Text>
               <CustomerSidebar
                 isCollapsed={isCollapsed}
                 setIsCollapsed={setIsCollapsed}
               />
-            )}
+            </View>
+          ) : (
+            <CustomerSidebar
+              isCollapsed={isCollapsed}
+              setIsCollapsed={setIsCollapsed}
+            />
+          )}
 
-            {/* Main Content - Only show when sidebar is collapsed or on desktop */}
-            {(isCollapsed || !isMobile) && (
-              <View
-                style={[
-                  styles.mainContent,
-                  { marginLeft: isCollapsed ? 0 : 300 },
-                ]}
-              >
-                {children}
-              </View>
-            )}
-          </View>
+          {/* Main Content - Only show when sidebar is collapsed or on desktop */}
+          {(isCollapsed || !isMobile) && (
+            <View
+              style={[
+                styles.mainContent,
+                { marginLeft: isCollapsed ? 0 : 300 },
+              ]}
+            >
+              {children}
+            </View>
+          )}
         </View>
-      </SafeAreaView>
-    </RequireAuth>
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -86,6 +83,5 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: appColorTheme.grey_1,
     minHeight: "100%",
-    padding: 20,
   },
 });

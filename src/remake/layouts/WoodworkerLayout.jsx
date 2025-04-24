@@ -12,7 +12,6 @@ import { appColorTheme } from "../config/appconfig.js";
 import useAuth from "../hooks/useAuth.js";
 import WoodworkerSideBar from "../components/Sidebar/WoodworkerSideBar.jsx";
 import Header from "../components/Header/Header.jsx";
-import RequireAuth from "../components/Utility/RequireAuth.jsx";
 
 export default function WoodworkerLayout({ children }) {
   const [isCollapsed, setIsCollapsed] = useState(true);
@@ -55,50 +54,48 @@ export default function WoodworkerLayout({ children }) {
   }
 
   return (
-    <RequireAuth allowedRoles={["Woodworker"]}>
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.container}>
-          <Header />
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <Header />
 
-          <View style={styles.content}>
-            {/* Sidebar */}
-            {!isCollapsed ? (
-              <View style={[styles.sidebar, { width: 300 }]}>
-                <Text style={styles.sidebarTitle}>Menu xưởng mộc</Text>
-                <WoodworkerSideBar
-                  isCollapsed={isCollapsed}
-                  setIsCollapsed={setIsCollapsed}
-                />
-              </View>
-            ) : (
+        <View style={styles.content}>
+          {/* Sidebar */}
+          {!isCollapsed ? (
+            <View style={[styles.sidebar, { width: 300 }]}>
+              <Text style={styles.sidebarTitle}>Menu xưởng mộc</Text>
               <WoodworkerSideBar
                 isCollapsed={isCollapsed}
                 setIsCollapsed={setIsCollapsed}
               />
-            )}
+            </View>
+          ) : (
+            <WoodworkerSideBar
+              isCollapsed={isCollapsed}
+              setIsCollapsed={setIsCollapsed}
+            />
+          )}
 
-            {/* Main Content - Only show when sidebar is collapsed or on desktop */}
-            {(isCollapsed || !isMobile) && (
-              <View
-                style={[
-                  styles.mainContent,
-                  { marginLeft: isCollapsed ? 0 : 300 },
-                ]}
-              >
-                {children}
-              </View>
-            )}
-          </View>
-
-          {/* Footer */}
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>
-              Xưởng mộc {auth?.woodworker?.brandName || woodworker?.brandName}
-            </Text>
-          </View>
+          {/* Main Content - Only show when sidebar is collapsed or on desktop */}
+          {(isCollapsed || !isMobile) && (
+            <View
+              style={[
+                styles.mainContent,
+                { marginLeft: isCollapsed ? 0 : 300 },
+              ]}
+            >
+              {children}
+            </View>
+          )}
         </View>
-      </SafeAreaView>
-    </RequireAuth>
+
+        {/* Footer */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>
+            Xưởng mộc {auth?.woodworker?.brandName || woodworker?.brandName}
+          </Text>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -152,7 +149,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: appColorTheme.grey_1,
     minHeight: "100%",
-    padding: 20,
   },
   footer: {
     position: "absolute",

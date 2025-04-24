@@ -1,108 +1,119 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+  TouchableOpacity,
+} from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons";
-import { useUpdateTransactionStatusMutation } from "../../../services/transactionApi";
-import { useDecryptDataQuery } from "../../../services/decryptApi";
-import { useNotify } from "../../../components/Utility/Notify";
+import Icon from "react-native-vector-icons/Feather";
 import { appColorTheme } from "../../../config/appconfig";
+import { formatPrice } from "../../../utils/utils";
+import { useVerifyOrderPaymentMutation } from "../../../services/walletApi";
+import { useNotify } from "../../../components/Utility/Notify";
+
+// Simple primary button to replace your CustomButton
+function PrimaryButton({ title, onPress, icon }) {
+  return (
+    <TouchableOpacity style={styles.primaryButton} onPress={onPress}>
+      {icon && (
+        <Icon name={icon} size={18} color="#fff" style={styles.btnIcon} />
+      )}
+      <Text style={styles.primaryButtonText}>{title}</Text>
+    </TouchableOpacity>
+  );
+}
 
 export default function OrderPaymentSuccessPage() {
-  const navigation = useNavigation();
   const route = useRoute();
-  const params = route.params || {};
+  const navigation = useNavigation();
   const notify = useNotify();
-  const [updateTransactionStatus] = useUpdateTransactionStatusMutation();
-  const [status, setStatus] = useState("Đang xử lý giao dịch...");
-  const [isProcessing, setIsProcessing] = useState(true);
+  const [verifyPayment, { isLoading }] = useVerifyOrderPaymentMutation();
+  const [paymentInfo, setPaymentInfo] = useState(null);
 
-  // Order Payment-specific parameters (lowercase)
-  const encryptedTransactionId = params.transactionId;
-  const encryptedOrderDepositId = params.orderDepositId;
-
-  // Decrypt transaction ID
-  const { data: transactionIdData, isLoading: isTransactionIdLoading } =
-    useDecryptDataQuery(encryptedTransactionId, {
-      skip: !encryptedTransactionId,
-    });
-
-  // Decrypt order deposit ID
-  const { data: orderDepositIdData, isLoading: isOrderDepositIdLoading } =
-    useDecryptDataQuery(encryptedOrderDepositId, {
-      skip: !encryptedOrderDepositId,
-    });
+  const orderDepositId = route.params?.orderDepositId || "";
+  const transactionId = route.params?.transactionId || "";
 
   useEffect(() => {
-    handleOrderPaymentSuccess();
-  }, [
-    transactionIdData,
-    orderDepositIdData,
-    isTransactionIdLoading,
-    isOrderDepositIdLoading,
-  ]);
+    const verifyTransaction = async () => {
+      try {
+        if (orderDepositId && transactionId) {
+          const response = await verifyPayment({
+            orderDepositId,
+            transactionId,
+          }).unwrap();
+          setPaymentInfo(response.data);
+        }
+      } catch (err) {
+        notify(
+          "Xác thực thanh toán thất bại",
+          err?.data?.message || "Có lỗi xảy ra khi xác thực thanh toán",
+          "error"
+        );
+        navigation.navigate("Error", {
+          message: "Có lỗi xảy ra khi xác thực thanh toán",
+        });
+      }
+    };
+    verifyTransaction();
+  }, [orderDepositId, transactionId]);
 
-  const handleOrderPaymentSuccess = async () => {
-    if (!encryptedTransactionId || !encryptedOrderDepositId) {
-      setStatus("Thông tin giao dịch không hợp lệ");
-      setIsProcessing(false);
-      navigation.replace("CustomerServiceOrders");
-      return;
-    }
-
-    if (isTransactionIdLoading || isOrderDepositIdLoading) {
-      setStatus("Đang giải mã thông tin giao dịch...");
-      return;
-    }
-
-    try {
-      setStatus("Đang cập nhật trạng thái giao dịch...");
-      // Update transaction status
-      await updateTransactionStatus({
-        transactionId: parseInt(transactionIdData?.data),
-        status: true,
-      }).unwrap();
-
-      setStatus("Giao dịch hoàn tất!");
-      setIsProcessing(false);
-
-      navigation.replace("Success", {
-        title: "Thanh toán thành công",
-        desc: "Thanh toán đặt cọc đã được xử lý thành công",
-        path: "CustomerServiceOrders",
-        buttonText: "Xem danh sách đơn hàng",
+  const handleViewOrder = () => {
+    if (paymentInfo?.orderId) {
+      navigation.navigate("CustomerServiceOrderDetail", {
+        orderId: paymentInfo.orderId,
       });
-    } catch (error) {
-      setStatus("Có lỗi xảy ra, vui lòng thử lại sau");
-      setIsProcessing(false);
-      notify(
-        "Cập nhật thất bại",
-        error?.data?.message || "Có lỗi xảy ra, vui lòng thử lại sau",
-        "error"
-      );
-      navigation.replace("CustomerServiceOrders");
     }
   };
 
+  if (isLoading || !paymentInfo) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color={appColorTheme.primary} />
+        <Text style={styles.loadingText}>Đang xác thực thanh toán...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <View style={styles.card}>
-        <View style={styles.iconContainer}>
-          {isProcessing ? (
-            <ActivityIndicator size="large" color="white" />
-          ) : (
-            <Ionicons name="sync" size={50} color="white" />
-          )}
+      <View style={styles.iconContainer}>
+        <Icon name="check-circle" size={80} color={appColorTheme.success} />
+      </View>
+
+      <Text style={styles.title}>Thanh toán thành công!</Text>
+      <Text style={styles.message}>
+        Bạn đã hoàn thành thanh toán đặt cọc cho đơn dịch vụ
+      </Text>
+
+      <View style={styles.detailsContainer}>
+        <View style={styles.detailRow}>
+          <Text style={styles.detailLabel}>Mã đơn dịch vụ:</Text>
+          <Text style={styles.detailValue}>#{paymentInfo.orderId}</Text>
         </View>
 
-        <Text style={styles.heading}>{status}</Text>
+        <View style={styles.detailRow}>
+          <Text style={styles.detailLabel}>Khoản thanh toán:</Text>
+          <Text style={styles.detailValue}>
+            Đặt cọc lần #{paymentInfo.depositNumber}
+          </Text>
+        </View>
 
-        <Text style={styles.description}>
-          {isProcessing
-            ? "Vui lòng đợi trong giây lát, chúng tôi đang xử lý giao dịch của bạn"
-            : status == "Giao dịch hoàn tất!"
-            ? "Chuyển hướng bạn đến trang thành công..."
-            : "Chuyển hướng bạn về trang đơn hàng..."}
-        </Text>
+        <View style={styles.detailRow}>
+          <Text style={styles.detailLabel}>Số tiền:</Text>
+          <Text style={[styles.detailValue, styles.amountText]}>
+            {formatPrice(paymentInfo.amount)}
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <PrimaryButton
+          title="Xem đơn hàng"
+          onPress={handleViewOrder}
+          icon="eye"
+        />
       </View>
     </View>
   );
@@ -111,46 +122,76 @@ export default function OrderPaymentSuccessPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
     padding: 16,
-  },
-  card: {
     backgroundColor: "white",
-    borderRadius: 12,
-    padding: 24,
-    width: "100%",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
     alignItems: "center",
+    justifyContent: "center",
+  },
+  loadingContainer: {
+    gap: 16,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: "#666",
   },
   iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: appColorTheme.brown_2,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 24,
   },
-  heading: {
-    fontSize: 20,
+  title: {
+    fontSize: 24,
     fontWeight: "bold",
-    color: appColorTheme.brown_2,
+    marginBottom: 12,
     textAlign: "center",
-    marginBottom: 16,
-    fontFamily: "Montserrat",
   },
-  description: {
-    fontSize: 14,
-    color: "#718096",
+  message: {
+    fontSize: 16,
+    color: "#666",
     textAlign: "center",
-    maxWidth: 300,
+    marginBottom: 24,
+  },
+  detailsContainer: {
+    width: "100%",
+    backgroundColor: "#F9FAFB",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 32,
+  },
+  detailRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  detailLabel: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#4B5563",
+  },
+  detailValue: {
+    fontSize: 15,
+    fontWeight: "500",
+  },
+  amountText: {
+    color: appColorTheme.brown_2,
+    fontWeight: "700",
+  },
+  buttonContainer: {
+    width: "100%",
+  },
+  // ---- new button styles ----
+  primaryButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: appColorTheme.primary,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  primaryButtonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  btnIcon: {
+    marginRight: 8,
   },
 });

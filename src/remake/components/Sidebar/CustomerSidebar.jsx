@@ -106,8 +106,8 @@ const styles = StyleSheet.create({
   },
   toggleButtonCollapsed: {
     position: "absolute",
-    top: 10,
-    left: 10,
+    top: -20,
+    left: 0,
     width: 35,
     height: 35,
     borderRadius: 20,

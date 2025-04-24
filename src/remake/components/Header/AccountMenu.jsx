@@ -30,10 +30,10 @@ export default function AccountMenu() {
     let profilePath = "Auth";
     switch (auth?.role) {
       case "Woodworker":
-        profilePath = "WWProfile";
+        profilePath = "WoodworkerProfile";
         break;
       case "Customer":
-        profilePath = "CusProfile";
+        profilePath = "CustomerProfile";
         break;
       case "Staff":
         profilePath = "Staff";

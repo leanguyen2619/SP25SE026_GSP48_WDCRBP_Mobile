@@ -90,7 +90,9 @@ export default function HomePage() {
               onPress={() => {
                 if (auth?.userId) {
                   navigation.navigate(
-                    auth?.role === "Woodworker" ? "WWProfile" : "CusProfile"
+                    auth?.role === "Woodworker"
+                      ? "WoodworkerProfile"
+                      : "CustomerProfile"
                   );
                 } else {
                   navigation.navigate("Auth");

@@ -38,13 +38,22 @@ const TechSpecItem = ({ name, value, optionType }) => {
 };
 
 // Custom Accordion Component
-const AccordionItem = ({ title, children, badge, price, defaultExpanded = false }) => {
+const AccordionItem = ({
+  title,
+  children,
+  badge,
+  price,
+  defaultExpanded = false,
+}) => {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   return (
     <View style={styles.accordionItem}>
       <TouchableOpacity
-        style={[styles.accordionButton, isExpanded && styles.accordionButtonExpanded]}
+        style={[
+          styles.accordionButton,
+          isExpanded && styles.accordionButtonExpanded,
+        ]}
         onPress={() => setIsExpanded(!isExpanded)}
       >
         <View style={styles.accordionHeaderContent}>
@@ -74,54 +83,70 @@ const AccordionItem = ({ title, children, badge, price, defaultExpanded = false 
 // Image Gallery Component
 const ImageGallery = ({ imgUrls }) => {
   if (!imgUrls) return null;
-  
-  const urls = imgUrls.split(",").filter(url => url.trim() !== "");
-  
+
+  const urls = imgUrls.split(",").filter((url) => url.trim() !== "");
+
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      style={styles.imageGallery}
-    >
-      {urls.map((url, index) => (
-        <Image
-          key={index}
-          source={{ uri: url }}
-          style={styles.galleryImage}
-          resizeMode="cover"
-        />
-      ))}
-    </ScrollView>
+    <View style={styles.galleryContainer}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.imageGallery}
+        nestedScrollEnabled={true}
+      >
+        {urls.map((url, index) => (
+          <Image
+            key={index}
+            source={{ uri: url }}
+            style={styles.galleryImage}
+            resizeMode="cover"
+          />
+        ))}
+      </ScrollView>
+    </View>
   );
 };
 
 // Table Component for Quotation Details
 const QuotationTable = ({ details }) => {
   const calculateTotalPrice = () => {
-    return details.reduce((total, detail) => total + (detail.costAmount || 0), 0) || 0;
+    return (
+      details.reduce((total, detail) => total + (detail.costAmount || 0), 0) ||
+      0
+    );
   };
 
   return (
     <View style={styles.tableContainer}>
       <View style={styles.tableHeader}>
         <Text style={[styles.tableHeaderCell, { flex: 0.5 }]}>STT</Text>
-        <Text style={[styles.tableHeaderCell, { flex: 1.5 }]}>Loại chi phí</Text>
+        <Text style={[styles.tableHeaderCell, { flex: 1.5 }]}>
+          Loại chi phí
+        </Text>
         <Text style={[styles.tableHeaderCell, { flex: 1 }]}>Số lượng</Text>
         <Text style={[styles.tableHeaderCell, { flex: 1 }]}>Chi phí</Text>
       </View>
-      
+
       {details.map((detail, index) => (
         <View key={index} style={styles.tableRow}>
           <Text style={[styles.tableCell, { flex: 0.5 }]}>{index + 1}</Text>
-          <Text style={[styles.tableCell, { flex: 1.5 }]}>{detail.costType}</Text>
-          <Text style={[styles.tableCell, { flex: 1 }]}>{detail.quantityRequired}</Text>
-          <Text style={[styles.tableCell, { flex: 1 }]}>{formatPrice(detail.costAmount)}</Text>
+          <Text style={[styles.tableCell, { flex: 1.5 }]}>
+            {detail.costType}
+          </Text>
+          <Text style={[styles.tableCell, { flex: 1 }]}>
+            {detail.quantityRequired}
+          </Text>
+          <Text style={[styles.tableCell, { flex: 1 }]}>
+            {formatPrice(detail.costAmount)}
+          </Text>
         </View>
       ))}
-      
+
       <View style={styles.tableTotalRow}>
         <Text style={[styles.tableTotalLabel, { flex: 3 }]}>Tổng chi phí:</Text>
-        <Text style={[styles.tableTotalValue, { flex: 1 }]}>{formatPrice(calculateTotalPrice())}</Text>
+        <Text style={[styles.tableTotalValue, { flex: 1 }]}>
+          {formatPrice(calculateTotalPrice())}
+        </Text>
       </View>
     </View>
   );
@@ -169,7 +194,7 @@ export default function PersonalizationProductList({
     <View style={styles.container}>
       <Text style={styles.heading}>Thông tin sản phẩm</Text>
 
-      <ScrollView style={styles.productList}>
+      <ScrollView style={styles.productList} nestedScrollEnabled={true}>
         {products.map((product) => {
           const personalDetail = product.personalProductDetail;
           const techSpecList = personalDetail?.techSpecList || [];
@@ -182,18 +207,23 @@ export default function PersonalizationProductList({
               key={product.requestedProductId}
               title={`#${product.requestedProductId}. ${product.category?.categoryName} x ${product.quantity}`}
               badge={product.category?.categoryName || "Không phân loại"}
-              price={product.totalAmount > 0 ? formatPrice(product.totalAmount) : null}
+              price={
+                product.totalAmount > 0
+                  ? formatPrice(product.totalAmount)
+                  : null
+              }
             >
               <View style={styles.productDetailsContainer}>
                 {/* Quotation Details */}
                 <View style={styles.sectionContainer}>
-                  <Text style={styles.sectionTitle}>
-                    Chi tiết báo giá:
-                  </Text>
+                  <Text style={styles.sectionTitle}>Chi tiết báo giá:</Text>
 
                   {isLoadingQuotations ? (
                     <View style={styles.loadingContainer}>
-                      <ActivityIndicator size="small" color={appColorTheme.brown_2} />
+                      <ActivityIndicator
+                        size="small"
+                        color={appColorTheme.brown_2}
+                      />
                     </View>
                   ) : quotationDetails.length > 0 ? (
                     <QuotationTable details={quotationDetails} />
@@ -217,19 +247,15 @@ export default function PersonalizationProductList({
                 {/* Design Images if available */}
                 {personalDetail?.designUrls && (
                   <View style={styles.sectionContainer}>
-                    <Text style={styles.sectionTitle}>
-                      Thiết kế:
-                    </Text>
+                    <Text style={styles.sectionTitle}>Thiết kế:</Text>
                     <ImageGallery imgUrls={personalDetail.designUrls} />
                   </View>
                 )}
 
                 {/* Technical Specifications */}
                 <View style={styles.sectionContainer}>
-                  <Text style={styles.sectionTitle}>
-                    Thông số kỹ thuật:
-                  </Text>
-                  
+                  <Text style={styles.sectionTitle}>Thông số kỹ thuật:</Text>
+
                   {techSpecList.length > 0 ? (
                     <View style={styles.techSpecsContainer}>
                       {techSpecList.map((spec, index) => (
@@ -239,7 +265,9 @@ export default function PersonalizationProductList({
                             value={spec.value}
                             optionType={spec.optionType}
                           />
-                          {index < techSpecList.length - 1 && <View style={styles.divider} />}
+                          {index < techSpecList.length - 1 && (
+                            <View style={styles.divider} />
+                          )}
                         </React.Fragment>
                       ))}
                     </View>
@@ -283,7 +311,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   productList: {
-    maxHeight: 500,
+    // Bỏ maxHeight để hiển thị đầy đủ nội dung
   },
   accordionItem: {
     borderWidth: 1,
@@ -337,6 +365,8 @@ const styles = StyleSheet.create({
   },
   accordionPanel: {
     padding: 12,
+    maxHeight: undefined,
+    backgroundColor: "#FAFAFA",
   },
   productDetailsContainer: {
     marginTop: 8,
@@ -378,6 +408,10 @@ const styles = StyleSheet.create({
   },
   imageGallery: {
     marginTop: 8,
+  },
+  galleryContainer: {
+    maxWidth: "100%",
+    overflow: "hidden",
   },
   galleryImage: {
     width: windowWidth * 0.6,

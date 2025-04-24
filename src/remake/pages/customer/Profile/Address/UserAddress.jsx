@@ -1,14 +1,11 @@
 import {
-  Box,
-  Button,
-  Heading,
-  HStack,
-  Spinner,
-  Alert,
-  AlertIcon,
-  useDisclosure,
-} from "@chakra-ui/react";
-import { AddIcon } from "@chakra-ui/icons";
+  View,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+  StyleSheet,
+} from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { appColorTheme } from "../../../../config/appconfig.js";
 import {
@@ -28,16 +25,13 @@ export default function UserAddress() {
   const [currentAddress, setCurrentAddress] = useState(null);
 
   // Modal controls
-  const {
-    isOpen: isCreateModalOpen,
-    onOpen: onCreateModalOpen,
-    onClose: onCreateModalClose,
-  } = useDisclosure();
-  const {
-    isOpen: isUpdateModalOpen,
-    onOpen: onUpdateModalOpen,
-    onClose: onUpdateModalClose,
-  } = useDisclosure();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+
+  const onCreateModalOpen = () => setIsCreateModalOpen(true);
+  const onCreateModalClose = () => setIsCreateModalOpen(false);
+  const onUpdateModalOpen = () => setIsUpdateModalOpen(true);
+  const onUpdateModalClose = () => setIsUpdateModalOpen(false);
 
   // API Queries and Mutations
   const { data, isLoading, isError, error, refetch } =
@@ -120,38 +114,40 @@ export default function UserAddress() {
     onUpdateModalOpen();
   };
 
-  if (isLoading) return <Spinner size="xl" />;
+  if (isLoading)
+    return (
+      <ActivityIndicator size="large" color="#38A169" style={styles.spinner} />
+    );
 
   if (isError) {
     return (
-      <Alert status="error">
-        <AlertIcon />
-        Không thể tải địa chỉ: {error?.data?.message || "Vui lòng thử lại sau"}
-      </Alert>
+      <View style={styles.errorContainer}>
+        <MaterialIcons name="error-outline" size={24} color="#E53E3E" />
+        <Text style={styles.errorText}>
+          Không thể tải địa chỉ:{" "}
+          {error?.data?.message || "Vui lòng thử lại sau"}
+        </Text>
+      </View>
     );
   }
 
   return (
-    <Box>
-      <HStack justify="space-between" mb={4}>
-        <Heading
-          color={appColorTheme.brown_2}
-          fontFamily="Montserrat"
-          fontSize="2xl"
-        >
-          Địa chỉ của bạn
-        </Heading>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Địa chỉ của bạn</Text>
 
-        <Button
-          leftIcon={<AddIcon />}
-          variant={"outline"}
-          onClick={onCreateModalOpen}
-          isDisabled={addressesData?.length >= 3}
-          colorScheme="green"
+        <TouchableOpacity
+          style={[
+            styles.addButton,
+            addressesData?.length >= 3 && styles.disabledButton,
+          ]}
+          onPress={onCreateModalOpen}
+          disabled={addressesData?.length >= 3}
         >
-          Thêm địa chỉ
-        </Button>
-      </HStack>
+          <MaterialIcons name="add" size={18} color="#38A169" />
+          <Text style={styles.addButtonText}>Thêm địa chỉ</Text>
+        </TouchableOpacity>
+      </View>
 
       <AddressList
         addresses={addressesData}
@@ -176,6 +172,61 @@ export default function UserAddress() {
           isLoading={isUpdating}
         />
       )}
-    </Box>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: "#f9f9f9",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  title: {
+    color: appColorTheme.brown_2,
+    fontFamily: "Montserrat",
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  addButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#38A169",
+    borderRadius: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  addButtonText: {
+    color: "#38A169",
+    marginLeft: 5,
+  },
+  disabledButton: {
+    opacity: 0.5,
+    borderColor: "#A0AEC0",
+  },
+  spinner: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorContainer: {
+    padding: 16,
+    backgroundColor: "#FFF5F5",
+    borderRadius: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 16,
+  },
+  errorText: {
+    color: "#E53E3E",
+    marginLeft: 8,
+    flex: 1,
+  },
+});

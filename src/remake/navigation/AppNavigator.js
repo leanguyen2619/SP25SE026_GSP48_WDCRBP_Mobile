@@ -23,8 +23,12 @@ import WoodworkersPage from "../pages/general/Woodworker/WoodworkerList/Woodwork
 import WoodworkerDetailPage from "../pages/general/Woodworker/WoodworkerDetail/WoodworkerDetailPage";
 import WoodworkerWelcomePage from "../pages/woodworker/Welcome/WoodworkerWelcomePage";
 import WWServiceOrderListPage from "../pages/woodworker/ServiceOrder/ServiceOrderList/WWServiceOrderListPage";
+import CusServiceOrderListPage from "../pages/customer/ServiceOrder/ServiceOrderList/CusServiceOrderListPage";
+import CusServiceOrderDetailPage from "../pages/customer/ServiceOrder/ServiceOrderDetail/MainPage/CusServiceOrderDetailPage";
 // import WWServiceOrderDetailPage from "../pages/woodworker/ServiceOrder/ServiceOrderDetail/MainPage/WWServiceOrderDetailPage";
 import WoodworkerLayout from "../layouts/WoodworkerLayout";
+import CustomerLayout from "../layouts/CustomerLayout";
+import CustomerProfilePage from "../pages/customer/Profile/ManagePage/CustomerProfilePage";
 
 const Stack = createNativeStackNavigator();
 
@@ -33,10 +37,6 @@ const AppNavigator = () => {
 
   const getInitialRoute = () => {
     switch (auth?.role) {
-      case "Woodworker":
-        return "WoodworkerWelcome";
-      case "Customer":
-        return "Home";
       default:
         return "Home";
     }
@@ -67,7 +67,14 @@ const AppNavigator = () => {
       <Stack.Screen name="PaymentSuccess" component={PaymentSuccessPage} />
 
       {/* Customer */}
-      {/* <Stack.Screen name="CustomerProfile" component={CustomerProfilePage} /> */}
+      <Stack.Screen
+        name="CustomerProfile"
+        component={(props) => (
+          <CustomerLayout>
+            <CustomerProfilePage {...props} />
+          </CustomerLayout>
+        )}
+      />
       {/* <Stack.Screen
         name="PersonalizationRequest"
         component={PersonalizationRequestPage}
@@ -77,14 +84,22 @@ const AppNavigator = () => {
         component={CustomerComplaintPage}
       /> */}
       {/* <Stack.Screen name="CustomerWallet" component={CustomerWalletPage} /> */}
-      {/* <Stack.Screen
+      <Stack.Screen
         name="CustomerServiceOrders"
-        component={CusServiceOrderListPage}
-      /> */}
-      {/* <Stack.Screen
+        component={(props) => (
+          <CustomerLayout>
+            <CusServiceOrderListPage {...props} />
+          </CustomerLayout>
+        )}
+      />
+      <Stack.Screen
         name="CustomerServiceOrderDetail"
-        component={CusServiceOrderDetailPage}
-      /> */}
+        component={(props) => (
+          <CustomerLayout>
+            <CusServiceOrderDetailPage {...props} />
+          </CustomerLayout>
+        )}
+      />
       {/* <Stack.Screen name="GuaranteeRequest" component={GuaranteeRequestPage} /> */}
       {/* <Stack.Screen
         name="CustomerGuaranteeOrders"

@@ -1,47 +1,39 @@
-import { Box, Stack, Text, IconButton, HStack, Button } from "@chakra-ui/react";
-import { EditIcon } from "@chakra-ui/icons";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 
 const AddressCard = ({ address, onEdit, onSetDefault, isUpdating }) => {
   return (
-    <Box p={4} borderWidth="1px" borderRadius="lg" bg="white">
-      <HStack>
-        <Text>{address.address}</Text>
+    <View style={styles.card}>
+      <View style={styles.headerRow}>
+        <Text style={styles.addressText}>{address.address}</Text>
         {address.isDefault && (
-          <Text
-            px={2}
-            py={1}
-            bg="green.100"
-            color="green.800"
-            borderRadius="md"
-            fontSize="sm"
-          >
-            Mặc định
-          </Text>
+          <View style={styles.defaultBadge}>
+            <Text style={styles.defaultBadgeText}>Mặc định</Text>
+          </View>
         )}
-      </HStack>
+      </View>
 
-      <HStack mb={2}>
-        <HStack ml="auto">
+      <View style={styles.actionRow}>
+        <View style={styles.actionContainer}>
           {!address.isDefault && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => onSetDefault(address)}
-              isLoading={isUpdating}
+            <TouchableOpacity
+              style={styles.defaultButton}
+              onPress={() => onSetDefault(address)}
+              disabled={isUpdating}
             >
-              Đặt làm mặc định
-            </Button>
+              <Text style={styles.defaultButtonText}>Đặt làm mặc định</Text>
+            </TouchableOpacity>
           )}
-          <IconButton
-            icon={<EditIcon />}
-            size="sm"
-            variant="ghost"
-            onClick={() => onEdit(address)}
-            isDisabled={isUpdating}
-          />
-        </HStack>
-      </HStack>
-    </Box>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => onEdit(address)}
+            disabled={isUpdating}
+          >
+            <MaterialIcons name="edit" size={20} color="#555" />
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
   );
 };
 
@@ -52,11 +44,15 @@ export default function AddressList({
   isUpdating,
 }) {
   if (!addresses || addresses.length === 0) {
-    return <Text>Bạn chưa có địa chỉ nào. Vui lòng thêm địa chỉ mới.</Text>;
+    return (
+      <Text style={styles.emptyText}>
+        Bạn chưa có địa chỉ nào. Vui lòng thêm địa chỉ mới.
+      </Text>
+    );
   }
 
   return (
-    <Stack spacing={4}>
+    <View style={styles.container}>
       {addresses.map((address) => (
         <AddressCard
           key={address.userAddressId}
@@ -66,6 +62,63 @@ export default function AddressList({
           isUpdating={isUpdating}
         />
       ))}
-    </Stack>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    gap: 16,
+  },
+  card: {
+    padding: 16,
+    borderWidth: 1,
+    borderRadius: 8,
+    backgroundColor: "white",
+    borderColor: "#e2e8f0",
+    marginBottom: 8,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+  },
+  addressText: {
+    flex: 1,
+  },
+  defaultBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: "#C6F6D5",
+    borderRadius: 6,
+    marginLeft: 8,
+  },
+  defaultBadgeText: {
+    color: "#276749",
+    fontSize: 12,
+  },
+  actionRow: {
+    flexDirection: "row",
+    marginTop: 8,
+    marginBottom: 2,
+  },
+  actionContainer: {
+    flexDirection: "row",
+    marginLeft: "auto",
+    alignItems: "center",
+  },
+  defaultButton: {
+    padding: 6,
+  },
+  defaultButtonText: {
+    color: "#2D3748",
+    fontSize: 14,
+  },
+  editButton: {
+    padding: 8,
+  },
+  emptyText: {
+    textAlign: "center",
+    marginVertical: 20,
+  },
+});
