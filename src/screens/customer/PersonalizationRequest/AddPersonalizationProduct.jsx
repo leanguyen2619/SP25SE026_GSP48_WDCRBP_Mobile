@@ -1,24 +1,17 @@
 import {
-  Box,
-  Flex,
-  FormControl,
-  FormLabel,
-  Heading,
-  Input,
-  Spacer,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
-  NumberIncrementStepper,
-  NumberDecrementStepper,
+  View,
   Text,
-  ButtonGroup,
-} from "@chakra-ui/react";
+  TextInput,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
 import ImageUpdateUploader from "../../../components/Utility/ImageUpdateUploader.jsx";
 import ActionButton from "../../../components/Button/ActionButton.jsx";
 import AutoCompleteInput from "./AutoCompleteInput.jsx";
 import { useState } from "react";
 import CategorySelector from "../../../components/Utility/CategorySelector.jsx";
+import NumberInput from "../../../components/Utility/NumberInput.jsx";
 
 export default function AddPersonalizationProduct({
   techSpecs = [],
@@ -65,11 +58,14 @@ export default function AddPersonalizationProduct({
 
   // Handle quantity changes
   const handleQuantityChange = (value) => {
-    if (value < 1) value = 1;
-    if (value > 4) value = 4;
+    // Đảm bảo giá trị nằm trong khoảng 1-4
+    let numValue = parseInt(value) || 1;
+    if (numValue < 1) numValue = 1;
+    if (numValue > 4) numValue = 4;
+
     setProductData({
       ...productData,
-      quantity: value,
+      quantity: numValue,
     });
   };
 
@@ -83,14 +79,19 @@ export default function AddPersonalizationProduct({
       categorySelector: Date.now(), // Add a key for CategorySelector
     };
 
-    // Also reset ImageUpdateUploader keys
+    // Reset AutoCompleteInput và ImageUpdateUploader keys
     techSpecs.forEach((spec) => {
-      if (spec.optionType === "file") {
+      if (spec.optionType === "file" || spec.optionType === "select") {
         newResetKeys[spec.techSpecId] = Date.now();
       }
     });
 
     setResetKeys(newResetKeys);
+
+    // Reset toàn bộ dữ liệu sản phẩm
+    if (!isEditing) {
+      setProductData({});
+    }
   };
 
   // Handle file upload completion
@@ -106,30 +107,24 @@ export default function AddPersonalizationProduct({
       case "number":
         return (
           <NumberInput
-            min={1}
             value={value}
-            onChange={(valueString) =>
+            onChangeText={(valueString) =>
               handleInputChange(techSpec.techSpecId, valueString)
             }
-          >
-            <NumberInputField
-              placeholder={`Nhập ${techSpec.name.toLowerCase()}`}
-            />
-            <NumberInputStepper>
-              <NumberIncrementStepper />
-              <NumberDecrementStepper />
-            </NumberInputStepper>
-          </NumberInput>
+            min={1}
+            label=""
+          />
         );
 
       case "select":
         return (
           <AutoCompleteInput
             options={techSpec.values || []}
+            key={resetKeys[techSpec.techSpecId] || techSpec.techSpecId}
             value={value}
-            onChange={(newValue) =>
-              handleInputChange(techSpec.techSpecId, newValue)
-            }
+            onChange={(newValue) => {
+              handleInputChange(techSpec.techSpecId, newValue);
+            }}
             placeholder={`Chọn ${techSpec.name.toLowerCase()}`}
           />
         );
@@ -150,11 +145,12 @@ export default function AddPersonalizationProduct({
       case "text":
       default:
         return (
-          <Input
+          <TextInput
+            style={styles.textInput}
             placeholder={`Nhập ${techSpec.name.toLowerCase()}`}
             value={value}
-            onChange={(e) =>
-              handleInputChange(techSpec.techSpecId, e.target.value)
+            onChangeText={(text) =>
+              handleInputChange(techSpec.techSpecId, text)
             }
           />
         );
@@ -162,84 +158,162 @@ export default function AddPersonalizationProduct({
   };
 
   return (
-    <Box>
-      <Box bgColor="white" p="20px" borderRadius="10px">
-        <Heading fontWeight="bold" fontSize="20px" mb={4}>
+    <ScrollView style={styles.container}>
+      <View style={styles.card}>
+        <Text style={styles.heading}>
           {isEditing ? "Sửa sản phẩm" : "Thêm sản phẩm"}
-        </Heading>
-
-        <Text color="gray.500">
-          (Lưu ý sử dụng <b>cm</b> làm đơn vị cho kích thước)
         </Text>
 
-        <FormControl mt={4} isRequired>
-          <FormLabel>Danh mục sản phẩm</FormLabel>
+        <Text style={styles.note}>
+          (Lưu ý sử dụng <Text style={styles.bold}>cm</Text> làm đơn vị cho kích
+          thước)
+        </Text>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Danh mục sản phẩm *</Text>
           <CategorySelector
             key={resetKeys.categorySelector || "category-selector"}
             setCategoryId={handleCategoryChange}
             setCategoryName={handleCategoryNameChange}
           />
           {productData.categoryName && (
-            <Text mt={2} fontSize="sm" color="green.600">
-              Danh mục đã chọn: <strong>{productData.categoryName}</strong>
+            <Text style={styles.categorySelected}>
+              Danh mục đã chọn:{" "}
+              <Text style={styles.bold}>{productData.categoryName}</Text>
             </Text>
           )}
-        </FormControl>
+        </View>
 
         {techSpecs.map((techSpec) => (
-          <FormControl key={techSpec.techSpecId} mt={4} isRequired>
-            <FormLabel>{techSpec.name}</FormLabel>
+          <View key={techSpec.techSpecId} style={styles.formGroup}>
+            <Text style={styles.label}>{techSpec.name} *</Text>
             {renderInput(techSpec)}
-          </FormControl>
+          </View>
         ))}
 
-        <FormControl mt={4} isRequired>
-          <FormLabel>Số lượng ({productData.quantity}/4)</FormLabel>
-          <Flex align="center">
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Số lượng sản phẩm</Text>
+          <View style={styles.quantityContainer}>
             <NumberInput
+              value={productData.quantity?.toString()}
+              onChangeText={handleQuantityChange}
               min={1}
               max={4}
-              value={productData.quantity || 1}
-              onChange={(valueString) =>
-                handleQuantityChange(parseInt(valueString))
-              }
-              maxW="100px"
-            >
-              <NumberInputField />
-              <NumberInputStepper>
-                <NumberIncrementStepper />
-                <NumberDecrementStepper />
-              </NumberInputStepper>
-            </NumberInput>
-            <Text ml={2} color="gray.500">
-              Tối đa 4 sản phẩm
-            </Text>
-          </Flex>
-        </FormControl>
+              style={{ width: 120 }}
+            />
+            <Text style={styles.quantityHelp}>Tối đa 4 sản phẩm</Text>
+          </View>
+        </View>
 
-        <Flex mt={6}>
-          <Spacer />
-          {isEditing && (
-            <ButtonGroup spacing={4}>
+        <View style={styles.buttonContainer}>
+          {isEditing ? (
+            <View style={styles.buttonGroup}>
               <ActionButton
                 text="Hủy"
-                bgColor="gray.400"
+                bgColor="gray"
                 onClickExeFn={onCancelEdit}
               />
+              <View style={styles.buttonSpacing} />
               <ActionButton
                 text="Cập nhật"
                 onClickExeFn={wrappedHandleAddProduct}
               />
-            </ButtonGroup>
-          )}
-          {!isEditing && (
+            </View>
+          ) : (
             <ActionButton
               text="+ Thêm sản phẩm"
               onClickExeFn={wrappedHandleAddProduct}
             />
           )}
-        </Flex>
-      </Box>
-    </Box>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  card: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  heading: {
+    fontWeight: "bold",
+    fontSize: 20,
+    marginBottom: 10,
+  },
+  note: {
+    color: "gray",
+    marginBottom: 15,
+  },
+  bold: {
+    fontWeight: "bold",
+  },
+  formGroup: {
+    marginTop: 15,
+    marginBottom: 10,
+  },
+  label: {
+    fontWeight: "600",
+    marginBottom: 5,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 4,
+    padding: 10,
+    fontSize: 16,
+  },
+  numberInput: {
+    flexDirection: "row",
+    alignItems: "center",
+    maxWidth: 120,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 4,
+  },
+  numberInputField: {
+    flex: 1,
+    textAlign: "center",
+    padding: 10,
+    fontSize: 16,
+  },
+  stepperButton: {
+    width: 30,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F7FAFC",
+  },
+  stepperButtonText: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  quantityContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  quantityHelp: {
+    marginLeft: 10,
+    color: "gray",
+  },
+  categorySelected: {
+    marginTop: 8,
+    fontSize: 14,
+    color: "green",
+  },
+  buttonContainer: {
+    marginTop: 20,
+    alignItems: "flex-end",
+  },
+  buttonGroup: {
+    flexDirection: "row",
+  },
+  buttonSpacing: {
+    width: 10,
+  },
+});

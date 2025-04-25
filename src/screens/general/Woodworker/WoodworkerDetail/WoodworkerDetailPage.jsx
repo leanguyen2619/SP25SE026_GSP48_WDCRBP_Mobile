@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   Dimensions,
 } from "react-native";
-import { useRoute } from "@react-navigation/native";
+import { useRoute, useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import RootLayout from "../../../../layouts/RootLayout";
 import ReviewSection from "./Tab/ReviewTab/ReviewSection";
@@ -23,10 +23,9 @@ import { useGetWoodworkerByIdQuery } from "../../../../services/woodworkerApi";
 import { appColorTheme, getPackTypeLabel } from "../../../../config/appconfig";
 import useAuth from "../../../../hooks/useAuth";
 
-const { width } = Dimensions.get("window");
-
 export default function WoodworkerDetailPage() {
   const route = useRoute();
+  const navigation = useNavigation();
   const { id } = route.params || {};
   const { auth } = useAuth();
 
@@ -38,11 +37,11 @@ export default function WoodworkerDetailPage() {
   };
 
   const handleServiceAction = (serviceType, path, action, newTabIndex) => {
-    if (action === "changeTab" && newTabIndex !== undefined) {
+    if (action === "navigate") {
+      navigation.navigate(path, { id });
+    } else if (action === "changeTab" && newTabIndex !== undefined) {
       changeTab(newTabIndex);
     }
-    // Navigation handling for React Native will be different
-    // We'll need to implement this specific logic when needed
   };
 
   if (isLoading) {

@@ -1,24 +1,15 @@
 import {
-  Box,
-  Heading,
-  SimpleGrid,
-  Flex,
-  Center,
-  Spinner,
-  Alert,
-  AlertIcon,
-  Button,
-  Textarea,
-  FormControl,
-  FormLabel,
-  Divider,
-  VStack,
-  Checkbox,
+  View,
   Text,
-} from "@chakra-ui/react";
+  ScrollView,
+  ActivityIndicator,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+} from "react-native";
 import { useState, useEffect } from "react";
 import useAuth from "../../../hooks/useAuth.js";
-import { useParams, useNavigate, Navigate } from "react-router-dom";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import AddPersonalizationProduct from "./AddPersonalizationProduct.jsx";
 import { appColorTheme } from "../../../config/appconfig.js";
 import { useNotify } from "../../../components/Utility/Notify.jsx";
@@ -30,11 +21,14 @@ import PersonalizationProductList from "./PersonalizationProductList.jsx";
 import WoodworkerBox from "./WoodworkerBox.jsx";
 import { useGetUserAddressesByUserIdQuery } from "../../../services/userAddressApi.js";
 import AddressSelection from "../Cart/components/AddressSelection.jsx";
+import { MaterialIcons } from "@expo/vector-icons";
+import RootLayout from "../../../layouts/RootLayout.jsx";
 
 export default function PersonalizationRequestPage() {
-  const { id: woodworkerId } = useParams();
+  const route = useRoute();
+  const woodworkerId = route.params?.id;
   const { auth } = useAuth();
-  const navigate = useNavigate();
+  const navigation = useNavigation();
   const notify = useNotify();
   const [editIndex, setEditIndex] = useState(-1);
   const [notes, setNotes] = useState(""); // Notes state
@@ -137,6 +131,17 @@ export default function PersonalizationRequestPage() {
       return;
     }
 
+    // Check for falsy properties in productData
+    const hasFalsyProperty = Object.values(productData).some((value) => !value);
+    if (hasFalsyProperty) {
+      notify(
+        "Lỗi!",
+        "Không được để trống bất kỳ thông số kỹ thuật nào.",
+        "error"
+      );
+      return;
+    }
+
     if (editIndex === -1) {
       setProductList([...productList, productData]);
       notify("Thành công!", "Sản phẩm đã được thêm vào danh sách.", "success");
@@ -145,12 +150,6 @@ export default function PersonalizationRequestPage() {
       updatedList[editIndex] = productData;
       setProductList(updatedList);
       notify("Thành công!", "Sản phẩm đã được cập nhật.", "success");
-
-      // Scroll up to the form area for better UX after editing
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
     }
 
     initializeProductData();
@@ -160,12 +159,6 @@ export default function PersonalizationRequestPage() {
   const handleEditProduct = (index) => {
     setProductData({ ...productList[index] });
     setEditIndex(index);
-
-    // Scroll to the form area for better UX
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
   };
 
   // Submit order
@@ -230,9 +223,12 @@ export default function PersonalizationRequestPage() {
 
       await createPersonalOrder(orderData).unwrap();
 
-      navigate(
-        "/success?title=Đặt hàng thành công&desc=Đơn hàng của bạn đã được tạo thành công, vui lòng đợi xưởng mộc xác nhận đơn hàng.&buttonText=Xem danh sách đơn hàng&path=/cus/service-order"
-      );
+      navigation.navigate("Success", {
+        title: "Đặt hàng thành công",
+        desc: "Đơn hàng của bạn đã được tạo thành công, vui lòng đợi xưởng mộc xác nhận đơn hàng.",
+        buttonText: "Xem danh sách đơn hàng",
+        path: "CustomerServiceOrders",
+      });
     } catch (error) {
       notify(
         "Lỗi!",
@@ -242,57 +238,49 @@ export default function PersonalizationRequestPage() {
     }
   };
 
-  // Redirect if user is not a customer
-  if (auth?.role != "Customer") {
-    return <Navigate to="/unauthorized" />;
-  }
-
   // Show loading state
   if (isTechSpecLoading || isWoodworkerLoading || isServiceLoading) {
     return (
-      <Center h="400px">
-        <Spinner size="xl" color={appColorTheme.brown_2} />
-      </Center>
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color={appColorTheme.brown_2} />
+      </View>
     );
   }
 
   // Show error state
   if (techSpecError || woodworkerError || serviceError) {
     return (
-      <Box textAlign="center" p={10}>
-        <Alert status="error">
-          <AlertIcon />
-          Có lỗi xảy ra khi tải thông tin. Vui lòng thử lại sau.
-        </Alert>
-      </Box>
+      <View style={styles.container}>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>
+            Có lỗi xảy ra khi tải thông tin. Vui lòng thử lại sau.
+          </Text>
+        </View>
+      </View>
     );
   }
 
   return (
-    <>
-      {!isServiceAvailable && (
-        <Box textAlign="center" p={10}>
-          <Alert status="warning">
-            <AlertIcon />
-            Dịch vụ cá nhân hóa tạm thời không khả dụng cho xưởng mộc này.
-          </Alert>
-        </Box>
-      )}
+    <RootLayout>
+      <ScrollView style={styles.container}>
+        {!isServiceAvailable && (
+          <View style={styles.warningContainer}>
+            <Text style={styles.warningText}>
+              Dịch vụ cá nhân hóa tạm thời không khả dụng cho xưởng mộc này.
+            </Text>
+          </View>
+        )}
 
-      {isServiceAvailable && (
-        <>
-          <Box mb={6}>
-            <Heading
-              color={appColorTheme.brown_2}
-              fontSize="2xl"
-              fontFamily="Montserrat"
-            >
-              Đặt thiết kế và gia công theo yêu cầu (cá nhân hóa)
-            </Heading>
-          </Box>
+        {isServiceAvailable && (
+          <View>
+            <View style={styles.headerContainer}>
+              <Text style={styles.headerText}>
+                Đặt thiết kế và gia công theo yêu cầu (cá nhân hóa)
+              </Text>
+            </View>
 
-          <Box>
-            <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={5}>
+            <View>
+              {/* Form area */}
               <AddPersonalizationProduct
                 techSpecs={techSpecData?.data || []}
                 productData={productData}
@@ -305,94 +293,215 @@ export default function PersonalizationRequestPage() {
                 }}
               />
 
-              <Box>
-                <PersonalizationProductList
-                  productList={productList}
-                  setProductList={setProductList}
-                  handleEditProduct={handleEditProduct}
-                  handleRemoveProduct={(index) => {
-                    setProductList(productList.filter((_, i) => i !== index));
-                    if (editIndex === index) {
-                      initializeProductData();
-                      setEditIndex(-1);
-                    }
-                    notify(
-                      "Đã xóa",
-                      "Sản phẩm đã được xóa khỏi danh sách",
-                      "info"
-                    );
-                  }}
-                  techSpecs={techSpecData?.data || []}
-                  notify={notify}
-                />
+              <View style={styles.spacing} />
 
-                <Box bg="white" p={5} borderRadius="10px" mt={5}>
-                  <VStack align="stretch" spacing={4}>
-                    {/* Address Selection */}
-                    <Box>
-                      <AddressSelection
-                        addresses={addresses}
-                        isLoading={isLoadingAddresses}
-                        error={addressesError}
-                        selectedAddress={selectedAddress}
-                        setSelectedAddress={setSelectedAddress}
-                      />
-                    </Box>
+              {/* Product list */}
+              <PersonalizationProductList
+                productList={productList}
+                setProductList={setProductList}
+                handleEditProduct={handleEditProduct}
+                handleRemoveProduct={(index) => {
+                  setProductList(productList.filter((_, i) => i !== index));
+                  if (editIndex === index) {
+                    initializeProductData();
+                    setEditIndex(-1);
+                  }
+                  notify(
+                    "Đã xóa",
+                    "Sản phẩm đã được xóa khỏi danh sách",
+                    "info"
+                  );
+                }}
+                techSpecs={techSpecData?.data || []}
+                notify={notify}
+              />
 
-                    <Divider />
+              <View style={styles.cardContainer}>
+                {/* Address Selection */}
+                <View>
+                  <AddressSelection
+                    addresses={addresses}
+                    isLoading={isLoadingAddresses}
+                    error={addressesError}
+                    selectedAddress={selectedAddress}
+                    setSelectedAddress={setSelectedAddress}
+                  />
+                </View>
 
-                    {/* Notes Field */}
-                    <FormControl>
-                      <FormLabel fontWeight="medium">
-                        Ghi chú đơn hàng
-                      </FormLabel>
-                      <Textarea
-                        placeholder="Nhập ghi chú hoặc yêu cầu đặc biệt cho đơn hàng này"
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        size="md"
-                        resize="vertical"
-                        maxLength={500}
-                      />
-                    </FormControl>
+                <View style={styles.divider} />
 
-                    {/* Installation Checkbox */}
-                    <Box py={2} my={2}>
-                      <Checkbox
-                        isChecked={isInstall}
-                        onChange={(e) => setIsInstall(e.target.checked)}
-                        size="md"
-                      >
-                        <Text fontWeight="medium">
-                          Yêu cầu giao hàng + lắp đặt bởi xưởng
-                        </Text>
-                      </Checkbox>
-                    </Box>
-                  </VStack>
-                </Box>
+                {/* Notes Field */}
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>Ghi chú đơn hàng</Text>
+                  <TextInput
+                    style={styles.textArea}
+                    multiline
+                    placeholder="Nhập ghi chú hoặc yêu cầu đặc biệt cho đơn hàng này"
+                    value={notes}
+                    onChangeText={setNotes}
+                    maxLength={500}
+                  />
+                </View>
 
-                <WoodworkerBox woodworkerProfile={woodworker} />
-
-                <Flex justifyContent="center" mt={6}>
-                  <Button
-                    _hover={{ backgroundColor: "app_brown.1", color: "white" }}
-                    px="30px"
-                    py="20px"
-                    bgColor={appColorTheme.brown_2}
-                    color="white"
-                    borderRadius="40px"
-                    onClick={handleSubmitOrder}
-                    isLoading={isCreating}
-                    isDisabled={productList.length === 0 || !selectedAddress}
+                {/* Installation Checkbox */}
+                <View style={styles.checkboxContainer}>
+                  <TouchableOpacity
+                    style={styles.checkbox}
+                    onPress={() => setIsInstall(!isInstall)}
                   >
-                    Gửi yêu cầu
-                  </Button>
-                </Flex>
-              </Box>
-            </SimpleGrid>
-          </Box>
-        </>
-      )}
-    </>
+                    <View
+                      style={[
+                        styles.checkboxIcon,
+                        isInstall && styles.checkboxIconChecked,
+                      ]}
+                    >
+                      {isInstall && (
+                        <MaterialIcons name="check" size={16} color="white" />
+                      )}
+                    </View>
+                    <Text style={styles.checkboxLabel}>
+                      Yêu cầu giao hàng + lắp đặt bởi xưởng
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <WoodworkerBox woodworkerProfile={woodworker} />
+
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.submitButton,
+                    (productList.length === 0 || !selectedAddress) &&
+                      styles.disabledButton,
+                  ]}
+                  onPress={handleSubmitOrder}
+                  disabled={
+                    productList.length === 0 || !selectedAddress || isCreating
+                  }
+                >
+                  {isCreating ? (
+                    <ActivityIndicator color="white" />
+                  ) : (
+                    <Text style={styles.submitButtonText}>Gửi yêu cầu</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
+      </ScrollView>
+    </RootLayout>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 400,
+  },
+  errorContainer: {
+    padding: 20,
+    alignItems: "center",
+  },
+  errorText: {
+    color: "red",
+    textAlign: "center",
+  },
+  warningContainer: {
+    backgroundColor: "#FFF3CD",
+    padding: 15,
+    borderRadius: 5,
+    margin: 10,
+  },
+  warningText: {
+    color: "#856404",
+    textAlign: "center",
+  },
+  headerContainer: {
+    marginBottom: 20,
+    padding: 10,
+  },
+  headerText: {
+    color: appColorTheme.brown_2,
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  spacing: {
+    height: 15,
+  },
+  cardContainer: {
+    backgroundColor: "white",
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 15,
+    marginBottom: 15,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#E2E8F0",
+    marginVertical: 15,
+  },
+  formGroup: {
+    marginBottom: 15,
+  },
+  label: {
+    fontWeight: "600",
+    marginBottom: 5,
+  },
+  textArea: {
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 4,
+    padding: 10,
+    minHeight: 100,
+    textAlignVertical: "top",
+  },
+  checkboxContainer: {
+    marginVertical: 10,
+  },
+  checkbox: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  checkboxIcon: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: appColorTheme.brown_2,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 8,
+  },
+  checkboxIconChecked: {
+    backgroundColor: appColorTheme.brown_2,
+  },
+  checkboxLabel: {
+    fontSize: 16,
+  },
+  buttonContainer: {
+    alignItems: "center",
+    marginVertical: 20,
+  },
+  submitButton: {
+    backgroundColor: appColorTheme.brown_2,
+    paddingHorizontal: 30,
+    paddingVertical: 15,
+    borderRadius: 40,
+  },
+  disabledButton: {
+    backgroundColor: "#CCCCCC",
+  },
+  submitButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+});

@@ -118,29 +118,6 @@ export default function ImageListSelector({ imgUrls, imgH = 300 }) {
         <SafeAreaView style={styles.fullscreenContainer}>
           <StatusBar hidden={isFullScreen} />
           <View style={styles.fullscreenContent}>
-            {/* Thumbnail Column */}
-            <View style={styles.fullscreenThumbnailContainer}>
-              <FlatList
-                data={imageList}
-                renderItem={({ item, index }) => (
-                  <TouchableOpacity
-                    onPress={() => setMainImage(item)}
-                    style={[
-                      styles.fullscreenThumbnail,
-                      mainImage === item && styles.selectedThumbnail,
-                    ]}
-                  >
-                    <Image
-                      source={{ uri: item }}
-                      style={styles.fullscreenThumbnailImage}
-                    />
-                  </TouchableOpacity>
-                )}
-                keyExtractor={(_, index) => index.toString()}
-                showsVerticalScrollIndicator={false}
-              />
-            </View>
-
             {/* Main Image Area */}
             <View style={styles.fullscreenImageContainer}>
               {/* Prev Button */}
@@ -173,6 +150,30 @@ export default function ImageListSelector({ imgUrls, imgH = 300 }) {
               >
                 <Ionicons name="close" size={24} color="white" />
               </TouchableOpacity>
+            </View>
+
+            {/* Thumbnail Row at Bottom */}
+            <View style={styles.fullscreenThumbnailContainer}>
+              <FlatList
+                horizontal
+                data={imageList}
+                renderItem={({ item, index }) => (
+                  <TouchableOpacity
+                    onPress={() => setMainImage(item)}
+                    style={[
+                      styles.fullscreenThumbnail,
+                      mainImage === item && styles.selectedThumbnail,
+                    ]}
+                  >
+                    <Image
+                      source={{ uri: item }}
+                      style={styles.fullscreenThumbnailImage}
+                    />
+                  </TouchableOpacity>
+                )}
+                keyExtractor={(_, index) => index.toString()}
+                showsHorizontalScrollIndicator={false}
+              />
             </View>
           </View>
         </SafeAreaView>
@@ -231,18 +232,20 @@ const styles = StyleSheet.create({
   },
   fullscreenContent: {
     flex: 1,
-    flexDirection: "row",
+    flexDirection: "column",
   },
   fullscreenThumbnailContainer: {
-    width: 100,
-    height: "100%",
+    height: 100,
+    width: "100%",
     backgroundColor: "rgba(255,255,255,0.05)",
     padding: 8,
+    position: "absolute",
+    bottom: 0,
   },
   fullscreenThumbnail: {
     width: 80,
     height: 80,
-    marginBottom: 8,
+    marginRight: 8,
     borderRadius: 8,
     borderWidth: 2,
     borderColor: "transparent",

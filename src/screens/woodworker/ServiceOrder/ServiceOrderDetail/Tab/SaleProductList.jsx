@@ -11,6 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { appColorTheme } from "../../../../../config/appconfig.js";
 import { formatPrice } from "../../../../../utils/utils.js";
+import ImageListSelector from "../../../../../components/Utility/ImageListSelector";
 
 const windowWidth = Dimensions.get("window").width;
 
@@ -23,13 +24,23 @@ const AttributeItem = ({ name, value }) => (
 );
 
 // Custom Accordion Component
-const AccordionItem = ({ title, children, image, price, badge, defaultExpanded = false }) => {
+const AccordionItem = ({
+  title,
+  children,
+  image,
+  price,
+  badge,
+  defaultExpanded = false,
+}) => {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   return (
     <View style={styles.accordionItem}>
       <TouchableOpacity
-        style={[styles.accordionButton, isExpanded && styles.accordionButtonExpanded]}
+        style={[
+          styles.accordionButton,
+          isExpanded && styles.accordionButtonExpanded,
+        ]}
         onPress={() => setIsExpanded(!isExpanded)}
       >
         <View style={styles.accordionHeaderContent}>
@@ -60,30 +71,6 @@ const AccordionItem = ({ title, children, image, price, badge, defaultExpanded =
       </TouchableOpacity>
       {isExpanded && <View style={styles.accordionPanel}>{children}</View>}
     </View>
-  );
-};
-
-// Image Gallery Component
-const ImageGallery = ({ imgUrls }) => {
-  if (!imgUrls) return null;
-  
-  const urls = imgUrls.split(";").filter(url => url.trim() !== "");
-  
-  return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      style={styles.imageGallery}
-    >
-      {urls.map((url, index) => (
-        <Image
-          key={index}
-          source={{ uri: url }}
-          style={styles.galleryImage}
-          resizeMode="cover"
-        />
-      ))}
-    </ScrollView>
   );
 };
 
@@ -121,24 +108,26 @@ export default function SaleProductList({
                     <Text style={styles.sectionTitle}>
                       Ảnh hoàn thành sản phẩm:
                     </Text>
-                    <ImageGallery imgUrls={product.finishImgUrls} />
+                    <ImageListSelector
+                      imgUrls={product.finishImgUrls}
+                      imgH={200}
+                    />
                   </View>
                 )}
 
                 {/* Product images */}
                 <View style={styles.sectionContainer}>
-                  <Text style={styles.sectionTitle}>
-                    Hình ảnh sản phẩm:
-                  </Text>
-                  <ImageGallery imgUrls={saleProduct?.mediaUrls} />
+                  <Text style={styles.sectionTitle}>Hình ảnh sản phẩm:</Text>
+                  <ImageListSelector
+                    imgUrls={saleProduct?.mediaUrls}
+                    imgH={200}
+                  />
                 </View>
 
                 {/* Description */}
                 {saleProduct?.description && (
                   <View style={styles.sectionContainer}>
-                    <Text style={styles.sectionTitle}>
-                      Mô tả:
-                    </Text>
+                    <Text style={styles.sectionTitle}>Mô tả:</Text>
                     <Text style={styles.descriptionText}>
                       {saleProduct.description}
                     </Text>
@@ -147,9 +136,7 @@ export default function SaleProductList({
 
                 {/* Product Attributes */}
                 <View style={styles.sectionContainer}>
-                  <Text style={styles.sectionTitle}>
-                    Thông số kỹ thuật:
-                  </Text>
+                  <Text style={styles.sectionTitle}>Thông số kỹ thuật:</Text>
                   <View style={styles.attributesContainer}>
                     <AttributeItem
                       name="Kích thước"

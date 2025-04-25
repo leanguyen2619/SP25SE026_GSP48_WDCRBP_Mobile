@@ -166,7 +166,7 @@ export const service = {
     serviceType: "Personalization",
     description:
       "Dịch vụ thiết kế và gia công theo ý tưởng khách hàng, giúp bạn biến ý tưởng thành hiện thực.",
-    path: "personalization",
+    path: "PersonalizationRequest",
     buttonText: "Đặt dịch vụ",
     action: "navigate",
   },

@@ -13,17 +13,21 @@ import { Ionicons } from "@expo/vector-icons";
 import { appColorTheme } from "../../../../../config/appconfig.js";
 import { formatPrice } from "../../../../../utils/utils.js";
 import { useGetByServiceOrderMutation } from "../../../../../services/quotationApi";
+import ImageListSelector from "../../../../../components/Utility/ImageListSelector";
 
 const windowWidth = Dimensions.get("window").width;
 
 // Tech Spec Item Component
 const TechSpecItem = ({ name, value, optionType }) => {
-  // For file type specs, use ImageGallery
+  // For file type specs, use ImageListSelector
   if (optionType === "file" && value) {
+    // Đổi dấu phẩy thành chấm phẩy cho phù hợp với ImageListSelector
+    const processedValue = value.replace(/,/g, ";");
+
     return (
       <View style={styles.specFileContainer}>
         <Text style={styles.specName}>{name}:</Text>
-        <ImageGallery imgUrls={value} />
+        <ImageListSelector imgUrls={processedValue} imgH={200} />
       </View>
     );
   }
@@ -76,33 +80,6 @@ const AccordionItem = ({
         </View>
       </TouchableOpacity>
       {isExpanded && <View style={styles.accordionPanel}>{children}</View>}
-    </View>
-  );
-};
-
-// Image Gallery Component
-const ImageGallery = ({ imgUrls }) => {
-  if (!imgUrls) return null;
-
-  const urls = imgUrls.split(",").filter((url) => url.trim() !== "");
-
-  return (
-    <View style={styles.galleryContainer}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.imageGallery}
-        nestedScrollEnabled={true}
-      >
-        {urls.map((url, index) => (
-          <Image
-            key={index}
-            source={{ uri: url }}
-            style={styles.galleryImage}
-            resizeMode="cover"
-          />
-        ))}
-      </ScrollView>
     </View>
   );
 };
@@ -240,7 +217,10 @@ export default function PersonalizationProductList({
                     <Text style={styles.sectionTitle}>
                       Ảnh hoàn thành sản phẩm:
                     </Text>
-                    <ImageGallery imgUrls={product.finishImgUrls} />
+                    <ImageListSelector
+                      imgUrls={product.finishImgUrls.replace(/,/g, ";")}
+                      imgH={200}
+                    />
                   </View>
                 )}
 
@@ -248,7 +228,10 @@ export default function PersonalizationProductList({
                 {personalDetail?.designUrls && (
                   <View style={styles.sectionContainer}>
                     <Text style={styles.sectionTitle}>Thiết kế:</Text>
-                    <ImageGallery imgUrls={personalDetail.designUrls} />
+                    <ImageListSelector
+                      imgUrls={personalDetail.designUrls.replace(/,/g, ";")}
+                      imgH={200}
+                    />
                   </View>
                 )}
 

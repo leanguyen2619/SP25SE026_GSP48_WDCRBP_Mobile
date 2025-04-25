@@ -1,25 +1,18 @@
+import React, { useState, useEffect, useRef } from "react";
 import {
-  Box,
+  View,
   Text,
-  Spinner,
-  Alert,
-  AlertIcon,
-  Badge,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverBody,
-  Input,
-  InputGroup,
-  InputRightElement,
-  VStack,
-  HStack,
-  Icon,
-} from "@chakra-ui/react";
-import { useState, useEffect, useRef } from "react";
+  TouchableOpacity,
+  Modal,
+  TextInput,
+  ActivityIndicator,
+  StyleSheet,
+  ScrollView,
+  Dimensions,
+} from "react-native";
+import Icon from "react-native-vector-icons/Feather";
 import { useGetAllNestedCategoryQuery } from "../../services/categoryApi";
 import { appColorTheme } from "../../config/appconfig";
-import { FiChevronDown, FiChevronRight } from "react-icons/fi";
 
 const CategorySelector = ({
   setCategoryId,
@@ -35,7 +28,7 @@ const CategorySelector = ({
   const [displayName, setDisplayName] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [hoveredCategory, setHoveredCategory] = useState(null);
-  const popoverRef = useRef(null);
+  const inputRef = useRef(null);
 
   const categories = data?.data || [];
 
@@ -100,182 +93,297 @@ const CategorySelector = ({
 
   if (isLoading) {
     return (
-      <Box textAlign="center" py={4}>
-        <Spinner color={appColorTheme.brown_2} size="xl" />
-      </Box>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={appColorTheme.brown_2} />
+      </View>
     );
   }
 
   if (error) {
     return (
-      <Alert status="error">
-        <AlertIcon />
-        Không thể tải danh mục. Vui lòng thử lại sau.
-      </Alert>
+      <View style={styles.alertContainer}>
+        <Text style={styles.alertText}>
+          Không thể tải danh mục. Vui lòng thử lại sau.
+        </Text>
+      </View>
     );
   }
 
   return (
-    <Box width="100%">
-      <Popover
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        placement="bottom-start"
-        autoFocus={false}
-        isLazy
-        closeOnBlur={true}
-        gutter={2}
-        ref={popoverRef}
+    <View style={styles.container}>
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={() => setIsOpen(true)}
+        style={styles.inputContainer}
       >
-        <PopoverTrigger>
-          <InputGroup>
-            <Input
-              placeholder="Chọn danh mục sản phẩm"
-              value={displayName}
-              bgColor="white"
-              readOnly
-              cursor="pointer"
-              onClick={() => setIsOpen(!isOpen)}
-              _hover={{ borderColor: appColorTheme.brown_1 }}
-              focusBorderColor={appColorTheme.brown_2}
-            />
-            <InputRightElement>
-              <Icon as={FiChevronDown} />
-            </InputRightElement>
-          </InputGroup>
-        </PopoverTrigger>
-        <PopoverContent
-          width="600px"
-          maxWidth="90vw"
-          boxShadow="lg"
-          _focus={{ outline: "none" }}
-          onMouseLeave={() => setHoveredCategory(null)}
-        >
-          <PopoverBody p={0}>
-            <HStack align="stretch" spacing={0} width="100%">
-              {/* Left panel - Level 0 categories */}
-              <VStack
-                align="stretch"
-                spacing={0}
-                width="40%"
-                borderRight="1px solid"
-                borderColor="gray.200"
-              >
-                {categories.map((category) => (
-                  <Box
-                    key={category.id}
-                    p={3}
-                    cursor="pointer"
-                    bg={
-                      hoveredCategory === category.id ||
-                      selectedCategoryId === category.id
-                        ? "gray.100"
-                        : "white"
-                    }
-                    _hover={{ bg: "gray.100" }}
-                    borderBottom="1px solid"
-                    borderColor="gray.100"
-                    onClick={() => handleCategorySelect(category, 0)}
-                    onMouseEnter={() => setHoveredCategory(category.id)}
-                    position="relative"
-                  >
-                    <HStack justifyContent="space-between">
-                      <Text
-                        fontWeight={
-                          selectedCategoryId === category.id ? "bold" : "normal"
-                        }
-                      >
-                        {category.categoryName}
-                      </Text>
-                      {category.children && category.children.length > 0 && (
-                        <Icon as={FiChevronRight} />
-                      )}
-                    </HStack>
+        <TextInput
+          ref={inputRef}
+          placeholder="Chọn danh mục sản phẩm"
+          value={displayName}
+          style={styles.input}
+          editable={false}
+          pointerEvents="none"
+        />
+        <Icon name="chevron-down" size={20} color="#666" style={styles.icon} />
+      </TouchableOpacity>
 
-                    {selectedCategoryId === category.id && (
-                      <Badge
-                        position="absolute"
-                        right={2}
-                        top={2}
-                        colorScheme="green"
-                        variant="solid"
-                        size="sm"
-                        fontSize="8px"
-                        borderRadius="full"
-                      >
-                        ✓
-                      </Badge>
-                    )}
-                  </Box>
-                ))}
-              </VStack>
+      <Modal
+        visible={isOpen}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setIsOpen(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Chọn danh mục</Text>
+              <TouchableOpacity onPress={() => setIsOpen(false)}>
+                <Icon name="x" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.categoryContainer}>
+              {/* Left panel - Level 0 categories */}
+              <View style={styles.leftPanel}>
+                <ScrollView>
+                  {categories.map((category) => (
+                    <TouchableOpacity
+                      key={category.id}
+                      style={[
+                        styles.categoryItem,
+                        hoveredCategory === category.id &&
+                          styles.hoveredCategory,
+                        selectedCategoryId === category.id &&
+                          styles.selectedCategory,
+                      ]}
+                      onPress={() => handleCategorySelect(category, 0)}
+                      onPressIn={() => setHoveredCategory(category.id)}
+                    >
+                      <View style={styles.categoryItemContent}>
+                        <Text
+                          style={[
+                            styles.categoryText,
+                            selectedCategoryId === category.id &&
+                              styles.selectedCategoryText,
+                          ]}
+                        >
+                          {category.categoryName}
+                        </Text>
+                        {category.children && category.children.length > 0 && (
+                          <Icon name="chevron-right" size={16} color="#666" />
+                        )}
+                      </View>
+
+                      {selectedCategoryId === category.id && (
+                        <View style={styles.badge}>
+                          <Text style={styles.badgeText}>✓</Text>
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
 
               {/* Right panel - Level 1 categories (if any) */}
-              <Box width="60%" p={2} bg="white">
-                {hoveredCategory &&
-                categories.find((cat) => cat.id === hoveredCategory)?.children
-                  ?.length > 0 ? (
-                  <VStack align="stretch" spacing={1}>
-                    <Text
-                      fontSize="sm"
-                      fontWeight="medium"
-                      color="gray.600"
-                      mb={1}
-                    >
-                      Danh mục con:
-                    </Text>
-                    {categories
-                      .find((cat) => cat.id === hoveredCategory)
-                      ?.children.map((subCategory) => (
-                        <Box
-                          key={subCategory.id}
-                          p={2}
-                          cursor="pointer"
-                          borderRadius="md"
-                          bg={
-                            selectedCategoryId === subCategory.id
-                              ? "blue.50"
-                              : "transparent"
-                          }
-                          _hover={{ bg: "gray.50" }}
-                          onClick={() => handleCategorySelect(subCategory, 1)}
-                        >
-                          <Text
-                            fontWeight={
-                              selectedCategoryId === subCategory.id
-                                ? "bold"
-                                : "normal"
-                            }
-                            color={
-                              selectedCategoryId === subCategory.id
-                                ? "blue.600"
-                                : "inherit"
-                            }
+              <View style={styles.rightPanel}>
+                <ScrollView>
+                  {hoveredCategory &&
+                  categories.find((cat) => cat.id === hoveredCategory)?.children
+                    ?.length > 0 ? (
+                    <View style={styles.subCategoriesContainer}>
+                      <Text style={styles.subCategoriesTitle}>
+                        Danh mục con:
+                      </Text>
+                      {categories
+                        .find((cat) => cat.id === hoveredCategory)
+                        ?.children.map((subCategory) => (
+                          <TouchableOpacity
+                            key={subCategory.id}
+                            style={[
+                              styles.subCategoryItem,
+                              selectedCategoryId === subCategory.id &&
+                                styles.selectedSubCategory,
+                            ]}
+                            onPress={() => handleCategorySelect(subCategory, 1)}
                           >
-                            {subCategory.categoryName}
-                          </Text>
-                        </Box>
-                      ))}
-                  </VStack>
-                ) : (
-                  <Text
-                    color="gray.500"
-                    fontSize="sm"
-                    textAlign="center"
-                    py={6}
-                  >
-                    {hoveredCategory
-                      ? "Danh mục này không có danh mục con"
-                      : "Vui lòng chọn một danh mục bên trái để xem chi tiết"}
-                  </Text>
-                )}
-              </Box>
-            </HStack>
-          </PopoverBody>
-        </PopoverContent>
-      </Popover>
-    </Box>
+                            <Text
+                              style={[
+                                styles.subCategoryText,
+                                selectedCategoryId === subCategory.id &&
+                                  styles.selectedSubCategoryText,
+                              ]}
+                            >
+                              {subCategory.categoryName}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                    </View>
+                  ) : (
+                    <View style={styles.emptyRightPanel}>
+                      <Text style={styles.emptyRightPanelText}>
+                        {hoveredCategory
+                          ? "Danh mục này không có danh mục con"
+                          : "Vui lòng chọn một danh mục bên trái để xem chi tiết"}
+                      </Text>
+                    </View>
+                  )}
+                </ScrollView>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    width: "100%",
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    backgroundColor: "white",
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+  input: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    fontSize: 16,
+  },
+  icon: {
+    paddingRight: 10,
+  },
+  loadingContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  alertContainer: {
+    backgroundColor: "#FED7D7",
+    padding: 12,
+    borderRadius: 4,
+    marginBottom: 10,
+  },
+  alertText: {
+    color: "#C53030",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    borderRadius: 8,
+    width: "90%",
+    maxHeight: "80%",
+    maxWidth: 600,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  categoryContainer: {
+    flexDirection: "row",
+    height: 400,
+  },
+  leftPanel: {
+    width: "40%",
+    borderRightWidth: 1,
+    borderRightColor: "#E2E8F0",
+  },
+  rightPanel: {
+    width: "60%",
+    padding: 10,
+  },
+  categoryItem: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+    backgroundColor: "white",
+  },
+  hoveredCategory: {
+    backgroundColor: "#F7FAFC",
+  },
+  selectedCategory: {
+    backgroundColor: "#F7FAFC",
+  },
+  categoryItemContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  categoryText: {
+    fontSize: 16,
+  },
+  selectedCategoryText: {
+    fontWeight: "bold",
+  },
+  badge: {
+    position: "absolute",
+    top: 5,
+    right: 5,
+    backgroundColor: "#38A169",
+    borderRadius: 10,
+    width: 16,
+    height: 16,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  badgeText: {
+    color: "white",
+    fontSize: 10,
+    fontWeight: "bold",
+  },
+  subCategoriesContainer: {
+    padding: 5,
+  },
+  subCategoriesTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#4A5568",
+    marginBottom: 10,
+  },
+  subCategoryItem: {
+    padding: 10,
+    marginBottom: 5,
+    borderRadius: 4,
+  },
+  selectedSubCategory: {
+    backgroundColor: "#EBF8FF",
+  },
+  subCategoryText: {
+    fontSize: 15,
+  },
+  selectedSubCategoryText: {
+    fontWeight: "bold",
+    color: "#3182CE",
+  },
+  emptyRightPanel: {
+    padding: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    height: "100%",
+  },
+  emptyRightPanelText: {
+    color: "#718096",
+    textAlign: "center",
+  },
+});
 
 export default CategorySelector;

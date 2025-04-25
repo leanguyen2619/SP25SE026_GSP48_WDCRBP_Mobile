@@ -1,5 +1,13 @@
-import React, { useState } from "react";
-import { Box, Input, List, ListItem, useOutsideClick } from "@chakra-ui/react";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  View,
+  TextInput,
+  FlatList,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  Keyboard,
+} from "react-native";
 
 export default function AutoCompleteInput({
   options = [],
@@ -10,28 +18,43 @@ export default function AutoCompleteInput({
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState(value);
   const [filteredOptions, setFilteredOptions] = useState(options);
-  const ref = React.useRef();
 
-  // Close dropdown when clicking outside
-  useOutsideClick({
-    ref: ref,
-    handler: () => setIsOpen(false),
-  });
+  useEffect(() => {
+    setInputValue(value);
+  }, [value]);
+
+  // Handle keyboard dismiss to close dropdown
+  useEffect(() => {
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setIsOpen(false);
+      }
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+    };
+  }, []);
+
+  // Update filtered options when options prop changes
+  useEffect(() => {
+    setFilteredOptions(options);
+  }, [options]);
 
   // Handle input change
-  const handleInputChange = (e) => {
-    const newValue = e.target.value;
-    setInputValue(newValue);
+  const handleInputChange = (text) => {
+    setInputValue(text);
 
     // Filter options based on input
     const filtered = options.filter((option) =>
-      option.toLowerCase().includes(newValue.toLowerCase())
+      option.toLowerCase().includes(text.toLowerCase())
     );
     setFilteredOptions(filtered);
     setIsOpen(true);
 
     // Pass value to parent
-    onChange(newValue);
+    onChange(text);
   };
 
   // Handle option selection
@@ -39,45 +62,82 @@ export default function AutoCompleteInput({
     setInputValue(option);
     setIsOpen(false);
     onChange(option);
+    Keyboard.dismiss();
   };
 
+  // Render option item
+  const renderItem = ({ item, index }) => (
+    <TouchableOpacity
+      style={styles.optionItem}
+      onPress={() => handleSelect(item)}
+      key={index}
+    >
+      <Text>{item}</Text>
+    </TouchableOpacity>
+  );
+
   return (
-    <Box position="relative" ref={ref}>
-      <Input
+    <View style={styles.container}>
+      <TextInput
+        style={styles.input}
         value={inputValue}
-        onChange={handleInputChange}
+        onChangeText={handleInputChange}
         placeholder={placeholder}
         onFocus={() => setIsOpen(true)}
         autoComplete="off"
       />
 
       {isOpen && filteredOptions.length > 0 && (
-        <List
-          position="absolute"
-          bg="white"
-          width="100%"
-          borderWidth="1px"
-          borderRadius="md"
-          mt="2px"
-          zIndex={10}
-          maxH="200px"
-          overflowY="auto"
-          boxShadow="md"
-        >
-          {filteredOptions.map((option, index) => (
-            <ListItem
-              key={index}
-              px={4}
-              py={2}
-              cursor="pointer"
-              _hover={{ bg: "gray.100" }}
-              onClick={() => handleSelect(option)}
-            >
-              {option}
-            </ListItem>
-          ))}
-        </List>
+        <View style={styles.dropdown}>
+          <FlatList
+            data={filteredOptions}
+            renderItem={renderItem}
+            keyExtractor={(_, index) => index.toString()}
+            style={styles.list}
+            keyboardShouldPersistTaps="handled"
+            nestedScrollEnabled
+          />
+        </View>
       )}
-    </Box>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    position: "relative",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 4,
+    padding: 10,
+    backgroundColor: "white",
+  },
+  dropdown: {
+    position: "absolute",
+    top: 50,
+    left: 0,
+    right: 0,
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 4,
+    maxHeight: 200,
+    zIndex: 1,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  list: {
+    maxHeight: 200,
+  },
+  optionItem: {
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F7FAFC",
+  },
+});
