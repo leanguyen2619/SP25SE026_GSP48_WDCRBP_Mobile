@@ -32,6 +32,7 @@ import CustomerWalletPage from "../screens/customer/WalletManagement/WalletList/
 import WoodworkerProfileManagementPage from "../screens/woodworker/ProfileManagement/ProfilePage/ManagePage/WoodworkerProfileManagementPage";
 import PricingPage from "../screens/general/Pricing/PricingPage";
 import WWServiceOrderDetailPage from "../screens/woodworker/ServiceOrder/ServiceOrderDetail/MainPage/WWServiceOrderDetailPage";
+import PersonalizationRequestPage from "../screens/customer/PersonalizationRequest/PersonalizationRequestPage";
 
 const Stack = createNativeStackNavigator();
 
@@ -100,10 +101,10 @@ const AppNavigator = () => {
 
       {/* Customer */}
       <Stack.Screen name="CustomerProfile" component={CustomerProfilePage} />
-      {/* <Stack.Screen
+      <Stack.Screen
         name="PersonalizationRequest"
         component={PersonalizationRequestPage}
-      /> */}
+      />
       {/* <Stack.Screen
         name="CustomerComplaint"
         component={CustomerComplaintPage}

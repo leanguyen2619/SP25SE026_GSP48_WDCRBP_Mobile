@@ -5,7 +5,6 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
-  FlatList,
   Alert,
   ActivityIndicator,
 } from "react-native";
@@ -27,7 +26,7 @@ export default function ImageUpdateUploader({
 
   // Phân tích imgUrls để hiển thị hình ảnh hiện có
   useEffect(() => {
-    if (imgUrls) {
+    if (imgUrls && !isUploadComplete) {
       const initialUrls = imgUrls
         .split(";")
         .filter((url) => url.trim().length > 0);
@@ -156,6 +155,14 @@ export default function ImageUpdateUploader({
       const allUrls = [...existingUrls, ...newImageUrls];
 
       if (allUrls.length > 0) {
+        // Cập nhật lại state existingImages để không bị trùng lặp
+        const updatedExistingImages = allUrls.map((uri) => ({
+          uri,
+          isExisting: true,
+        }));
+        setExistingImages(updatedExistingImages);
+        setNewImages([]); // Xóa các ảnh mới sau khi đã tải lên
+
         onUploadComplete(allUrls.join(";"));
         setIsUploadComplete(true);
         Alert.alert("Thành công", "Cập nhật ảnh thành công");
@@ -174,6 +181,7 @@ export default function ImageUpdateUploader({
 
   // Khôi phục trạng thái ban đầu
   const handleCancel = () => {
+    setIsUploadComplete(false); // Reset trạng thái upload
     if (imgUrls) {
       const initialUrls = imgUrls
         .split(";")

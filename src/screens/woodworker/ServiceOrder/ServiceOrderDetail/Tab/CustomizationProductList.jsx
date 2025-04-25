@@ -11,17 +11,28 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { appColorTheme } from "../../../../../config/appconfig.js";
 import { formatPrice } from "../../../../../utils/utils.js";
+import ImageListSelector from "../../../../../components/Utility/ImageListSelector";
 
 const windowWidth = Dimensions.get("window").width;
 
 // Custom Accordion Component
-const AccordionItem = ({ title, children, image, price, badge, defaultExpanded = false }) => {
+const AccordionItem = ({
+  title,
+  children,
+  image,
+  price,
+  badge,
+  defaultExpanded = false,
+}) => {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   return (
     <View style={styles.accordionItem}>
       <TouchableOpacity
-        style={[styles.accordionButton, isExpanded && styles.accordionButtonExpanded]}
+        style={[
+          styles.accordionButton,
+          isExpanded && styles.accordionButtonExpanded,
+        ]}
         onPress={() => setIsExpanded(!isExpanded)}
       >
         <View style={styles.accordionHeaderContent}>
@@ -42,9 +53,7 @@ const AccordionItem = ({ title, children, image, price, badge, defaultExpanded =
               )}
             </View>
           </View>
-          {price && (
-            <Text style={styles.priceText}>{price}</Text>
-          )}
+          {price && <Text style={styles.priceText}>{price}</Text>}
           <Ionicons
             name={isExpanded ? "chevron-up" : "chevron-down"}
             size={24}
@@ -65,30 +74,6 @@ const ConfigurationItem = ({ name, value }) => (
   </View>
 );
 
-// Image Gallery Component
-const ImageGallery = ({ imgUrls }) => {
-  if (!imgUrls) return null;
-  
-  const urls = imgUrls.split(";").filter(url => url.trim() !== "");
-  
-  return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      style={styles.imageGallery}
-    >
-      {urls.map((url, index) => (
-        <Image
-          key={index}
-          source={{ uri: url }}
-          style={styles.galleryImage}
-          resizeMode="cover"
-        />
-      ))}
-    </ScrollView>
-  );
-};
-
 export default function CustomizationProductList({
   products = [],
   totalAmount = 0,
@@ -101,11 +86,13 @@ export default function CustomizationProductList({
       <ScrollView style={styles.productList}>
         {products.map((product) => {
           const designDetail = product.designIdeaVariantDetail;
-          
+
           return (
             <AccordionItem
               key={product.requestedProductId}
-              title={`#${product.requestedProductId}. ${designDetail?.name || "Sản phẩm không xác định"} x ${product?.quantity}`}
+              title={`#${product.requestedProductId}. ${
+                designDetail?.name || "Sản phẩm không xác định"
+              } x ${product?.quantity}`}
               image={designDetail?.img_urls?.split(";")[0] || ""}
               price={formatPrice(product.totalAmount)}
               badge={designDetail?.category?.categoryName || "Không phân loại"}
@@ -117,15 +104,16 @@ export default function CustomizationProductList({
                     <Text style={styles.sectionTitle}>
                       Ảnh hoàn thành sản phẩm:
                     </Text>
-                    <ImageGallery imgUrls={product.finishImgUrls} />
+                    <ImageListSelector
+                      imgUrls={product.finishImgUrls}
+                      imgH={200}
+                    />
                   </View>
                 )}
 
                 {/* Cấu hình đã chọn */}
                 <View style={styles.sectionContainer}>
-                  <Text style={styles.sectionTitle}>
-                    Cấu hình đã chọn:
-                  </Text>
+                  <Text style={styles.sectionTitle}>Cấu hình đã chọn:</Text>
                   <View style={styles.configContainer}>
                     {designDetail?.designIdeaVariantConfig?.map(
                       (config, index) => {

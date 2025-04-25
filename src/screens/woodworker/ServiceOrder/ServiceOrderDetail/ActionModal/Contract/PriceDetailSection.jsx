@@ -262,120 +262,118 @@ export default function PriceDetailSection({ orderId, onQuotationComplete }) {
           </View>
         </View>
 
-        <ScrollView horizontal>
-          <View style={styles.tableContainer}>
-            <View style={styles.tableHeader}>
-              <Text style={styles.tableHeaderCell}>STT</Text>
-              <Text style={[styles.tableHeaderCell, { width: 120 }]}>
-                Loại chi phí
-              </Text>
-              <Text style={[styles.tableHeaderCell, { width: 120 }]}>
-                Số lượng cần dùng
-              </Text>
-              <Text style={styles.tableHeaderCell}>Chi phí</Text>
-              <Text style={[styles.tableHeaderCell, { width: 50 }]}></Text>
-            </View>
+        <View style={styles.tableContainer}>
+          <View style={styles.tableHeader}>
+            <Text style={[styles.tableHeaderCell, { flex: 0.5 }]}>STT</Text>
+            <Text style={[styles.tableHeaderCell, { flex: 2 }]}>
+              Loại chi phí
+            </Text>
+            <Text style={[styles.tableHeaderCell, { flex: 2 }]}>
+              Số lượng cần dùng
+            </Text>
+            <Text style={[styles.tableHeaderCell, { flex: 2 }]}>Chi phí</Text>
+            <Text style={[styles.tableHeaderCell, { flex: 0.5 }]}></Text>
+          </View>
 
-            {displayDetails?.length > 0 ? (
-              <>
-                {displayDetails.map((detail, index) => (
-                  <View key={detail.id || index} style={styles.tableRow}>
-                    <Text style={styles.tableCell}>{index + 1}</Text>
-                    <View style={[styles.tableCell, { width: 120 }]}>
-                      {isEditing &&
-                      editingProductId === product.requestedProductId ? (
-                        <TextInput
-                          style={styles.tableInput}
-                          value={detail.costType}
-                          onChangeText={(value) =>
-                            handlePriceDetailChange(
-                              detail.id,
-                              "costType",
-                              value
-                            )
-                          }
-                        />
-                      ) : (
-                        <Text>{detail.costType}</Text>
-                      )}
-                    </View>
-                    <View style={[styles.tableCell, { width: 120 }]}>
-                      {isEditing &&
-                      editingProductId === product.requestedProductId ? (
-                        <TextInput
-                          style={styles.tableInput}
-                          value={detail.quantityRequired}
-                          onChangeText={(value) =>
-                            handlePriceDetailChange(
-                              detail.id,
-                              "quantityRequired",
-                              value
-                            )
-                          }
-                        />
-                      ) : (
-                        <Text>{detail.quantityRequired}</Text>
-                      )}
-                    </View>
-                    <View style={styles.tableCell}>
-                      {isEditing &&
-                      editingProductId === product.requestedProductId ? (
-                        <TextInput
-                          style={styles.tableInput}
-                          value={String(detail.costAmount)}
-                          onChangeText={(value) =>
-                            handlePriceDetailChange(
-                              detail.id,
-                              "costAmount",
-                              value
-                            )
-                          }
-                          keyboardType="numeric"
-                        />
-                      ) : (
-                        <Text>{detail.costAmount.toLocaleString()}đ</Text>
-                      )}
-                    </View>
-                    <View style={[styles.tableCell, { width: 50 }]}>
-                      {isEditing &&
-                        editingProductId === product.requestedProductId && (
-                          <TouchableOpacity
-                            style={styles.deleteButton}
-                            onPress={() => handleRemovePriceDetail(detail.id)}
-                          >
-                            <Icon name="trash-2" size={16} color="white" />
-                          </TouchableOpacity>
-                        )}
-                    </View>
+          {displayDetails?.length > 0 ? (
+            <>
+              {displayDetails.map((detail, index) => (
+                <View key={detail.id || index} style={styles.tableRow}>
+                  <Text style={[styles.tableCell, { flex: 0.5 }]}>
+                    {index + 1}
+                  </Text>
+                  <View style={[styles.tableCell, { flex: 2 }]}>
+                    {isEditing &&
+                    editingProductId === product.requestedProductId ? (
+                      <TextInput
+                        style={styles.tableInput}
+                        value={detail.costType}
+                        onChangeText={(value) =>
+                          handlePriceDetailChange(detail.id, "costType", value)
+                        }
+                      />
+                    ) : (
+                      <Text>{detail.costType}</Text>
+                    )}
                   </View>
-                ))}
-
-                <View style={styles.tableRow}>
-                  <Text
-                    style={[
-                      styles.tableCell,
-                      { flex: 3, textAlign: "right", fontWeight: "bold" },
-                    ]}
-                  >
-                    Tổng chi phí:
-                  </Text>
-                  <Text style={[styles.tableCell, { fontWeight: "bold" }]}>
-                    {calculateTotalPrice(displayDetails).toLocaleString()}đ
-                  </Text>
-                  <View style={[styles.tableCell, { width: 50 }]} />
+                  <View style={[styles.tableCell, { flex: 2 }]}>
+                    {isEditing &&
+                    editingProductId === product.requestedProductId ? (
+                      <TextInput
+                        style={styles.tableInput}
+                        value={detail.quantityRequired}
+                        onChangeText={(value) =>
+                          handlePriceDetailChange(
+                            detail.id,
+                            "quantityRequired",
+                            value
+                          )
+                        }
+                      />
+                    ) : (
+                      <Text>{detail.quantityRequired}</Text>
+                    )}
+                  </View>
+                  <View style={[styles.tableCell, { flex: 2 }]}>
+                    {isEditing &&
+                    editingProductId === product.requestedProductId ? (
+                      <TextInput
+                        style={styles.tableInput}
+                        value={String(detail.costAmount)}
+                        onChangeText={(value) =>
+                          handlePriceDetailChange(
+                            detail.id,
+                            "costAmount",
+                            value
+                          )
+                        }
+                        keyboardType="numeric"
+                      />
+                    ) : (
+                      <Text>{detail.costAmount.toLocaleString()}đ</Text>
+                    )}
+                  </View>
+                  <View style={[styles.tableCell, { flex: 0.5 }]}>
+                    {isEditing &&
+                      editingProductId === product.requestedProductId && (
+                        <TouchableOpacity
+                          style={styles.deleteButton}
+                          onPress={() => handleRemovePriceDetail(detail.id)}
+                        >
+                          <Icon name="trash-2" size={16} color="white" />
+                        </TouchableOpacity>
+                      )}
+                  </View>
                 </View>
-              </>
-            ) : (
+              ))}
+
               <View style={styles.tableRow}>
                 <Text
-                  style={[styles.tableCell, { flex: 1, textAlign: "center" }]}
+                  style={[
+                    styles.tableCell,
+                    { flex: 4.5, textAlign: "right", fontWeight: "bold" },
+                  ]}
                 >
-                  {!isEditing ? "Chưa có báo giá" : "Thêm mục báo giá mới"}
+                  Tổng chi phí:
                 </Text>
+                <Text
+                  style={[styles.tableCell, { flex: 2, fontWeight: "bold" }]}
+                >
+                  {calculateTotalPrice(displayDetails).toLocaleString()}đ
+                </Text>
+                <View style={[styles.tableCell, { flex: 0.5 }]} />
               </View>
-            )}
-          </View>
-        </ScrollView>
+            </>
+          ) : (
+            <View style={styles.tableRow}>
+              <Text
+                style={[styles.tableCell, { flex: 1, textAlign: "center" }]}
+              >
+                {!isEditing ? "Chưa có báo giá" : "Thêm mục báo giá mới"}
+              </Text>
+            </View>
+          )}
+        </View>
 
         {isEditing && editingProductId === product.requestedProductId && (
           <View style={styles.buttonGroup}>
@@ -499,25 +497,26 @@ const styles = StyleSheet.create({
     borderColor: "#E0E0E0",
     borderRadius: 4,
     marginBottom: 16,
+    width: "100%",
   },
   tableHeader: {
     flexDirection: "row",
     backgroundColor: "#F5F5F5",
+    width: "100%",
   },
   tableHeaderCell: {
     padding: 10,
     fontWeight: "bold",
-    width: 80,
     borderRightWidth: 1,
     borderBottomWidth: 1,
     borderColor: "#E0E0E0",
   },
   tableRow: {
     flexDirection: "row",
+    width: "100%",
   },
   tableCell: {
     padding: 10,
-    width: 80,
     borderRightWidth: 1,
     borderBottomWidth: 1,
     borderColor: "#E0E0E0",
@@ -527,6 +526,7 @@ const styles = StyleSheet.create({
     borderColor: "#E0E0E0",
     borderRadius: 4,
     padding: 6,
+    width: "100%",
   },
   deleteButton: {
     backgroundColor: "#E53E3E",

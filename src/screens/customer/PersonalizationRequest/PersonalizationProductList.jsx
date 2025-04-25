@@ -1,19 +1,11 @@
 import {
-  Box,
-  Heading,
+  View,
   Text,
-  Flex,
-  HStack,
-  Button,
-  IconButton,
-  VStack,
-  Divider,
-  Grid,
-  Stack,
-  Badge,
-} from "@chakra-ui/react";
-import { Add, Remove, Edit } from "@mui/icons-material";
-import { appColorTheme } from "../../../config/appconfig.js";
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+} from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 import ImageListSelector from "../../../components/Utility/ImageListSelector.jsx";
 
 export default function PersonalizationProductList({
@@ -60,159 +52,272 @@ export default function PersonalizationProductList({
     return product[`techSpec_${fileSpec.techSpecId}`] || "";
   };
 
-  return (
-    <Box bgColor="white" p={5} borderRadius="10px">
-      <Heading fontWeight="bold" as="h3" fontSize="20px" mb={4}>
-        Danh sách sản phẩm đã thêm
-      </Heading>
-
-      {productList.length === 0 ? (
+  if (productList.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.heading}>Danh sách sản phẩm đã thêm</Text>
         <Text>Chưa có sản phẩm nào.</Text>
-      ) : (
-        <VStack spacing={4} align="stretch">
-          {productList.map((product, index) => (
-            <Box
-              key={index}
-              borderWidth="1px"
-              borderRadius="lg"
-              p={4}
-              position="relative"
-              _hover={{ boxShadow: "sm" }}
-              bgColor="gray.50"
-            >
-              <Grid templateColumns="1fr auto" gap={4}>
-                <Box>
-                  <Flex
-                    justifyContent="space-between"
-                    mb={2}
-                    alignItems="center"
-                  >
-                    <Flex alignItems="center" gap={2}>
-                      <Text fontWeight="bold" fontSize="lg">
-                        Sản phẩm {index + 1}
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.heading}>Danh sách sản phẩm đã thêm</Text>
+      <FlatList
+        data={productList}
+        keyExtractor={(_, index) => index.toString()}
+        renderItem={({ item, index }) => (
+          <View style={styles.productCard}>
+            <View style={styles.productContent}>
+              <View style={styles.mainContent}>
+                <View style={styles.productHeader}>
+                  <View style={styles.titleContainer}>
+                    <Text style={styles.productTitle}>
+                      Sản phẩm {index + 1}
+                    </Text>
+                    {item.categoryName && (
+                      <View style={styles.badge}>
+                        <Text style={styles.badgeText}>
+                          {item.categoryName}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+
+                {/* Display product images if available */}
+                {getProductImages(item) && (
+                  <View style={styles.imageContainer}>
+                    <ImageListSelector
+                      imgUrls={getProductImages(item)}
+                      imgH={150}
+                    />
+                  </View>
+                )}
+
+                {/* Dynamically render all tech specs with values */}
+                {Object.entries(item)
+                  .filter(
+                    ([key, value]) =>
+                      key.startsWith("techSpec_") &&
+                      value &&
+                      // Don't show file specs here as we're displaying the images separately
+                      getTechSpec(parseInt(key.split("_")[1]))?.optionType !==
+                        "file"
+                  )
+                  .map(([key, value]) => {
+                    const techSpecId = parseInt(key.split("_")[1]);
+                    const spec = getTechSpec(techSpecId);
+
+                    if (!spec) return null;
+
+                    return (
+                      <Text key={key} style={styles.specText}>
+                        <Text style={styles.specLabel}>{spec.name}:</Text>{" "}
+                        {value || "Chưa chọn"}
                       </Text>
-                      {product.categoryName && (
-                        <Badge
-                          colorScheme="green"
-                          fontSize="0.8em"
-                          px={2}
-                          py={1}
-                        >
-                          {product.categoryName}
-                        </Badge>
-                      )}
-                    </Flex>
-                  </Flex>
+                    );
+                  })}
+              </View>
 
-                  {/* Display product images if available */}
-                  {getProductImages(product) && (
-                    <Box mb={4}>
-                      <ImageListSelector
-                        imgUrls={getProductImages(product)}
-                        imgH={150}
-                      />
-                    </Box>
-                  )}
+              <View style={styles.actionButtons}>
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={() => handleEditProduct(index)}
+                >
+                  <MaterialIcons name="edit" size={16} color="white" />
+                  <Text style={styles.buttonText}>Sửa</Text>
+                </TouchableOpacity>
 
-                  <Stack gap={2}>
-                    {/* Dynamically render all tech specs with values */}
-                    {Object.entries(product)
-                      .filter(
-                        ([key, value]) =>
-                          key.startsWith("techSpec_") &&
-                          value &&
-                          // Don't show file specs here as we're displaying the images separately
-                          getTechSpec(parseInt(key.split("_")[1]))
-                            ?.optionType !== "file"
-                      )
-                      .map(([key, value]) => {
-                        const techSpecId = parseInt(key.split("_")[1]);
-                        const spec = getTechSpec(techSpecId);
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => handleRemoveProduct(index)}
+                >
+                  <MaterialIcons name="delete" size={16} color="white" />
+                  <Text style={styles.buttonText}>Xóa</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
 
-                        if (!spec) return null;
+            <View style={styles.divider} />
 
-                        return (
-                          <Text key={key}>
-                            <strong>{spec.name}:</strong> {value || "Chưa chọn"}
-                          </Text>
-                        );
-                      })}
-                  </Stack>
-                </Box>
-
-                <VStack spacing={2} align="flex-end">
-                  <Button
-                    leftIcon={<Edit />}
-                    colorScheme="blue"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEditProduct(index)}
-                  >
-                    Sửa
-                  </Button>
-
-                  <Button
-                    colorScheme="red"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleRemoveProduct(index)}
-                  >
-                    Xóa
-                  </Button>
-                </VStack>
-              </Grid>
-
-              <Divider my={3} />
-
-              <Flex justifyContent="space-between" alignItems="center">
-                <QuantitySelector
-                  quantity={product.quantity}
-                  onChange={(newQuantity) =>
-                    handleQuantityChange(index, newQuantity)
-                  }
-                />
-              </Flex>
-            </Box>
-          ))}
-        </VStack>
-      )}
-    </Box>
+            <View style={styles.quantityContainer}>
+              <QuantitySelector
+                quantity={item.quantity}
+                onChange={(newQuantity) =>
+                  handleQuantityChange(index, newQuantity)
+                }
+              />
+            </View>
+          </View>
+        )}
+        contentContainerStyle={styles.listContent}
+      />
+    </View>
   );
 }
 
 // Sub-component for quantity selection
 function QuantitySelector({ quantity, onChange }) {
   return (
-    <HStack>
+    <View style={styles.quantityRow}>
       <Text>Số lượng:</Text>
-      <Flex
-        alignItems="center"
-        border="1px solid"
-        borderColor="gray.200"
-        borderRadius="md"
-      >
-        <IconButton
-          size="sm"
-          color="black"
-          icon={<Remove sx={{ fontSize: "14px" }} />}
-          bg="transparent"
-          _hover={{ color: appColorTheme.brown_1 }}
-          onClick={() => onChange(parseInt(quantity) - 1)}
-          isDisabled={quantity <= 1}
-          aria-label="Decrease quantity"
-        />
-        <Text px={3}>{quantity}</Text>
-        <IconButton
-          size="sm"
-          color="black"
-          icon={<Add sx={{ fontSize: "14px" }} />}
-          bg="transparent"
-          _hover={{ color: appColorTheme.brown_1 }}
-          onClick={() => onChange(parseInt(quantity) + 1)}
-          isDisabled={quantity >= 4}
-          aria-label="Increase quantity"
-        />
-      </Flex>
-    </HStack>
+      <View style={styles.quantityControls}>
+        <TouchableOpacity
+          style={[
+            styles.quantityButton,
+            parseInt(quantity) <= 1 && styles.disabledButton,
+          ]}
+          onPress={() => onChange(parseInt(quantity) - 1)}
+          disabled={parseInt(quantity) <= 1}
+        >
+          <MaterialIcons
+            name="remove"
+            size={14}
+            color={parseInt(quantity) <= 1 ? "gray" : "black"}
+          />
+        </TouchableOpacity>
+
+        <Text style={styles.quantityText}>{quantity}</Text>
+
+        <TouchableOpacity
+          style={[
+            styles.quantityButton,
+            parseInt(quantity) >= 4 && styles.disabledButton,
+          ]}
+          onPress={() => onChange(parseInt(quantity) + 1)}
+          disabled={parseInt(quantity) >= 4}
+        >
+          <MaterialIcons
+            name="add"
+            size={14}
+            color={parseInt(quantity) >= 4 ? "gray" : "black"}
+          />
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "white",
+    padding: 15,
+    borderRadius: 10,
+  },
+  heading: {
+    fontWeight: "bold",
+    fontSize: 20,
+    marginBottom: 15,
+  },
+  listContent: {
+    paddingBottom: 10,
+  },
+  productCard: {
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 8,
+    marginBottom: 10,
+    backgroundColor: "#F8F9FA",
+  },
+  productContent: {
+    padding: 15,
+  },
+  mainContent: {
+    marginBottom: 10,
+  },
+  productHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  titleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  productTitle: {
+    fontWeight: "bold",
+    fontSize: 16,
+    marginRight: 8,
+  },
+  badge: {
+    backgroundColor: "green",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 15,
+  },
+  badgeText: {
+    color: "white",
+    fontSize: 12,
+  },
+  imageContainer: {
+    marginBottom: 15,
+  },
+  specText: {
+    marginBottom: 5,
+  },
+  specLabel: {
+    fontWeight: "bold",
+  },
+  actionButtons: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+  },
+  editButton: {
+    backgroundColor: "#4299E1",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 8,
+  },
+  deleteButton: {
+    backgroundColor: "#E53E3E",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 4,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "white",
+    marginLeft: 5,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#E2E8F0",
+    marginVertical: 10,
+  },
+  quantityContainer: {
+    paddingHorizontal: 15,
+    paddingBottom: 15,
+  },
+  quantityRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  quantityControls: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 4,
+    marginLeft: 10,
+  },
+  quantityButton: {
+    width: 30,
+    height: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "transparent",
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+  quantityText: {
+    paddingHorizontal: 10,
+  },
+});
