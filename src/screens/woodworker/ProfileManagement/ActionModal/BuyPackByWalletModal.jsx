@@ -1,25 +1,28 @@
+import React from "react";
 import {
-  Button,
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
   Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  ModalFooter,
-  Spinner,
-  Flex,
-} from "@chakra-ui/react";
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
+import * as Linking from "expo-linking";
+import { appColorTheme } from "../../../../config/appconfig";
 import { useServicePackPaymentMutation } from "../../../../services/walletApi";
 import { useNotify } from "../../../../components/Utility/Notify.jsx";
 import useAuth from "../../../../hooks/useAuth";
 import Pricing from "../../../general/Pricing/Pricing.jsx";
-import { FiXCircle } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
+import Icon from "react-native-vector-icons/Feather";
 
-export default function BuyPackByWalletModal({ isOpen, onClose, woodworker }) {
+export default function BuyPackByWalletModal({
+  isOpen,
+  onClose,
+  woodworker,
+  onSuccess,
+}) {
   const { auth } = useAuth();
-  const navigate = useNavigate();
   const notify = useNotify();
   const [servicePackPayment, { isLoading }] = useServicePackPaymentMutation();
   const isServicePackValid =
@@ -27,24 +30,25 @@ export default function BuyPackByWalletModal({ isOpen, onClose, woodworker }) {
     Date.now() <= new Date(woodworker.servicePackEndDate).getTime();
 
   const handleBuyPack = async (data) => {
+    const returnUrl = Linking.createURL("payment-success");
+
     const postData = {
       servicePackId: data.servicePackId,
       userId: auth.userId,
       email: auth.sub,
-      returnUrl: `${window.location.origin}/payment-success`,
+      returnUrl: returnUrl,
     };
 
     try {
-      const res = await servicePackPayment(postData).unwrap();
+      await servicePackPayment(postData).unwrap();
 
-      if (res.url) {
-        window.location.href = res.url;
-      } else {
-        onClose();
-        navigate(
-          "/success?title=Thanh toán thành công&desc=Gói dịch vụ của bạn đã được kích hoạt&path=/ww/profile&buttonText=Xem tài khoản"
-        );
-      }
+      onSuccess();
+      onClose();
+      notify(
+        "Thanh toán thành công",
+        "Thanh toán gói dịch vụ thành công",
+        "success"
+      );
     } catch (err) {
       notify(
         "Thanh toán thất bại",
@@ -56,49 +60,119 @@ export default function BuyPackByWalletModal({ isOpen, onClose, woodworker }) {
 
   return (
     <Modal
-      closeOnOverlayClick={false}
-      closeOnEsc={false}
-      isOpen={isOpen}
-      onClose={isLoading ? null : onClose}
-      size="6xl"
+      visible={isOpen}
+      animationType="slide"
+      transparent={true}
+      onRequestClose={isLoading ? null : onClose}
     >
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>Mua gói dịch vụ</ModalHeader>
-        {!isLoading && <ModalCloseButton />}
-        <ModalBody bgColor="app_grey.1" py={6}>
-          {isLoading ? (
-            <Flex justifyContent="center" alignItems="center" minHeight="300px">
-              <Spinner size="xl" thickness="4px" color="app_primary.500" />
-            </Flex>
-          ) : (
-            <Pricing
-              handleButtonClick={handleBuyPack}
-              label="Kích hoạt"
-              isLoading={isLoading}
-              servicePackId={
-                isServicePackValid
-                  ? woodworker?.servicePack?.servicePackId
-                  : null
-              }
-              packName={
-                isServicePackValid ? woodworker?.servicePack?.name : null
-              }
-            />
-          )}
-        </ModalBody>
-        <ModalFooter>
-          <Button
-            variant="ghost"
-            mr={3}
-            onClick={onClose}
-            leftIcon={<FiXCircle />}
-            isDisabled={isLoading}
-          >
-            Đóng
-          </Button>
-        </ModalFooter>
-      </ModalContent>
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalHeaderText}>Mua gói dịch vụ</Text>
+            {!isLoading && (
+              <TouchableOpacity onPress={onClose}>
+                <Icon name="x" size={24} color="#333" />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <ScrollView style={styles.modalBody}>
+            {isLoading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={appColorTheme.brown_2} />
+              </View>
+            ) : (
+              <Pricing
+                handleButtonClick={handleBuyPack}
+                label="Kích hoạt"
+                isLoading={isLoading}
+                servicePackId={
+                  isServicePackValid
+                    ? woodworker?.servicePack?.servicePackId
+                    : null
+                }
+                packName={
+                  isServicePackValid ? woodworker?.servicePack?.name : null
+                }
+              />
+            )}
+          </ScrollView>
+
+          <View style={styles.modalFooter}>
+            <TouchableOpacity
+              style={[
+                styles.footerButton,
+                styles.closeButton,
+                isLoading && styles.disabledButton,
+              ]}
+              onPress={onClose}
+              disabled={isLoading}
+            >
+              <Icon name="x-circle" size={16} color="#333" />
+              <Text style={styles.closeButtonText}>Đóng</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    height: "90%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  modalHeaderText: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  modalBody: {
+    flex: 1,
+  },
+  loadingContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    height: 300,
+  },
+  modalFooter: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
+  },
+  footerButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 8,
+  },
+  closeButton: {
+    backgroundColor: "#F3F4F6",
+  },
+  closeButtonText: {
+    color: "#333",
+    fontWeight: "500",
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+});

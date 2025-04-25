@@ -1,4 +1,5 @@
 import { useState } from "react";
+import * as FileSystem from "expo-file-system";
 
 export const useImageUpload = () => {
   const [uploading, setUploading] = useState(false);
@@ -17,8 +18,21 @@ export const useImageUpload = () => {
 
       // Kiểm tra loại dữ liệu đầu vào
       if (typeof imageData === "string") {
-        // Kiểm tra xem đây có phải là URI hay chuỗi base64
-        if (
+        // Kiểm tra xem đây có phải là URI file:///
+        if (imageData.startsWith("file:///")) {
+          // Chuyển đổi file URI thành Base64
+          try {
+            const base64 = await FileSystem.readAsStringAsync(imageData, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
+            // Gửi dữ liệu Base64
+            formData.append("image", base64);
+          } catch (fileErr) {
+            throw new Error(`Không thể đọc file: ${fileErr.message}`);
+          }
+        }
+        // URI bắt đầu với data:image hoặc http
+        else if (
           imageData.startsWith("data:image") ||
           imageData.startsWith("http")
         ) {

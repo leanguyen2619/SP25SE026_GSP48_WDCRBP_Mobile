@@ -196,13 +196,24 @@ export default function GeneralInformationTab({ order, isActive }) {
                           {order.review.comment || "Không có bình luận"}
                         </Text>
                       </View>
+
+                      <View style={styles.infoRow}>
+                        <Text style={styles.infoLabel}>Ngày đăng:</Text>
+                        <Text style={styles.infoValue}>
+                          {formatDateTimeString(
+                            new Date(order.review.createdAt)
+                          )}
+                        </Text>
+                      </View>
                     </View>
                   </>
                 ) : (
                   <Text style={styles.emptyText}>Đánh giá đang chờ duyệt</Text>
                 )}
               </>
-            ) : null}
+            ) : (
+              <Text style={styles.emptyText}>Chưa có đánh giá</Text>
+            )}
           </View>
         </View>
       </View>

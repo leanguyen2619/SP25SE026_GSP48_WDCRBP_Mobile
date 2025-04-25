@@ -50,7 +50,7 @@ export default function DesignCartItemDetail({ design, type, woodworkerId }) {
   };
 
   const navigateToDesignDetail = () => {
-    navigation.navigate("DesignDetail", { designId: design.designId });
+    navigation.navigate("DesignDetail", { id: design.designId });
   };
 
   return (

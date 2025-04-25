@@ -1,7 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import ServiceOrderList from "./ServiceOrderList.jsx";
-import { appColorTheme } from "../../../../config/appconfig";
 import WoodworkerLayout from "../../../../layouts/WoodworkerLayout";
 
 export default function WWServiceOrderListPage() {

@@ -66,8 +66,6 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
         navigation.navigate("Success", {
           title: "Thanh toán thành công",
           desc: "Bạn đã thanh toán cho đơn hàng thành công",
-          path: `/cus/service-order/${order.orderId}`,
-          buttonText: "Xem đơn hàng",
         });
 
         onClose();
@@ -90,7 +88,6 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
         }
       }
     } catch (err) {
-      console.log(err);
       notify(
         "Thanh toán thất bại",
         err?.data?.message || "Có lỗi xảy ra, vui lòng thử lại sau",

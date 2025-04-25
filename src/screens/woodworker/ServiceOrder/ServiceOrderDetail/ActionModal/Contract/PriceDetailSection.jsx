@@ -1,35 +1,20 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  Box,
-  Button,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  Input,
-  IconButton,
-  HStack,
+  View,
   Text,
-  ButtonGroup,
-  Heading,
-  Alert,
-  AlertIcon,
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-  AccordionIcon,
-  Spinner,
-  Center,
-} from "@chakra-ui/react";
-import { FiPlus, FiTrash2, FiEdit, FiSave, FiXCircle } from "react-icons/fi";
+  TouchableOpacity,
+  TextInput,
+  StyleSheet,
+  ActivityIndicator,
+  ScrollView,
+} from "react-native";
+import Icon from "react-native-vector-icons/Feather";
 import { useNotify } from "../../../../../../components/Utility/Notify.jsx";
 import {
   useGetByServiceOrderMutation,
   useSaveQuotationDetailsMutation,
 } from "../../../../../../services/quotationApi";
+import Accordion from "react-native-collapsible/Accordion";
 
 const MIN_PRICE = 1000;
 const MAX_PRICE = 50000000;
@@ -46,6 +31,7 @@ export default function PriceDetailSection({ orderId, onQuotationComplete }) {
   const [editingProductId, setEditingProductId] = useState(null);
   const [editingDetails, setEditingDetails] = useState({});
   const [isAllProductsQuoted, setIsAllProductsQuoted] = useState(false);
+  const [activeSections, setActiveSections] = useState([0]); // For accordion
 
   // Fetch quotation data
   const fetchQuotations = async () => {
@@ -194,233 +180,401 @@ export default function PriceDetailSection({ orderId, onQuotationComplete }) {
     );
   };
 
+  const updateActiveSections = (sections) => {
+    setActiveSections(sections);
+  };
+
   if (isLoadingQuotations) {
     return (
-      <Center p={8}>
-        <Spinner size="xl" />
-      </Center>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
     );
   }
 
   if (!quotationData || quotationData.length === 0) {
     return (
-      <Alert status="info">
-        <AlertIcon />
-        Không tìm thấy thông tin sản phẩm cho báo giá.
-      </Alert>
+      <View style={styles.infoContainer}>
+        <Text style={styles.infoText}>
+          Không tìm thấy thông tin sản phẩm cho báo giá.
+        </Text>
+      </View>
     );
   }
 
-  return (
-    <Box p={5} bgColor="white" mb={6}>
-      <Heading size="md" mb={4}>
-        Báo giá sản phẩm
-      </Heading>
+  // Prepare sections for Accordion
+  const renderHeader = (item, _, isActive) => {
+    const product = item.requestedProduct;
+    const quotations = item.quotationDetails || [];
+    const hasQuotations = quotations.length > 0;
 
-      <Accordion allowMultiple defaultIndex={[0]}>
-        {quotationData.map((productData, productIndex) => {
-          const product = productData.requestedProduct;
-          const quotations = productData.quotationDetails || [];
-          const hasQuotations = quotations.length > 0;
-          const isEditing = editingProductId === product.requestedProductId;
-          const displayDetails = isEditing ? editingDetails : quotations;
+    return (
+      <View style={styles.accordionHeader}>
+        <Text style={styles.accordionHeaderText}>
+          {product.category}
+          {hasQuotations && !editingProductId && (
+            <Text style={styles.quotedText}> - Đã báo giá</Text>
+          )}
+        </Text>
+        <Icon
+          name={isActive ? "chevron-up" : "chevron-down"}
+          size={16}
+          color="#333"
+        />
+      </View>
+    );
+  };
 
-          return (
-            <AccordionItem key={product.requestedProductId}>
-              <h2>
-                <AccordionButton>
-                  <Box flex="1" textAlign="left" fontWeight="bold">
-                    {product.category}{" "}
-                    {hasQuotations && !isEditing && (
-                      <Text as="span" ml={2} color="green.500">
-                        - Đã báo giá
-                      </Text>
-                    )}
-                  </Box>
-                  <AccordionIcon />
-                </AccordionButton>
-              </h2>
-              <AccordionPanel pb={4}>
-                <HStack justify="space-between" mb={4}>
-                  <Text>Số lượng: {product.quantity}</Text>
-                  <HStack>
-                    {!isEditing ? (
-                      <IconButton
-                        icon={<FiEdit />}
-                        onClick={() =>
-                          handleStartEdit(
-                            product.requestedProductId,
-                            quotations
-                          )
-                        }
-                        colorScheme="teal"
-                        size="sm"
-                        isDisabled={
-                          isEditing &&
-                          editingProductId !== product.requestedProductId
-                        }
-                      />
-                    ) : (
-                      editingProductId === product.requestedProductId && (
-                        <IconButton
-                          icon={<FiPlus />}
-                          onClick={handleAddPriceDetail}
-                          colorScheme="teal"
-                          size="sm"
+  const renderContent = (item) => {
+    const product = item.requestedProduct;
+    const quotations = item.quotationDetails || [];
+    const hasQuotations = quotations.length > 0;
+    const isEditing = editingProductId === product.requestedProductId;
+    const displayDetails = isEditing ? editingDetails : quotations;
+
+    return (
+      <View style={styles.accordionContent}>
+        <View style={styles.productInfoRow}>
+          <Text>Số lượng: {product.quantity}</Text>
+          <View style={styles.actionButtonContainer}>
+            {!isEditing ? (
+              <TouchableOpacity
+                style={styles.editButton}
+                onPress={() =>
+                  handleStartEdit(product.requestedProductId, quotations)
+                }
+                disabled={
+                  isEditing && editingProductId !== product.requestedProductId
+                }
+              >
+                <Icon name="edit" size={16} color="white" />
+              </TouchableOpacity>
+            ) : (
+              editingProductId === product.requestedProductId && (
+                <TouchableOpacity
+                  style={styles.addButton}
+                  onPress={handleAddPriceDetail}
+                >
+                  <Icon name="plus" size={16} color="white" />
+                </TouchableOpacity>
+              )
+            )}
+          </View>
+        </View>
+
+        <ScrollView horizontal>
+          <View style={styles.tableContainer}>
+            <View style={styles.tableHeader}>
+              <Text style={styles.tableHeaderCell}>STT</Text>
+              <Text style={[styles.tableHeaderCell, { width: 120 }]}>
+                Loại chi phí
+              </Text>
+              <Text style={[styles.tableHeaderCell, { width: 120 }]}>
+                Số lượng cần dùng
+              </Text>
+              <Text style={styles.tableHeaderCell}>Chi phí</Text>
+              <Text style={[styles.tableHeaderCell, { width: 50 }]}></Text>
+            </View>
+
+            {displayDetails?.length > 0 ? (
+              <>
+                {displayDetails.map((detail, index) => (
+                  <View key={detail.id || index} style={styles.tableRow}>
+                    <Text style={styles.tableCell}>{index + 1}</Text>
+                    <View style={[styles.tableCell, { width: 120 }]}>
+                      {isEditing &&
+                      editingProductId === product.requestedProductId ? (
+                        <TextInput
+                          style={styles.tableInput}
+                          value={detail.costType}
+                          onChangeText={(value) =>
+                            handlePriceDetailChange(
+                              detail.id,
+                              "costType",
+                              value
+                            )
+                          }
                         />
-                      )
-                    )}
-                  </HStack>
-                </HStack>
+                      ) : (
+                        <Text>{detail.costType}</Text>
+                      )}
+                    </View>
+                    <View style={[styles.tableCell, { width: 120 }]}>
+                      {isEditing &&
+                      editingProductId === product.requestedProductId ? (
+                        <TextInput
+                          style={styles.tableInput}
+                          value={detail.quantityRequired}
+                          onChangeText={(value) =>
+                            handlePriceDetailChange(
+                              detail.id,
+                              "quantityRequired",
+                              value
+                            )
+                          }
+                        />
+                      ) : (
+                        <Text>{detail.quantityRequired}</Text>
+                      )}
+                    </View>
+                    <View style={styles.tableCell}>
+                      {isEditing &&
+                      editingProductId === product.requestedProductId ? (
+                        <TextInput
+                          style={styles.tableInput}
+                          value={String(detail.costAmount)}
+                          onChangeText={(value) =>
+                            handlePriceDetailChange(
+                              detail.id,
+                              "costAmount",
+                              value
+                            )
+                          }
+                          keyboardType="numeric"
+                        />
+                      ) : (
+                        <Text>{detail.costAmount.toLocaleString()}đ</Text>
+                      )}
+                    </View>
+                    <View style={[styles.tableCell, { width: 50 }]}>
+                      {isEditing &&
+                        editingProductId === product.requestedProductId && (
+                          <TouchableOpacity
+                            style={styles.deleteButton}
+                            onPress={() => handleRemovePriceDetail(detail.id)}
+                          >
+                            <Icon name="trash-2" size={16} color="white" />
+                          </TouchableOpacity>
+                        )}
+                    </View>
+                  </View>
+                ))}
 
-                <Table variant="simple" size="sm">
-                  <Thead>
-                    <Tr>
-                      <Th>Số thứ tự</Th>
-                      <Th>Loại chi phí</Th>
-                      <Th>Số lượng cần dùng</Th>
-                      <Th>Chi phí</Th>
-                      <Th></Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {displayDetails?.length > 0 ? (
-                      displayDetails.map((detail, index) => (
-                        <Tr key={detail.id || index}>
-                          <Td>{index + 1}</Td>
-                          <Td>
-                            {isEditing &&
-                            editingProductId === product.requestedProductId ? (
-                              <Input
-                                size="sm"
-                                value={detail.costType}
-                                onChange={(e) =>
-                                  handlePriceDetailChange(
-                                    detail.id,
-                                    "costType",
-                                    e.target.value
-                                  )
-                                }
-                              />
-                            ) : (
-                              detail.costType
-                            )}
-                          </Td>
-                          <Td>
-                            {isEditing &&
-                            editingProductId === product.requestedProductId ? (
-                              <Input
-                                size="sm"
-                                value={detail.quantityRequired}
-                                onChange={(e) =>
-                                  handlePriceDetailChange(
-                                    detail.id,
-                                    "quantityRequired",
-                                    e.target.value
-                                  )
-                                }
-                              />
-                            ) : (
-                              detail.quantityRequired
-                            )}
-                          </Td>
-                          <Td>
-                            {isEditing &&
-                            editingProductId === product.requestedProductId ? (
-                              <Input
-                                size="sm"
-                                type="number"
-                                value={detail.costAmount}
-                                onChange={(e) =>
-                                  handlePriceDetailChange(
-                                    detail.id,
-                                    "costAmount",
-                                    e.target.value
-                                  )
-                                }
-                              />
-                            ) : (
-                              detail.costAmount.toLocaleString() + "đ"
-                            )}
-                          </Td>
-                          <Td>
-                            {isEditing &&
-                              editingProductId ===
-                                product.requestedProductId && (
-                                <IconButton
-                                  icon={<FiTrash2 />}
-                                  onClick={() =>
-                                    handleRemovePriceDetail(detail.id)
-                                  }
-                                  colorScheme="red"
-                                  size="sm"
-                                />
-                              )}
-                          </Td>
-                        </Tr>
-                      ))
-                    ) : (
-                      <Tr>
-                        <Td colSpan={5} textAlign="center">
-                          {!isEditing
-                            ? "Chưa có báo giá"
-                            : "Thêm mục báo giá mới"}
-                        </Td>
-                      </Tr>
-                    )}
-                    {displayDetails?.length > 0 && (
-                      <Tr>
-                        <Td colSpan={3} textAlign="right" fontWeight="bold">
-                          Tổng chi phí:
-                        </Td>
-                        <Td fontWeight="bold">
-                          {calculateTotalPrice(displayDetails).toLocaleString()}
-                          đ
-                        </Td>
-                        <Td></Td>
-                      </Tr>
-                    )}
-                  </Tbody>
-                </Table>
+                <View style={styles.tableRow}>
+                  <Text
+                    style={[
+                      styles.tableCell,
+                      { flex: 3, textAlign: "right", fontWeight: "bold" },
+                    ]}
+                  >
+                    Tổng chi phí:
+                  </Text>
+                  <Text style={[styles.tableCell, { fontWeight: "bold" }]}>
+                    {calculateTotalPrice(displayDetails).toLocaleString()}đ
+                  </Text>
+                  <View style={[styles.tableCell, { width: 50 }]} />
+                </View>
+              </>
+            ) : (
+              <View style={styles.tableRow}>
+                <Text
+                  style={[styles.tableCell, { flex: 1, textAlign: "center" }]}
+                >
+                  {!isEditing ? "Chưa có báo giá" : "Thêm mục báo giá mới"}
+                </Text>
+              </View>
+            )}
+          </View>
+        </ScrollView>
 
-                {isEditing &&
-                  editingProductId === product.requestedProductId && (
-                    <ButtonGroup
-                      spacing={2}
-                      mt={4}
-                      width="100%"
-                      justifyContent="flex-end"
-                    >
-                      <Button
-                        onClick={handleCancel}
-                        variant="outline"
-                        isDisabled={isSaving}
-                        leftIcon={<FiXCircle />}
-                      >
-                        Đóng
-                      </Button>
-                      <Button
-                        onClick={() => handleSave(product.requestedProductId)}
-                        colorScheme="blue"
-                        leftIcon={<FiSave />}
-                        isLoading={isSaving}
-                      >
-                        Lưu báo giá
-                      </Button>
-                    </ButtonGroup>
-                  )}
-              </AccordionPanel>
-            </AccordionItem>
-          );
-        })}
-      </Accordion>
+        {isEditing && editingProductId === product.requestedProductId && (
+          <View style={styles.buttonGroup}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={handleCancel}
+              disabled={isSaving}
+            >
+              <Icon name="x-circle" size={16} color="#333" />
+              <Text style={styles.cancelButtonText}>Đóng</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={() => handleSave(product.requestedProductId)}
+              disabled={isSaving}
+            >
+              {isSaving ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <>
+                  <Icon name="save" size={16} color="white" />
+                  <Text style={styles.saveButtonText}>Lưu báo giá</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.heading}>Báo giá sản phẩm</Text>
+
+      <Accordion
+        sections={quotationData}
+        activeSections={activeSections}
+        renderHeader={renderHeader}
+        renderContent={renderContent}
+        onChange={updateActiveSections}
+        expandMultiple
+      />
 
       {isAllProductsQuoted && (
-        <Alert status="success" mt={4}>
-          <AlertIcon />
-          Tất cả sản phẩm đã được báo giá. Bạn có thể tiếp tục tạo hợp đồng.
-        </Alert>
+        <View style={styles.successContainer}>
+          <Text style={styles.successText}>
+            Tất cả sản phẩm đã được báo giá. Bạn có thể tiếp tục tạo hợp đồng.
+          </Text>
+        </View>
       )}
-    </Box>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "white",
+    marginBottom: 24,
+  },
+  heading: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 16,
+  },
+  loadingContainer: {
+    padding: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  infoContainer: {
+    padding: 16,
+    backgroundColor: "#E6F6FF",
+    borderRadius: 8,
+  },
+  infoText: {
+    color: "#0077CC",
+  },
+  accordionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    backgroundColor: "#F5F5F5",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E0E0E0",
+  },
+  accordionHeaderText: {
+    fontWeight: "bold",
+  },
+  quotedText: {
+    color: "green",
+  },
+  accordionContent: {
+    padding: 16,
+    backgroundColor: "#FFFFFF",
+  },
+  productInfoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  actionButtonContainer: {
+    flexDirection: "row",
+  },
+  editButton: {
+    backgroundColor: "#0077CC",
+    padding: 8,
+    borderRadius: 4,
+  },
+  addButton: {
+    backgroundColor: "#38A169",
+    padding: 8,
+    borderRadius: 4,
+  },
+  tableContainer: {
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    borderRadius: 4,
+    marginBottom: 16,
+  },
+  tableHeader: {
+    flexDirection: "row",
+    backgroundColor: "#F5F5F5",
+  },
+  tableHeaderCell: {
+    padding: 10,
+    fontWeight: "bold",
+    width: 80,
+    borderRightWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: "#E0E0E0",
+  },
+  tableRow: {
+    flexDirection: "row",
+  },
+  tableCell: {
+    padding: 10,
+    width: 80,
+    borderRightWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: "#E0E0E0",
+  },
+  tableInput: {
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    borderRadius: 4,
+    padding: 6,
+  },
+  deleteButton: {
+    backgroundColor: "#E53E3E",
+    padding: 6,
+    borderRadius: 4,
+    alignItems: "center",
+  },
+  buttonGroup: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 16,
+    gap: 8,
+  },
+  cancelButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 4,
+    backgroundColor: "#F5F5F5",
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    gap: 8,
+  },
+  cancelButtonText: {
+    color: "#333",
+    fontWeight: "500",
+  },
+  saveButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 4,
+    backgroundColor: "#0077CC",
+    gap: 8,
+  },
+  saveButtonText: {
+    color: "white",
+    fontWeight: "500",
+  },
+  successContainer: {
+    marginTop: 16,
+    padding: 16,
+    backgroundColor: "#F0FFF4",
+    borderRadius: 8,
+  },
+  successText: {
+    color: "#38A169",
+  },
+});

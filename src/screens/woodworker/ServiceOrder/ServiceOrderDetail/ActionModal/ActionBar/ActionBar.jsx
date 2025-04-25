@@ -1,7 +1,8 @@
+import React from "react";
+import { View, Text } from "react-native";
 import AppointmentUpdateModal from "../Appointment/AppointmentUpdateModal.jsx";
 import ContractUpdateModal from "../Contract/ContractUpdateModal.jsx";
 import { serviceOrderStatusConstants } from "../../../../../../config/appconfig.js";
-import { Text } from "@chakra-ui/react";
 import CancelModal from "./CancelModal.jsx";
 import DesignUpdateModal from "../Design/DesignUpdateModal.jsx";
 import FinishUpdateModal from "../Finish/FinishUpdateModal.jsx";
@@ -75,7 +76,7 @@ export default function ActionBar({ status, feedback, order, refetch }) {
     showCancelModal = false;
 
     return (
-      <>
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
         {showAppointmentModal && (
           <AppointmentUpdateModal refetch={refetch} order={order} />
         )}
@@ -100,7 +101,7 @@ export default function ActionBar({ status, feedback, order, refetch }) {
             refetch={refetch}
           />
         )}
-      </>
+      </View>
     );
   };
 

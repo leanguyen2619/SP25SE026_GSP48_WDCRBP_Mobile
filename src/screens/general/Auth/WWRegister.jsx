@@ -46,15 +46,6 @@ export default function WWRegister() {
   const [registerWoodworker, { isLoading }] = useRegisterWoodworkerMutation();
   const [error, setError] = useState("");
 
-  // Chuyển hướng nếu đã đăng nhập
-  if (auth) {
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "Home" }],
-    });
-    return null;
-  }
-
   const handleChange = (name, value) => {
     setFormData((prev) => ({
       ...prev,
