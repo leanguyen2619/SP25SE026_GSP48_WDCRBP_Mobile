@@ -17,6 +17,7 @@ import GeneralInformationTab from "../Tab/GeneralInformationTab.jsx";
 import ProgressTab from "../Tab/ProgressTab.jsx";
 import ContractAndTransactionTab from "../Tab/ContractAndTransactionTab.jsx";
 import { useGetAllOrderDepositByOrderIdQuery } from "../../../../../services/orderDepositApi.js";
+import CustomerLayout from "../../../../../layouts/CustomerLayout.jsx";
 
 export default function CusServiceOrderDetailPage() {
   const route = useRoute();
@@ -89,96 +90,98 @@ export default function CusServiceOrderDetailPage() {
   ];
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.titleContainer}>
-          <View style={styles.titleRow}>
-            <Text style={styles.title}>Chi tiết đơn #{order.orderId}</Text>
-          </View>
-
-          <View style={styles.statusContainer}>
-            <View style={styles.statusBadge}>
-              <Text style={styles.statusText}>
-                {order?.status || "Đang xử lý"}
-              </Text>
+    <CustomerLayout>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.titleContainer}>
+            <View style={styles.titleRow}>
+              <Text style={styles.title}>Chi tiết đơn #{order.orderId}</Text>
             </View>
+
+            <View style={styles.statusContainer}>
+              <View style={styles.statusBadge}>
+                <Text style={styles.statusText}>
+                  {order?.status || "Đang xử lý"}
+                </Text>
+              </View>
+            </View>
+
+            {order?.feedback && (
+              <Text style={styles.feedback}>
+                <Text style={styles.boldText}>Phản hồi của bạn:</Text>{" "}
+                {order?.feedback}
+              </Text>
+            )}
           </View>
 
-          {order?.feedback && (
-            <Text style={styles.feedback}>
-              <Text style={styles.boldText}>Phản hồi của bạn:</Text>{" "}
-              {order?.feedback}
-            </Text>
-          )}
+          <View style={styles.actionContainer}>
+            <ActionBar
+              deposits={deposits}
+              order={order}
+              refetch={refetch}
+              status={order?.status}
+              feedback={order?.feedback}
+              refetchDeposit={refetchDeposit}
+            />
+          </View>
         </View>
 
-        <View style={styles.actionContainer}>
-          <ActionBar
-            deposits={deposits}
-            order={order}
-            refetch={refetch}
-            status={order?.status}
-            feedback={order?.feedback}
-            refetchDeposit={refetchDeposit}
-          />
-        </View>
-      </View>
-
-      <View style={styles.tabsContainer}>
-        <View style={styles.tabHeaderContainer}>
-          {tabs.map((tab, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.tabButton,
-                activeTabIndex === index && styles.activeTabButton,
-              ]}
-              onPress={() => handleTabChange(index)}
-            >
-              <Ionicons
-                name={tab.icon}
-                size={16}
-                color={
-                  activeTabIndex === index ? appColorTheme.brown_2 : "#4A5568"
-                }
-              />
-              <Text
+        <View style={styles.tabsContainer}>
+          <View style={styles.tabHeaderContainer}>
+            {tabs.map((tab, index) => (
+              <TouchableOpacity
+                key={index}
                 style={[
-                  styles.tabLabel,
-                  activeTabIndex === index && styles.activeTabLabel,
+                  styles.tabButton,
+                  activeTabIndex === index && styles.activeTabButton,
                 ]}
+                onPress={() => handleTabChange(index)}
               >
-                {tab.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+                <Ionicons
+                  name={tab.icon}
+                  size={16}
+                  color={
+                    activeTabIndex === index ? appColorTheme.brown_2 : "#4A5568"
+                  }
+                />
+                <Text
+                  style={[
+                    styles.tabLabel,
+                    activeTabIndex === index && styles.activeTabLabel,
+                  ]}
+                >
+                  {tab.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
 
-        <View style={styles.tabContent}>
-          {activeTabIndex === 0 && (
-            <GeneralInformationTab
-              order={order}
-              activeTabIndex={activeTabIndex}
-              isActive={activeTabIndex === 0}
-            />
-          )}
-          {activeTabIndex === 1 && (
-            <ProgressTab
-              order={order}
-              activeTabIndex={activeTabIndex}
-              isActive={activeTabIndex === 1}
-            />
-          )}
-          {activeTabIndex === 2 && (
-            <ContractAndTransactionTab
-              order={order}
-              activeTabIndex={activeTabIndex}
-              isActive={activeTabIndex === 2}
-            />
-          )}
+          <View style={styles.tabContent}>
+            {activeTabIndex === 0 && (
+              <GeneralInformationTab
+                order={order}
+                activeTabIndex={activeTabIndex}
+                isActive={activeTabIndex === 0}
+              />
+            )}
+            {activeTabIndex === 1 && (
+              <ProgressTab
+                order={order}
+                activeTabIndex={activeTabIndex}
+                isActive={activeTabIndex === 1}
+              />
+            )}
+            {activeTabIndex === 2 && (
+              <ContractAndTransactionTab
+                order={order}
+                activeTabIndex={activeTabIndex}
+                isActive={activeTabIndex === 2}
+              />
+            )}
+          </View>
         </View>
       </View>
-    </View>
+    </CustomerLayout>
   );
 }
 

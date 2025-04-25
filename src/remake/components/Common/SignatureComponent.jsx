@@ -2,15 +2,15 @@ import React, { useRef, useState, useEffect } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
-  Animated,
-  PanResponder,
-  Dimensions,
   Image,
+  TouchableOpacity,
+  Modal,
+  Dimensions,
+  SafeAreaView,
 } from "react-native";
-import { captureRef } from "react-native-view-shot";
-import { MaterialIcons } from "@expo/vector-icons";
+import SignatureScreen from "react-native-signature-canvas";
+import { Feather } from "@expo/vector-icons";
 
 export default function SignatureComponent({
   initialSignature,
@@ -18,196 +18,84 @@ export default function SignatureComponent({
   savedSignature,
   isEditable = true,
   title = "Chữ ký",
-  showSizeControls = true,
 }) {
-  const [canvasSize, setCanvasSize] = useState({
-    width: 300,
-    height: 150,
-  });
-  const [points, setPoints] = useState([]);
-  const [currentStroke, setCurrentStroke] = useState([]);
-  const [sizeModalVisible, setSizeModalVisible] = useState(false);
+  const screenWidth = Dimensions.get("window").width;
+  const canvasWidth = screenWidth - 40;
+  const canvasHeight = 250;
 
+  const [modalVisible, setModalVisible] = useState(false);
   const signatureRef = useRef(null);
 
-  // Tạo PanResponder
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: (event) => {
-        const { locationX, locationY } = event.nativeEvent;
-        const newPoint = { x: locationX, y: locationY };
-        setCurrentStroke([newPoint]);
-      },
-      onPanResponderMove: (event) => {
-        if (!isEditable || savedSignature) return;
-
-        const { locationX, locationY } = event.nativeEvent;
-        const newPoint = { x: locationX, y: locationY };
-        setCurrentStroke((prevStroke) => [...prevStroke, newPoint]);
-      },
-      onPanResponderRelease: () => {
-        if (currentStroke.length > 0) {
-          setPoints((prevPoints) => [...prevPoints, currentStroke]);
-          setCurrentStroke([]);
-        }
-      },
-    })
-  ).current;
-
-  // Xóa chữ ký
-  const clearSignature = () => {
-    setPoints([]);
-    setCurrentStroke([]);
-  };
-
-  // Lưu chữ ký
-  const saveSignature = async () => {
-    if (points.length > 0 && signatureRef.current) {
+  // Xử lý sự kiện lưu chữ ký
+  const handleSaveSignature = (signature) => {
+    if (signature) {
       try {
-        const dataURL = await captureRef(signatureRef, {
-          format: "png",
-          quality: 1,
-        });
-
-        // Chuyển đổi URI thành blob
-        const response = await fetch(dataURL);
-        const blob = await response.blob();
-
-        onSaveSignature(blob, dataURL);
-      } catch (error) {
-        console.error("Lỗi khi lưu chữ ký:", error);
+        const base64Data = signature.replace(/^data:image\/\w+;base64,/, "");
+        onSaveSignature(base64Data, signature);
+        setModalVisible(false); // Đóng modal sau khi lưu
+      } catch (err) {
+        console.error("Lỗi khi xử lý chữ ký:", err);
       }
     }
   };
 
-  // Tăng/giảm kích thước
-  const handleSizeChange = (field, amount) => {
-    clearSignature();
-    setCanvasSize((prev) => ({
-      ...prev,
-      [field]: Math.max(field === "width" ? 200 : 100, prev[field] + amount),
-    }));
+  // Xử lý sự kiện xóa chữ ký
+  const clearSignature = () => {
+    if (signatureRef.current) {
+      signatureRef.current.clearSignature();
+    }
   };
 
-  // Render từng nét vẽ
-  const renderStrokes = () => {
-    return [...points, currentStroke.length > 0 ? currentStroke : null]
-      .filter(Boolean)
-      .map((stroke, strokeIndex) => (
-        <View key={`stroke-${strokeIndex}`}>
-          {stroke.map((point, pointIndex) => (
-            <Animated.View
-              key={`point-${strokeIndex}-${pointIndex}`}
-              style={[
-                styles.point,
-                {
-                  left: point.x - 2,
-                  top: point.y - 2,
-                },
-              ]}
-            />
-          ))}
-        </View>
-      ));
+  // Mở modal để ký
+  const openSignatureModal = () => {
+    setModalVisible(true);
   };
+
+  // Đóng modal và hủy
+  const cancelSignature = () => {
+    setModalVisible(false);
+  };
+
+  // Web style cho thư viện signature canvas
+  const style = `.m-signature-pad {
+    box-shadow: none; 
+    border: 2px solid black;
+    border-radius: 8px;
+  }
+  .m-signature-pad--body { border: none; }
+  .m-signature-pad--footer { display: none; }
+  body,html { height: ${canvasHeight}px; width: ${canvasWidth}px; }`;
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>{title}</Text>
-        {savedSignature && (
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>Đã lưu</Text>
-          </View>
-        )}
+        <Text style={styles.title}>
+          {title} {savedSignature && <Text style={styles.badge}>Đã lưu</Text>}
+        </Text>
       </View>
 
-      {isEditable && showSizeControls && (
-        <View style={styles.sizeControls}>
-          <View style={styles.sizeControl}>
-            <Text style={styles.sizeLabel}>Chiều rộng:</Text>
-            <View style={styles.sizeButtons}>
-              <TouchableOpacity
-                style={styles.sizeButton}
-                onPress={() => handleSizeChange("width", -50)}
-              >
-                <Text style={styles.sizeButtonText}>-</Text>
-              </TouchableOpacity>
-              <Text style={styles.sizeValue}>{canvasSize.width}px</Text>
-              <TouchableOpacity
-                style={styles.sizeButton}
-                onPress={() => handleSizeChange("width", 50)}
-              >
-                <Text style={styles.sizeButtonText}>+</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={styles.sizeControl}>
-            <Text style={styles.sizeLabel}>Chiều cao:</Text>
-            <View style={styles.sizeButtons}>
-              <TouchableOpacity
-                style={styles.sizeButton}
-                onPress={() => handleSizeChange("height", -50)}
-              >
-                <Text style={styles.sizeButtonText}>-</Text>
-              </TouchableOpacity>
-              <Text style={styles.sizeValue}>{canvasSize.height}px</Text>
-              <TouchableOpacity
-                style={styles.sizeButton}
-                onPress={() => handleSizeChange("height", 50)}
-              >
-                <Text style={styles.sizeButtonText}>+</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      )}
-
+      {/* Hiển thị nút hoặc hình ảnh chữ ký đã lưu */}
       {isEditable ? (
-        <>
-          <Text style={styles.instruction}>
-            Vui lòng ký tên vào khu vực bên dưới
-          </Text>
-
-          <View
-            ref={signatureRef}
-            style={[
-              styles.signatureCanvas,
-              {
-                width: canvasSize.width,
-                height: canvasSize.height,
-              },
-            ]}
-            {...panResponder.panHandlers}
-          >
-            {renderStrokes()}
-          </View>
-
-          <View style={styles.buttonContainer}>
+        <View style={styles.signButtonContainer}>
+          {savedSignature ? (
+            <View style={styles.savedSignatureContainer}>
+              <TouchableOpacity
+                style={styles.reSignButton}
+                onPress={openSignatureModal}
+              >
+                <Text style={styles.reSignButtonText}>Ký lại</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
             <TouchableOpacity
-              style={[
-                styles.button,
-                styles.saveButton,
-                savedSignature && styles.disabledButton,
-              ]}
-              onPress={saveSignature}
-              disabled={savedSignature}
+              style={styles.signButton}
+              onPress={openSignatureModal}
             >
-              <MaterialIcons name="save" size={20} color="white" />
-              <Text style={styles.buttonText}>Lưu</Text>
+              <Feather name="edit-2" size={20} color="#3182CE" />
+              <Text style={styles.signButtonText}>Nhấn để ký tên</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.button, styles.clearButton]}
-              onPress={clearSignature}
-            >
-              <MaterialIcons name="delete" size={20} color="white" />
-              <Text style={styles.buttonText}>Xóa</Text>
-            </TouchableOpacity>
-          </View>
-        </>
+          )}
+        </View>
       ) : initialSignature ? (
         <Image
           source={{ uri: initialSignature }}
@@ -215,125 +103,210 @@ export default function SignatureComponent({
           resizeMode="contain"
         />
       ) : (
-        <Text style={styles.emptyText}>Chưa có chữ ký</Text>
+        <Text style={styles.placeholderText}>Chưa có chữ ký</Text>
       )}
+
+      {/* Modal chứa canvas ký tên */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={cancelSignature}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Ký tên</Text>
+              <TouchableOpacity onPress={cancelSignature}>
+                <Feather name="x" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.modalBody}>
+              <Text style={styles.instruction}>
+                Vui lòng ký tên vào khu vực bên dưới
+              </Text>
+
+              <View
+                style={[
+                  styles.signatureContainer,
+                  { width: canvasWidth, height: canvasHeight },
+                ]}
+              >
+                <SignatureScreen
+                  ref={signatureRef}
+                  onOK={handleSaveSignature}
+                  onEmpty={() => console.log("Chữ ký trống")}
+                  webStyle={style}
+                />
+              </View>
+
+              <View style={styles.buttonRow}>
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.clearButton]}
+                  onPress={clearSignature}
+                >
+                  <Feather name="trash-2" size={16} color="white" />
+                  <Text style={styles.buttonText}>Xóa</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.cancelButton]}
+                  onPress={cancelSignature}
+                >
+                  <Feather name="x-circle" size={16} color="white" />
+                  <Text style={styles.buttonText}>Hủy</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.saveButton]}
+                  onPress={() => signatureRef.current?.readSignature()}
+                >
+                  <Feather name="save" size={16} color="white" />
+                  <Text style={styles.buttonText}>Lưu</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </SafeAreaView>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 10,
+    padding: 20,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 12,
   },
   title: {
     fontWeight: "bold",
     fontSize: 16,
-  },
-  badge: {
-    backgroundColor: "#48BB78",
-    borderRadius: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    marginLeft: 8,
-  },
-  badgeText: {
-    color: "white",
-    fontSize: 12,
-  },
-  sizeControls: {
-    marginBottom: 15,
-  },
-  sizeControl: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
     marginBottom: 8,
   },
-  sizeLabel: {
-    fontWeight: "bold",
+  badge: {
+    backgroundColor: "green",
+    color: "white",
+    fontSize: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    marginLeft: 8,
   },
-  sizeButtons: {
+  signButtonContainer: {
+    marginVertical: 10,
+  },
+  signButton: {
     flexDirection: "row",
     alignItems: "center",
-  },
-  sizeButton: {
-    backgroundColor: "#E2E8F0",
-    width: 30,
-    height: 30,
     justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#3182CE",
+    borderRadius: 8,
+    paddingVertical: 15,
+    backgroundColor: "#EBF8FF",
+    gap: 8,
+  },
+  signButtonText: {
+    color: "#3182CE",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  savedSignatureContainer: {
     alignItems: "center",
-    borderRadius: 15,
   },
-  sizeButtonText: {
-    fontSize: 18,
-    fontWeight: "bold",
+  previewImage: {
+    width: "100%",
+    height: 150,
+    marginBottom: 10,
   },
-  sizeValue: {
-    marginHorizontal: 10,
-    minWidth: 50,
-    textAlign: "center",
+  reSignButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: "#3182CE",
+    borderRadius: 8,
+  },
+  reSignButtonText: {
+    color: "white",
+    fontWeight: "600",
   },
   instruction: {
     fontSize: 14,
-    color: "#718096",
-    marginBottom: 10,
+    color: "#666",
+    marginBottom: 12,
   },
-  signatureCanvas: {
-    backgroundColor: "white",
+  signatureContainer: {
     borderWidth: 2,
     borderColor: "black",
     borderRadius: 8,
-  },
-  point: {
-    position: "absolute",
-    width: 4,
-    height: 4,
-    backgroundColor: "black",
-    borderRadius: 2,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    marginTop: 10,
-  },
-  button: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 5,
-    marginLeft: 10,
-  },
-  saveButton: {
-    backgroundColor: "#48BB78",
-  },
-  clearButton: {
-    backgroundColor: "#E53E3E",
-  },
-  disabledButton: {
-    opacity: 0.5,
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: "bold",
-    marginLeft: 5,
+    marginBottom: 16,
+    alignSelf: "center",
   },
   signatureImage: {
     width: "100%",
-    height: 150,
+    height: 250,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: "#ddd",
     borderRadius: 8,
   },
-  emptyText: {
+  placeholderText: {
     textAlign: "center",
-    marginVertical: 20,
-    color: "#718096",
+    padding: 16,
+    color: "#666",
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    borderRadius: 12,
+    margin: 20,
+    overflow: "hidden",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  modalBody: {
+    padding: 20,
+  },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 16,
+  },
+  actionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 8,
+  },
+  saveButton: {
+    backgroundColor: "green",
+  },
+  clearButton: {
+    backgroundColor: "red",
+  },
+  cancelButton: {
+    backgroundColor: "#718096",
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "600",
   },
 });

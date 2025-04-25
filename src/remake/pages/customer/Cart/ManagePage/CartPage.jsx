@@ -16,12 +16,9 @@ import useAuth from "../../../../hooks/useAuth.js";
 import RootLayout from "../../../../layouts/RootLayout.jsx";
 
 export default function CartPage() {
-  const { auth } = useAuth();
   const route = useRoute();
-  const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState(0);
 
-  // Xử lý tab dựa trên query parameter
   useEffect(() => {
     if (route.params?.tab) {
       const tabParam = route.params.tab;
@@ -33,14 +30,6 @@ export default function CartPage() {
     }
   }, [route.params]);
 
-  // Chuyển hướng nếu là woodworker
-  useEffect(() => {
-    if (auth?.role === "Woodworker") {
-      navigation.navigate("WoodworkerServiceOrder");
-    }
-  }, [auth, navigation]);
-
-  // Tab selection handler
   const handleTabChange = (index) => {
     setActiveTab(index);
   };

@@ -7,8 +7,8 @@ import {
   Modal,
   ScrollView,
   ActivityIndicator,
-  Linking,
 } from "react-native";
+import * as Linking from "expo-linking";
 import { useNotify } from "../../../../../../components/Utility/Notify";
 import Icon from "react-native-vector-icons/Feather";
 import CheckboxList from "../../../../../../components/Utility/CheckboxList";
@@ -48,12 +48,14 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
 
   const handleSubmit = async () => {
     try {
+      const returnUrl = Linking.createURL("payment-success");
+
       const postData = {
         userId: auth.userId,
         orderDepositId: deposit?.orderDepositId,
         transactionType: "",
         email: auth.sub,
-        returnUrl: "woodworkcrafts://payment-success",
+        returnUrl: returnUrl,
       };
 
       if (paymentMethod === "wallet") {
@@ -88,6 +90,7 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
         }
       }
     } catch (err) {
+      console.log(err);
       notify(
         "Thanh toán thất bại",
         err?.data?.message || "Có lỗi xảy ra, vui lòng thử lại sau",

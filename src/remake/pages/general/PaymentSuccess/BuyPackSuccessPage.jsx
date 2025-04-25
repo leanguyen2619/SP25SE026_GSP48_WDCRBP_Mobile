@@ -1,17 +1,21 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { useEffect, useState } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons";
 import { useUpdateTransactionStatusMutation } from "../../../services/transactionApi";
 import { useDecryptDataQuery } from "../../../services/decryptApi";
 import { useAddServicePackMutation } from "../../../services/woodworkerApi";
 import { useNotify } from "../../../components/Utility/Notify";
+import {
+  View,
+  ActivityIndicator,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+} from "react-native";
 import { appColorTheme } from "../../../config/appconfig";
 
 export default function BuyPackSuccessPage() {
   const navigation = useNavigation();
   const route = useRoute();
-  const params = route.params || {};
   const notify = useNotify();
   const [updateTransactionStatus] = useUpdateTransactionStatusMutation();
   const [addServicePack] = useAddServicePackMutation();
@@ -19,9 +23,9 @@ export default function BuyPackSuccessPage() {
   const [isProcessing, setIsProcessing] = useState(true);
 
   // Service Pack-specific parameters
-  const encryptedTransactionId = params.TransactionId;
-  const encryptedWoodworkerId = params.WoodworkerId;
-  const encryptedServicePackId = params.ServicePackId;
+  const encryptedTransactionId = route.params?.TransactionId;
+  const encryptedWoodworkerId = route.params?.WoodworkerId;
+  const encryptedServicePackId = route.params?.ServicePackId;
 
   // Decrypt transaction ID
   const { data: transactionIdData, isLoading: isTransactionIdLoading } =
@@ -93,7 +97,7 @@ export default function BuyPackSuccessPage() {
       navigation.replace("Success", {
         title: "Thanh toán thành công",
         desc: "Đăng ký gói dịch vụ đã được thực hiện thành công",
-        path: "WoodworkerProfile",
+        path: "Profile",
         buttonText: "Xem hồ sơ",
       });
     } catch (error) {
@@ -109,73 +113,62 @@ export default function BuyPackSuccessPage() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
         <View style={styles.iconContainer}>
-          {isProcessing ? (
-            <ActivityIndicator size="large" color="white" />
-          ) : (
-            <Ionicons name="sync" size={50} color="white" />
-          )}
+          <ActivityIndicator
+            size="large"
+            color="white"
+            animating={isProcessing}
+          />
         </View>
 
         <Text style={styles.heading}>{status}</Text>
 
-        <Text style={styles.description}>
+        <Text style={styles.text}>
           {isProcessing
             ? "Vui lòng đợi trong giây lát, chúng tôi đang xử lý giao dịch của bạn"
-            : status == "Giao dịch hoàn tất!"
+            : status === "Giao dịch hoàn tất!"
             ? "Chuyển hướng bạn đến trang thành công..."
             : "Chuyển hướng bạn về trang hồ sơ..."}
         </Text>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 16,
-  },
-  card: {
     backgroundColor: "white",
-    borderRadius: 12,
-    padding: 24,
-    width: "100%",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  },
+  content: {
+    flex: 1,
     alignItems: "center",
+    justifyContent: "center",
+    padding: 0,
   },
   iconContainer: {
     width: 80,
     height: 80,
     borderRadius: 40,
     backgroundColor: appColorTheme.brown_2,
-    justifyContent: "center",
     alignItems: "center",
-    marginBottom: 16,
+    justifyContent: "center",
+    marginBottom: 20,
   },
   heading: {
-    fontSize: 20,
-    fontWeight: "bold",
     color: appColorTheme.brown_2,
-    textAlign: "center",
-    marginBottom: 16,
     fontFamily: "Montserrat",
-  },
-  description: {
-    fontSize: 14,
-    color: "#718096",
+    fontSize: 22,
+    fontWeight: "bold",
     textAlign: "center",
-    maxWidth: 300,
+    marginBottom: 10,
+  },
+  text: {
+    color: "#666",
+    textAlign: "center",
+    fontSize: 16,
+    maxWidth: "90%",
   },
 });

@@ -84,7 +84,6 @@ export default function CustomerPersonalInfoForm({ userData, refetch }) {
             value={fullNameValue}
             onChangeText={setFullNameValue}
             placeholder="Nhập họ và tên"
-            editable={!personalInfoDisabled}
           />
         </View>
 
@@ -108,7 +107,6 @@ export default function CustomerPersonalInfoForm({ userData, refetch }) {
             onChangeText={setPhoneValue}
             placeholder="Nhập số điện thoại"
             keyboardType="phone-pad"
-            editable={!personalInfoDisabled}
           />
         </View>
       </View>

@@ -75,8 +75,8 @@ export default function ContractConfirmModal({
   };
 
   // Handle signature save callback
-  const handleSaveSignature = (blob, dataUrl) => {
-    setLocalSignatureBlob(blob);
+  const handleSaveSignature = (base64Data, dataUrl) => {
+    setLocalSignatureBlob(base64Data);
     setSignatureDataUrl(dataUrl);
     setSavedSignature(true);
     notify("Lưu chữ ký", "Chữ ký đã được lưu thành công", "success");
@@ -90,17 +90,8 @@ export default function ContractConfirmModal({
       // If we have a signature, upload it
       if (savedSignature && localSignatureBlob) {
         try {
-          // Create file from blob
-          const file = new File(
-            [localSignatureBlob],
-            `signature-${Date.now()}.png`,
-            {
-              type: "image/png",
-            }
-          );
-
-          // Upload to your image storage
-          const result = await uploadImage(file);
+          // Sử dụng chuỗi base64 trực tiếp
+          const result = await uploadImage(localSignatureBlob);
           customerSign = result.url;
         } catch (error) {
           notify(
@@ -192,7 +183,9 @@ export default function ContractConfirmModal({
                   <View style={styles.contractInfoContainer}>
                     <View style={styles.infoRow}>
                       <Text style={styles.infoLabel}>Mã hợp đồng:</Text>
-                      <Text style={styles.infoValue}>{contract.contractId}</Text>
+                      <Text style={styles.infoValue}>
+                        {contract.contractId}
+                      </Text>
                     </View>
 
                     <View style={styles.infoRow}>
@@ -213,7 +206,9 @@ export default function ContractConfirmModal({
                     </View>
 
                     <View style={styles.infoRow}>
-                      <Text style={styles.infoLabel}>Tổng tiền thanh toán:</Text>
+                      <Text style={styles.infoLabel}>
+                        Tổng tiền thanh toán:
+                      </Text>
                       <Text style={styles.infoTotal}>
                         {contract.contractTotalAmount?.toLocaleString("vi-VN")}{" "}
                         VNĐ
@@ -265,7 +260,7 @@ export default function ContractConfirmModal({
                 )}
 
                 <View style={styles.divider} />
-                
+
                 <CheckboxList
                   items={checkboxItems}
                   setButtonDisabled={setIsCheckboxDisabled}
@@ -286,7 +281,7 @@ export default function ContractConfirmModal({
                 <Icon name="x-circle" size={16} color="#333" />
                 <Text style={styles.closeButtonText}>Đóng</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 style={[
                   styles.footerButton,
@@ -296,7 +291,10 @@ export default function ContractConfirmModal({
                 ]}
                 onPress={handleSubmit}
                 disabled={
-                  isCheckboxDisabled || !contract || contractLoading || submitLoading
+                  isCheckboxDisabled ||
+                  !contract ||
+                  contractLoading ||
+                  submitLoading
                 }
               >
                 {submitLoading ? (

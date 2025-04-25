@@ -15,8 +15,6 @@ import Header from "../components/Header/Header.jsx";
 
 export default function WoodworkerLayout({ children }) {
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const { width } = Dimensions.get("window");
-  const isMobile = width < 768;
 
   const { auth, setAuth } = useAuth();
   const {
@@ -76,7 +74,7 @@ export default function WoodworkerLayout({ children }) {
           )}
 
           {/* Main Content - Only show when sidebar is collapsed or on desktop */}
-          {(isCollapsed || !isMobile) && (
+          {isCollapsed && (
             <View
               style={[
                 styles.mainContent,

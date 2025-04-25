@@ -1,22 +1,18 @@
 import React from "react";
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   StatusBar,
   Platform,
 } from "react-native";
-import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import BrandLogo from "./BrandLogo";
 import AccountMenu from "./AccountMenu";
-import { appColorTheme } from "../../config/appconfig";
 import useAuth from "../../hooks/useAuth";
 
 export default function Header() {
   const navigation = useNavigation();
-  const { auth } = useAuth();
 
   return (
     <View style={styles.container}>
@@ -46,8 +42,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 5,
-    paddingTop: Platform.OS === "ios" ? 0 : StatusBar.currentHeight,
-    zIndex: 10,
+    paddingTop: Platform.OS === "ios" ? 0 : 0,
   },
   header: {
     flexDirection: "row",
