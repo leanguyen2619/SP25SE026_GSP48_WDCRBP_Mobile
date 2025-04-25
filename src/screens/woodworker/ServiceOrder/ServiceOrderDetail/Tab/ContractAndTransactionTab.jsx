@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useRoute } from "@react-navigation/native";
+import { useRoute, useNavigation } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -37,41 +37,53 @@ const InfoRow = ({ label, value, valueColor, bold = false }) => (
 
 // Transaction Item Component
 const TransactionItem = ({ deposit }) => (
-  <View style={[
-    styles.transactionItem,
-    { backgroundColor: deposit.status ? "#F0FFF4" : "#F7FAFC" }
-  ]}>
+  <View
+    style={[
+      styles.transactionItem,
+      { backgroundColor: deposit.status ? "#F0FFF4" : "#F7FAFC" },
+    ]}
+  >
     <View style={styles.transactionHeader}>
       <Text style={styles.transactionTitle}>
         Đặt cọc lần {deposit.depositNumber}
       </Text>
-      <View style={[
-        styles.badge,
-        { backgroundColor: deposit.status ? "#48BB78" : "#CBD5E0" }
-      ]}>
+      <View
+        style={[
+          styles.badge,
+          { backgroundColor: deposit.status ? "#48BB78" : "#CBD5E0" },
+        ]}
+      >
         <Text style={styles.badgeText}>
           {deposit.status ? "Đã thanh toán" : "Chưa thanh toán"}
         </Text>
       </View>
     </View>
-    
+
     <InfoRow
       label="Ngày tạo:"
-      value={deposit.createdAt ? formatDateTimeString(new Date(deposit.createdAt)) : "Chưa cập nhật"}
+      value={
+        deposit.createdAt
+          ? formatDateTimeString(new Date(deposit.createdAt))
+          : "Chưa cập nhật"
+      }
     />
-    
+
     <InfoRow
       label="Ngày thanh toán:"
-      value={deposit.updatedAt ? formatDateTimeString(new Date(deposit.updatedAt)) : "Chưa cập nhật"}
+      value={
+        deposit.updatedAt
+          ? formatDateTimeString(new Date(deposit.updatedAt))
+          : "Chưa cập nhật"
+      }
     />
-    
+
     <InfoRow
       label="Số tiền thanh toán:"
       value={deposit.amount ? formatPrice(deposit.amount) : "Chưa cập nhật"}
       valueColor={appColorTheme.brown_2}
       bold
     />
-    
+
     <InfoRow
       label="Phần trăm cọc:"
       value={deposit.percent ? `${deposit.percent}%` : "Chưa cập nhật"}
@@ -86,7 +98,8 @@ export default function ContractAndTransactionTab({
 }) {
   const serviceName = order?.service?.service?.serviceName;
   const route = useRoute();
-  const id = route.params?.id || order?.serviceOrderId;
+  const navigation = useNavigation();
+  const id = route.params?.id || order?.orderId;
 
   // Fetch contract data
   const {
@@ -174,13 +187,12 @@ export default function ContractAndTransactionTab({
 
                 <View style={styles.divider} />
 
-                <InfoRow
-                  label="Mã hợp đồng:"
-                  value={contract.contractId}
-                />
+                <InfoRow label="Mã hợp đồng:" value={contract.contractId} />
 
                 <View style={styles.fullWidthContainer}>
-                  <Text style={styles.infoLabel}>Điều khoản của xưởng mộc:</Text>
+                  <Text style={styles.infoLabel}>
+                    Điều khoản của xưởng mộc:
+                  </Text>
                   <Text style={styles.termsText}>
                     {contract.woodworkerTerms || "Chưa cập nhật"}
                   </Text>
@@ -188,29 +200,47 @@ export default function ContractAndTransactionTab({
 
                 <InfoRow
                   label="Ngày ký:"
-                  value={contract.signDate ? formatDateString(new Date(contract.signDate)) : null}
+                  value={
+                    contract.signDate
+                      ? formatDateString(new Date(contract.signDate))
+                      : null
+                  }
                 />
 
                 <InfoRow
                   label="Ngày cam kết hoàn thành sản phẩm:"
-                  value={contract.completeDate ? formatDateString(new Date(contract.completeDate)) : null}
+                  value={
+                    contract.completeDate
+                      ? formatDateString(new Date(contract.completeDate))
+                      : null
+                  }
                 />
 
                 <InfoRow
                   label="Giá trị hợp đồng:"
-                  value={contract.contractTotalAmount ? formatPrice(contract.contractTotalAmount) : null}
+                  value={
+                    contract.contractTotalAmount
+                      ? formatPrice(contract.contractTotalAmount)
+                      : null
+                  }
                   valueColor={appColorTheme.brown_2}
                   bold
                 />
 
                 <InfoRow
                   label="Thời hạn bảo hành:"
-                  value={contract.warrantyPeriod ? formatDateTimeString(new Date(contract.warrantyPeriod)) : null}
+                  value={
+                    contract.warrantyPeriod
+                      ? formatDateTimeString(new Date(contract.warrantyPeriod))
+                      : null
+                  }
                 />
 
                 <View style={styles.signaturesContainer}>
                   <View style={styles.signatureBox}>
-                    <Text style={styles.signatureLabel}>Chữ ký người đại diện</Text>
+                    <Text style={styles.signatureLabel}>
+                      Chữ ký người đại diện
+                    </Text>
                     {contract.woodworkerSignature ? (
                       <Image
                         source={{ uri: contract.woodworkerSignature }}
@@ -219,7 +249,9 @@ export default function ContractAndTransactionTab({
                       />
                     ) : (
                       <View style={styles.noSignature}>
-                        <Text style={styles.noSignatureText}>Chưa có chữ ký</Text>
+                        <Text style={styles.noSignatureText}>
+                          Chưa có chữ ký
+                        </Text>
                       </View>
                     )}
                   </View>
@@ -234,7 +266,9 @@ export default function ContractAndTransactionTab({
                       />
                     ) : (
                       <View style={styles.noSignature}>
-                        <Text style={styles.noSignatureText}>Chưa có chữ ký</Text>
+                        <Text style={styles.noSignatureText}>
+                          Chưa có chữ ký
+                        </Text>
                       </View>
                     )}
                   </View>
@@ -242,7 +276,12 @@ export default function ContractAndTransactionTab({
 
                 <TouchableOpacity
                   style={styles.viewDetailsButton}
-                  onPress={() => Linking.openURL(`/contract/${order.orderId}`)}
+                  onPress={() => {
+                    const contractId = order?.orderId;
+                    if (contractId) {
+                      navigation.navigate("Contract", { id: contractId });
+                    }
+                  }}
                 >
                   <Text style={styles.viewDetailsText}>Xem chi tiết</Text>
                 </TouchableOpacity>
@@ -278,7 +317,9 @@ export default function ContractAndTransactionTab({
               <View style={styles.orderAmountSummary}>
                 <InfoRow
                   label="Thành tiền:"
-                  value={order?.totalAmount ? formatPrice(order?.totalAmount) : null}
+                  value={
+                    order?.totalAmount ? formatPrice(order?.totalAmount) : null
+                  }
                   valueColor={appColorTheme.brown_2}
                   bold
                 />
@@ -301,7 +342,7 @@ export default function ContractAndTransactionTab({
               <View style={styles.depositsList}>
                 {deposits.map((deposit) => (
                   <TransactionItem
-                    key={deposit.serviceDepositId}
+                    key={deposit.orderDepositId}
                     deposit={deposit}
                   />
                 ))}

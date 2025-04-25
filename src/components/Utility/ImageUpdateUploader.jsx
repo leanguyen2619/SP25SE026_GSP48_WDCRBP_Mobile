@@ -145,7 +145,9 @@ export default function ImageUpdateUploader({
       let newImageUrls = [];
       if (newImages.length > 0) {
         const imageUris = newImages.map((img) => img.uri);
+
         const results = await uploadMultipleImages(imageUris);
+
         newImageUrls = results.map((result) => result.url);
       }
 

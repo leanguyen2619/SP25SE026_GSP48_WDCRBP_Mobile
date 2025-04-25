@@ -31,7 +31,7 @@ export default function ProductCartItemDetail({ product, woodworkerId }) {
   };
 
   const navigateToProduct = () => {
-    navigation.navigate("ProductDetail", { productId: product.productId });
+    navigation.navigate("ProductDetail", { id: product.productId });
   };
 
   return (

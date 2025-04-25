@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import React from "react";
+import { View, StyleSheet } from "react-native";
 import { serviceOrderStatusConstants } from "../../../../../../config/appconfig.js";
 import FeedbackModal from "../FeedbackModal/FeedbackModal.jsx";
 import CancelModal from "../FeedbackModal/CancelModal.jsx";
@@ -205,10 +205,10 @@ export default function ActionBar({
 
 const styles = StyleSheet.create({
   actionButtons: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    flexWrap: "wrap",
     gap: 8,
-  }
+  },
 });

@@ -13,7 +13,6 @@ import WWRegister from "../screens/general/Auth/WWRegister";
 import ContractPage from "../screens/general/Contract/ContractPage";
 import DesignsPage from "../screens/general/Design/DesignList/DesignsPage";
 import DesignDetailPage from "../screens/general/Design/DesignDetail/DesignDetailPage";
-import Pricing from "../screens/general/Pricing/Pricing";
 import ServicePackUpgradeGuide from "../screens/general/Pricing/ServicePackUpgradeGuide";
 import PaymentSuccessPage from "../screens/general/PaymentSuccess/PaymentSuccessPage";
 import SuccessPage from "../screens/general/StatusPage/SuccessPage";
@@ -27,10 +26,12 @@ import WoodworkerWelcomePage from "../screens/woodworker/Welcome/WoodworkerWelco
 import WWServiceOrderListPage from "../screens/woodworker/ServiceOrder/ServiceOrderList/WWServiceOrderListPage";
 import CusServiceOrderListPage from "../screens/customer/ServiceOrder/ServiceOrderList/CusServiceOrderListPage";
 import CusServiceOrderDetailPage from "../screens/customer/ServiceOrder/ServiceOrderDetail/MainPage/CusServiceOrderDetailPage";
-// import WWServiceOrderDetailPage from "../screens/woodworker/ServiceOrder/ServiceOrderDetail/MainPage/WWServiceOrderDetailPage";
 import CustomerProfilePage from "../screens/customer/Profile/ManagePage/CustomerProfilePage";
 import WWWalletPage from "../screens/woodworker/WalletManagement/WalletList/WWWalletPage";
 import CustomerWalletPage from "../screens/customer/WalletManagement/WalletList/CustomerWalletPage";
+import WoodworkerProfileManagementPage from "../screens/woodworker/ProfileManagement/ProfilePage/ManagePage/WoodworkerProfileManagementPage";
+import PricingPage from "../screens/general/Pricing/PricingPage";
+import WWServiceOrderDetailPage from "../screens/woodworker/ServiceOrder/ServiceOrderDetail/MainPage/WWServiceOrderDetailPage";
 
 const Stack = createNativeStackNavigator();
 
@@ -90,7 +91,7 @@ const AppNavigator = () => {
       <Stack.Screen name="WoodworkerDetail" component={WoodworkerDetailPage} />
       <Stack.Screen name="Designs" component={DesignsPage} />
       <Stack.Screen name="DesignDetail" component={DesignDetailPage} />
-      <Stack.Screen name="Pricing" component={Pricing} />
+      <Stack.Screen name="Pricing" component={PricingPage} />
       <Stack.Screen name="UpgradeGuide" component={ServicePackUpgradeGuide} />
       <Stack.Screen name="Contract" component={ContractPage} />
       <Stack.Screen name="Terms" component={TermsPage} />
@@ -151,15 +152,15 @@ const AppNavigator = () => {
         component={ReviewManagementListPage}
       /> */}
       <Stack.Screen name="WWWallet" component={WWWalletPage} />
-      {/* <Stack.Screen
+      <Stack.Screen
         name="WoodworkerProfile"
         component={WoodworkerProfileManagementPage}
-      /> */}
+      />
       <Stack.Screen name="WWServiceOrders" component={WWServiceOrderListPage} />
-      {/* <Stack.Screen
+      <Stack.Screen
         name="WWServiceOrderDetail"
         component={WWServiceOrderDetailPage}
-      /> */}
+      />
       {/* <Stack.Screen
         name="WWGuaranteeOrders"
         component={WWGuaranteeOrderListPage}

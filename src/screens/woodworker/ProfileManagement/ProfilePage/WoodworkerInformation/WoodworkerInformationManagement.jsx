@@ -1,23 +1,20 @@
+import React, { useState } from "react";
 import {
-  Box,
-  Button,
-  FormControl,
-  FormLabel,
-  GridItem,
-  Heading,
-  Input,
-  SimpleGrid,
-  Textarea,
-  Select,
-  Spinner,
-} from "@chakra-ui/react";
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import { appColorTheme } from "../../../../../config/appconfig.js";
 import ImageUpdateUploader from "../../../../../components/Utility/ImageUpdateUploader.jsx";
-import { useState } from "react";
 import AddressInput from "../../../../../components/Utility/AddressInput.jsx";
 import CheckboxList from "../../../../../components/Utility/CheckboxList.jsx";
 import { useNotify } from "../../../../../components/Utility/Notify.jsx";
-import { FiCheckCircle } from "react-icons/fi";
+import Icon from "react-native-vector-icons/Feather";
 import useAuth from "../../../../../hooks/useAuth.js";
 import { useUpdateWoodworkerProfileMutation } from "../../../../../services/woodworkerApi.js";
 
@@ -33,21 +30,29 @@ export default function WoodworkerInformationManagement({
   const woodworkerId = auth?.wwId;
   const [imgUrl, setImgUrl] = useState("");
   const [buttonDisabled, setButtonDisabled] = useState(true);
+  const [formData, setFormData] = useState({
+    brandName: woodworker.brandName || "",
+    businessType: woodworker.businessType || "Cá nhân",
+    bio: woodworker.bio || "",
+  });
   const notify = useNotify();
   const [isLoading, setIsLoading] = useState(false);
   const [updateWoodworkerProfile] = useUpdateWoodworkerProfileMutation();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
+  const handleInputChange = (name, value) => {
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
 
+  const handleSubmit = async () => {
     // Create the request body
     const requestBody = {
       woodworkerId: woodworkerId,
-      brandName: data.brandName,
-      bio: data.bio,
-      businessType: data.businessType,
+      brandName: formData.brandName,
+      bio: formData.bio,
+      businessType: formData.businessType,
       imgUrl: woodworker.imgUrl,
     };
 
@@ -83,139 +88,203 @@ export default function WoodworkerInformationManagement({
   };
 
   return (
-    <>
-      <Heading
-        color={appColorTheme.brown_2}
-        fontSize="2xl"
-        fontFamily="Montserrat"
-      >
-        Quản lý Thông tin xưởng mộc
-      </Heading>
+    <ScrollView style={styles.container}>
+      <Text style={styles.heading}>Quản lý Thông tin xưởng mộc</Text>
 
-      <Box bg="white" p={5} borderRadius="lg" boxShadow="md">
-        <form onSubmit={handleSubmit}>
-          <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={10}>
-            <GridItem colSpan={{ base: 2, xl: "none" }}>
-              <FormControl isRequired>
-                <FormLabel>Tên xưởng mộc</FormLabel>
-                <Input
-                  placeholder="Nhập Tên xưởng mộc"
-                  name="brandName"
-                  defaultValue={woodworker.brandName}
-                />
-              </FormControl>
-            </GridItem>
-            <GridItem>
-              <FormControl isRequired>
-                <FormLabel>Loại hình kinh doanh</FormLabel>
-                <Select
-                  placeholder="Chọn loại hình"
-                  name="businessType"
-                  defaultValue={woodworker.businessType}
-                >
-                  <option value="Cá nhân">Cá nhân</option>
-                  <option value="Hộ kinh doanh">Hộ kinh doanh</option>
-                </Select>
-              </FormControl>
-            </GridItem>
-            <GridItem colSpan={2}>
-              <FormControl isRequired>
-                <FormLabel>Địa chỉ xưởng</FormLabel>
-                {isAddressUpdate ? (
-                  <AddressInput
-                    value={address}
-                    onChange={setAddress}
-                    oldAddress={address}
-                  />
-                ) : (
-                  <Input
-                    value={woodworker.address}
-                    isReadOnly
-                    bgColor={appColorTheme.grey_1}
-                  />
-                )}
-                <Button
-                  variant="link"
-                  color={appColorTheme.brown_2}
-                  mt={2}
-                  onClick={() => setIsAddressUpdate(!isAddressUpdate)}
-                >
-                  {isAddressUpdate ? "Hủy cập nhật" : "Cập nhật địa chỉ"}
-                </Button>
-              </FormControl>
-            </GridItem>
-            <GridItem colSpan={2}>
-              <FormControl isRequired>
-                <FormLabel>Mã số thuế</FormLabel>
-                <Input
-                  placeholder="Nhập mã số thuế"
-                  name="taxCode"
-                  isReadOnly
-                  bgColor={appColorTheme.grey_1}
-                  defaultValue={woodworker.taxCode}
-                />
-              </FormControl>
-            </GridItem>
-            <GridItem colSpan={2}>
-              <FormControl isRequired>
-                <FormLabel>Giới thiệu</FormLabel>
-                <Textarea
-                  whiteSpace="pre-wrap"
-                  placeholder="Giới thiệu về xưởng mộc của bạn"
-                  name="bio"
-                  rows={4}
-                  defaultValue={woodworker.bio}
-                />
-              </FormControl>
-            </GridItem>
-            <GridItem colSpan={{ base: 1, xl: 2 }}>
-              <FormControl isRequired>
-                <FormLabel>Ảnh đại diện cho xưởng</FormLabel>
-                <ImageUpdateUploader
-                  onUploadComplete={(results) => {
-                    setImgUrl(results);
-                  }}
-                  maxFiles={1}
-                  imgUrls={woodworker.imgUrl}
-                />
-              </FormControl>
-            </GridItem>
-          </SimpleGrid>
+      <View style={styles.formContainer}>
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Tên xưởng mộc *</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Nhập Tên xưởng mộc"
+            value={formData.brandName}
+            onChangeText={(text) => handleInputChange("brandName", text)}
+          />
+        </View>
 
-          <Box mt={6}>
-            {isLoading ? (
-              <Spinner />
-            ) : (
-              <CheckboxList
-                items={[
-                  {
-                    description:
-                      "Tôi đã kiểm tra thông tin và xác nhận thao tác",
-                    isOptional: false,
-                  },
-                ]}
-                setButtonDisabled={setButtonDisabled}
-              />
-            )}
-          </Box>
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Loại hình kinh doanh *</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={formData.businessType}
+              onValueChange={(value) =>
+                handleInputChange("businessType", value)
+              }
+              style={styles.picker}
+            >
+              <Picker.Item label="Cá nhân" value="Cá nhân" />
+              <Picker.Item label="Hộ kinh doanh" value="Hộ kinh doanh" />
+            </Picker>
+          </View>
+        </View>
 
-          <Button
-            _hover={{ backgroundColor: "app_brown.1", color: "white" }}
-            px="30px"
-            py="20px"
-            bgColor={appColorTheme.brown_2}
-            color="white"
-            borderRadius="40px"
-            mt="40px"
-            zIndex="1"
-            type="submit"
-            isDisabled={buttonDisabled}
-            leftIcon={<FiCheckCircle />}
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Địa chỉ xưởng *</Text>
+          {isAddressUpdate ? (
+            <AddressInput
+              value={address}
+              onChange={setAddress}
+              oldAddress={address}
+            />
+          ) : (
+            <TextInput
+              style={[styles.input, styles.readOnlyInput]}
+              value={woodworker.address}
+              editable={false}
+            />
+          )}
+          <TouchableOpacity
+            style={styles.linkButton}
+            onPress={() => setIsAddressUpdate(!isAddressUpdate)}
           >
-            Cập nhật thông tin
-          </Button>
-        </form>
-      </Box>
-    </>
+            <Text style={styles.linkText}>
+              {isAddressUpdate ? "Hủy cập nhật" : "Cập nhật địa chỉ"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Mã số thuế *</Text>
+          <TextInput
+            style={[styles.input, styles.readOnlyInput]}
+            placeholder="Nhập mã số thuế"
+            value={woodworker.taxCode}
+            editable={false}
+          />
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Giới thiệu *</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder="Giới thiệu về xưởng mộc của bạn"
+            value={formData.bio}
+            onChangeText={(text) => handleInputChange("bio", text)}
+            multiline
+            numberOfLines={4}
+          />
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Ảnh đại diện cho xưởng *</Text>
+          <ImageUpdateUploader
+            onUploadComplete={(results) => {
+              setImgUrl(results);
+            }}
+            maxFiles={1}
+            imgUrls={woodworker.imgUrl}
+          />
+        </View>
+
+        <View style={styles.checkboxContainer}>
+          {isLoading ? (
+            <ActivityIndicator size="small" color={appColorTheme.brown_2} />
+          ) : (
+            <CheckboxList
+              items={[
+                {
+                  description: "Tôi đã kiểm tra thông tin và xác nhận thao tác",
+                  isOptional: false,
+                },
+              ]}
+              setButtonDisabled={setButtonDisabled}
+            />
+          )}
+        </View>
+
+        <TouchableOpacity
+          style={[styles.submitButton, buttonDisabled && styles.disabledButton]}
+          onPress={handleSubmit}
+          disabled={buttonDisabled || isLoading}
+        >
+          <Icon name="check-circle" size={18} color="white" />
+          <Text style={styles.buttonText}>Cập nhật thông tin</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  heading: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: appColorTheme.brown_2,
+    marginBottom: 16,
+  },
+  formContainer: {
+    backgroundColor: "white",
+    borderRadius: 8,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 3,
+  },
+  formGroup: {
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 4,
+    padding: 10,
+    fontSize: 16,
+  },
+  readOnlyInput: {
+    backgroundColor: appColorTheme.grey_1,
+  },
+  textArea: {
+    height: 100,
+    textAlignVertical: "top",
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 4,
+  },
+  picker: {
+    height: 50,
+  },
+  linkButton: {
+    marginTop: 8,
+  },
+  linkText: {
+    color: appColorTheme.brown_2,
+    fontSize: 14,
+  },
+  checkboxContainer: {
+    marginTop: 16,
+  },
+  submitButton: {
+    backgroundColor: appColorTheme.brown_2,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 40,
+    marginTop: 30,
+    gap: 8,
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+});

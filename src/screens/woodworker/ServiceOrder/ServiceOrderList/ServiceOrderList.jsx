@@ -59,15 +59,26 @@ export default function ServiceOrderList() {
     data: apiResponse,
     error,
     isLoading,
-  } = useGetServiceOrdersQuery({
-    id: auth?.wwId,
-    role: "Woodworker",
-  });
+  } = useGetServiceOrdersQuery(
+    {
+      id: auth?.wwId,
+      role: "Woodworker",
+    },
+    {
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
+    }
+  );
 
   // Set initial filtered data when API data is loaded
   useEffect(() => {
     if (apiResponse?.data) {
-      setFilteredData(apiResponse.data);
+      // Sắp xếp dữ liệu theo orderId giảm dần
+      const sortedData = [...apiResponse.data].sort(
+        (a, b) => parseInt(b.orderId) - parseInt(a.orderId)
+      );
+      setFilteredData(sortedData);
     }
   }, [apiResponse]);
 
@@ -77,7 +88,6 @@ export default function ServiceOrderList() {
 
     let filtered = [...apiResponse.data];
 
-    console.log("statusFilter:", statusFilter);
     // Apply status filter if selected
     if (statusFilter && statusFilter !== "" && statusFilter !== "All") {
       filtered = filtered.filter((item) => item.status === statusFilter);
@@ -94,6 +104,11 @@ export default function ServiceOrderList() {
         (item) => item.service?.service?.serviceName === apiServiceType
       );
     }
+
+    // Sắp xếp dữ liệu theo orderId giảm dần sau khi lọc
+    filtered = filtered.sort(
+      (a, b) => parseInt(b.orderId) - parseInt(a.orderId)
+    );
 
     setFilteredData(filtered);
     setCurrentPage(1); // Reset to first page when filters change

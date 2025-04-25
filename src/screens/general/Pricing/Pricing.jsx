@@ -12,7 +12,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { appColorTheme } from "../../../config/appconfig";
 import { useGetAllServicePacksQuery } from "../../../services/servicePackApi";
-import RootLayout from "../../../layouts/RootLayout.jsx";
 
 const baseFeatures = [
   "Quản lý dịch vụ cung cấp (Tùy chỉnh, sửa chữa)",
@@ -89,11 +88,9 @@ export default function Pricing({
 
   if (isLoading) {
     return (
-      <RootLayout>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={appColorTheme.brown_2} />
-        </View>
-      </RootLayout>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={appColorTheme.brown_2} />
+      </View>
     );
   }
 
@@ -205,52 +202,48 @@ export default function Pricing({
   );
 
   return (
-    <RootLayout>
-      <ScrollView style={styles.container}>
-        {/* Title Section */}
-        <View style={styles.titleSection}>
-          <Text style={styles.mainTitle}>
-            Các gói dịch vụ dành cho xưởng mộc
-          </Text>
-          <Text style={styles.subtitle}>
-            Tham gia cùng hàng nghìn Xưởng mộc dịch vụ khác
-          </Text>
-        </View>
+    <ScrollView style={styles.container}>
+      {/* Title Section */}
+      <View style={styles.titleSection}>
+        <Text style={styles.mainTitle}>Các gói dịch vụ dành cho xưởng mộc</Text>
+        <Text style={styles.subtitle}>
+          Tham gia cùng hàng nghìn Xưởng mộc dịch vụ khác
+        </Text>
+      </View>
 
-        {/* Period Selection */}
-        <View style={styles.periodSelection}>
-          {Object.entries(periodLabels).map(([duration, label]) => (
-            <TouchableOpacity
-              key={duration}
+      {/* Period Selection */}
+      <View style={styles.periodSelection}>
+        {Object.entries(periodLabels).map(([duration, label]) => (
+          <TouchableOpacity
+            key={duration}
+            style={[
+              styles.periodButton,
+              selectedPeriod === Number(duration) && styles.selectedPeriod,
+            ]}
+            onPress={() => setSelectedPeriod(Number(duration))}
+          >
+            <Text
               style={[
-                styles.periodButton,
-                selectedPeriod === Number(duration) && styles.selectedPeriod,
+                styles.periodButtonText,
+                selectedPeriod === Number(duration) &&
+                  styles.selectedPeriodText,
               ]}
-              onPress={() => setSelectedPeriod(Number(duration))}
             >
-              <Text
-                style={[
-                  styles.periodButtonText,
-                  selectedPeriod === Number(duration) &&
-                    styles.selectedPeriodText,
-                ]}
-              >
-                {label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+              {label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
-        {/* Plans */}
-        <FlatList
-          data={plans}
-          renderItem={renderPlanItem}
-          keyExtractor={(item, index) => `plan-${index}`}
-          scrollEnabled={false}
-          contentContainerStyle={styles.plansContainer}
-        />
-      </ScrollView>
-    </RootLayout>
+      {/* Plans */}
+      <FlatList
+        data={plans}
+        renderItem={renderPlanItem}
+        keyExtractor={(item, index) => `plan-${index}`}
+        scrollEnabled={false}
+        contentContainerStyle={styles.plansContainer}
+      />
+    </ScrollView>
   );
 }
 

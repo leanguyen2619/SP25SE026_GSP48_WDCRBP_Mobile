@@ -27,7 +27,7 @@ import ghnLogo from "../../../../../assets/images/ghnLogo.webp";
 
 export default function ProgressTab({ order, activeTabIndex, isActive }) {
   const route = useRoute();
-  const id = route.params?.id || order?.serviceOrderId;
+  const id = route.params?.id || order?.orderId;
   const [trackingData, setTrackingData] = useState({});
 
   const {

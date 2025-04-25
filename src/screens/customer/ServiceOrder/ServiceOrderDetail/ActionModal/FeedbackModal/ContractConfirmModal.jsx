@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  errorContainer: {
+  errorContainer: { 
     padding: 16,
     backgroundColor: "#FEE2E2",
     borderRadius: 8,

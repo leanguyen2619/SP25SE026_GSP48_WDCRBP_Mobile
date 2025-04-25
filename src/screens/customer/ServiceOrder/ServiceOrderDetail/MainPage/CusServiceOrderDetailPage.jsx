@@ -36,7 +36,11 @@ export default function CusServiceOrderDetailPage() {
     isLoading: isDepositsLoading,
     error: depositsError,
     refetch: refetchDeposit,
-  } = useGetAllOrderDepositByOrderIdQuery(orderId);
+  } = useGetAllOrderDepositByOrderIdQuery(orderId, {
+    refetchOnMountOrArgChange: true,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
   const deposits = depositsResponse?.data || [];
   const { auth } = useAuth();
   const serviceName = order?.service?.service?.serviceName;

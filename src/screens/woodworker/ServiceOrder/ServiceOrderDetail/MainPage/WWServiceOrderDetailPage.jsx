@@ -2,27 +2,46 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   ActivityIndicator,
-  TouchableOpacity,
+  StyleSheet,
   ScrollView,
-  SafeAreaView,
+  TouchableOpacity,
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 import { useGetServiceOrderByIdQuery } from "../../../../../services/serviceOrderApi";
 import { appColorTheme } from "../../../../../config/appconfig";
 import useAuth from "../../../../../hooks/useAuth";
 import ActionBar from "../ActionModal/ActionBar/ActionBar.jsx";
-import Ionicons from "react-native-vector-icons/Ionicons";
 import GeneralInformationTab from "../Tab/GeneralInformationTab.jsx";
-import ProcessTab from "../Tab/ProgressTab.jsx";
+import ProgressTab from "../Tab/ProgressTab.jsx";
 import ContractAndTransactionTab from "../Tab/ContractAndTransactionTab.jsx";
+import { useGetAllOrderDepositByOrderIdQuery } from "../../../../../services/orderDepositApi.js";
+import WoodworkerLayout from "../../../../../layouts/WoodworkerLayout.jsx";
 
 export default function WWServiceOrderDetailPage() {
   const route = useRoute();
-  const id = route.params?.id;
-  const { data, isLoading, error, refetch } = useGetServiceOrderByIdQuery(id);
+  const { orderId } = route.params;
+  const { data, isLoading, error, refetch } = useGetServiceOrderByIdQuery(
+    orderId,
+    {
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
+    }
+  );
   const order = data?.data;
+  const {
+    data: depositsResponse,
+    isLoading: isDepositsLoading,
+    error: depositsError,
+    refetch: refetchDeposit,
+  } = useGetAllOrderDepositByOrderIdQuery(orderId, {
+    refetchOnMountOrArgChange: true,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
+  const deposits = depositsResponse?.data || [];
   const { auth } = useAuth();
   const serviceName = order?.service?.service?.serviceName;
 
@@ -34,7 +53,7 @@ export default function WWServiceOrderDetailPage() {
     setActiveTabIndex(index);
   };
 
-  if (isLoading) {
+  if (isLoading || isDepositsLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={appColorTheme.brown_2} />
@@ -42,7 +61,7 @@ export default function WWServiceOrderDetailPage() {
     );
   }
 
-  if (error) {
+  if (error || depositsError) {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>
@@ -65,50 +84,55 @@ export default function WWServiceOrderDetailPage() {
     );
   }
 
+  const tabs = [
+    { label: "Chung", icon: "document-text-outline" },
+    { label: "Tiến độ", icon: "pulse-outline" },
+    {
+      label: serviceName != "Sale" ? "HĐ & GD" : "Giao dịch",
+      icon: "document-outline",
+    },
+  ];
+
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView}>
+    <WoodworkerLayout>
+      <View style={styles.container}>
         <View style={styles.header}>
-          <View style={styles.headerTitleContainer}>
-            <Text style={styles.headerTitle}>
-              Chi tiết đơn #{order.orderId}
-            </Text>
-            <View style={styles.statusBadge}>
-              <Text style={styles.statusText}>
-                {order?.status || "Đang xử lý"}
-              </Text>
+          <View style={styles.titleContainer}>
+            <View style={styles.titleRow}>
+              <Text style={styles.title}>Chi tiết đơn #{order.orderId}</Text>
             </View>
+
+            <View style={styles.statusContainer}>
+              <View style={styles.statusBadge}>
+                <Text style={styles.statusText}>
+                  {order?.status || "Đang xử lý"}
+                </Text>
+              </View>
+            </View>
+
+            {order?.feedback && (
+              <Text style={styles.feedback}>
+                <Text style={styles.boldText}>Phản hồi của bạn:</Text>{" "}
+                {order?.feedback}
+              </Text>
+            )}
           </View>
 
-          {order?.feedback && (
-            <Text style={styles.feedbackText}>
-              <Text style={styles.boldText}>Phản hồi của khách hàng:</Text>{" "}
-              {order?.feedback}
-            </Text>
-          )}
-
-          <View style={styles.actionBarContainer}>
+          <View style={styles.actionContainer}>
             <ActionBar
+              deposits={deposits}
               order={order}
               refetch={refetch}
               status={order?.status}
               feedback={order?.feedback}
+              refetchDeposit={refetchDeposit}
             />
           </View>
         </View>
 
-        <View style={styles.tabContainer}>
+        <View style={styles.tabsContainer}>
           <View style={styles.tabHeaderContainer}>
-            {[
-              { label: "Chung", icon: "document-text-outline" },
-              { label: "Tiến độ", icon: "analytics-outline" },
-              {
-                label: `${
-                  serviceName != "Sale" ? "Hợp đồng & Giao dịch" : "Giao dịch"
-                }`,
-                icon: "document-outline",
-              },
-            ].map((tab, index) => (
+            {tabs.map((tab, index) => (
               <TouchableOpacity
                 key={index}
                 style={[
@@ -117,23 +141,21 @@ export default function WWServiceOrderDetailPage() {
                 ]}
                 onPress={() => handleTabChange(index)}
               >
-                <View style={styles.tabButtonContent}>
-                  <Ionicons
-                    name={tab.icon}
-                    size={20}
-                    color={
-                      activeTabIndex === index ? appColorTheme.brown_2 : "gray"
-                    }
-                  />
-                  <Text
-                    style={[
-                      styles.tabButtonText,
-                      activeTabIndex === index && styles.activeTabButtonText,
-                    ]}
-                  >
-                    {tab.label}
-                  </Text>
-                </View>
+                <Ionicons
+                  name={tab.icon}
+                  size={16}
+                  color={
+                    activeTabIndex === index ? appColorTheme.brown_2 : "#4A5568"
+                  }
+                />
+                <Text
+                  style={[
+                    styles.tabLabel,
+                    activeTabIndex === index && styles.activeTabLabel,
+                  ]}
+                >
+                  {tab.label}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -147,7 +169,7 @@ export default function WWServiceOrderDetailPage() {
               />
             )}
             {activeTabIndex === 1 && (
-              <ProcessTab
+              <ProgressTab
                 order={order}
                 activeTabIndex={activeTabIndex}
                 isActive={activeTabIndex === 1}
@@ -162,18 +184,15 @@ export default function WWServiceOrderDetailPage() {
             )}
           </View>
         </View>
-      </ScrollView>
-    </SafeAreaView>
+      </View>
+    </WoodworkerLayout>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: appColorTheme.grey_1,
-  },
-  scrollView: {
-    flex: 1,
+    backgroundColor: "#f8f9fa",
   },
   loadingContainer: {
     flex: 1,
@@ -187,98 +206,97 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   errorText: {
-    fontSize: 16,
     color: "red",
     textAlign: "center",
+    fontSize: 16,
   },
   header: {
     padding: 16,
     backgroundColor: "white",
-    marginBottom: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginBottom: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
   },
-  headerTitleContainer: {
+  titleContainer: {
+    marginBottom: 16,
+  },
+  titleRow: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 8,
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
+  title: {
     color: appColorTheme.brown_2,
-    flex: 1,
+    fontSize: 22,
+    fontWeight: "bold",
+  },
+  statusContainer: {
+    marginBottom: 12,
   },
   statusBadge: {
     backgroundColor: appColorTheme.brown_2,
+    paddingVertical: 4,
     paddingHorizontal: 10,
-    paddingVertical: 5,
     borderRadius: 15,
+    alignSelf: "flex-start",
   },
   statusText: {
     color: "white",
-    fontWeight: "bold",
+    fontWeight: "600",
+    fontSize: 12,
   },
-  feedbackText: {
+  feedback: {
     fontSize: 14,
     marginTop: 8,
-    marginBottom: 12,
   },
   boldText: {
     fontWeight: "bold",
   },
-  actionBarContainer: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    marginTop: 8,
+  actionContainer: {
+    alignItems: "flex-end",
   },
-  tabContainer: {
+  tabsContainer: {
     flex: 1,
-    backgroundColor: "white",
-    margin: 10,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
   },
   tabHeaderContainer: {
     flexDirection: "row",
+    backgroundColor: "white",
+    paddingHorizontal: 8,
+    paddingTop: 8,
+    paddingBottom: 0,
     borderBottomWidth: 1,
     borderBottomColor: "#E2E8F0",
+    marginBottom: 0,
   },
   tabButton: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     borderBottomWidth: 2,
-    borderBottomColor: "transparent",
+    borderBottomColor: "#E2E8F0",
+    marginRight: 8,
+    flex: 1,
+    justifyContent: "center",
   },
   activeTabButton: {
-    borderBottomColor: appColorTheme.brown_2,
     backgroundColor: appColorTheme.brown_0,
+    borderBottomColor: appColorTheme.brown_1,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
   },
-  tabButtonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  tabButtonText: {
-    marginLeft: 5,
-    color: "gray",
+  tabLabel: {
+    marginLeft: 4,
     fontSize: 14,
+    color: "#4A5568",
   },
-  activeTabButtonText: {
+  activeTabLabel: {
     color: appColorTheme.brown_2,
     fontWeight: "bold",
   },
   tabContent: {
-    padding: 15,
+    flex: 1,
+    paddingTop: 8,
+    paddingHorizontal: 0,
   },
 });
