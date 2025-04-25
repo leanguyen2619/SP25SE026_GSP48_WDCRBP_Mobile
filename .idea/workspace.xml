@@ -4,7 +4,344 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="18a314fa-dbfd-4c5a-b8cb-92a3212ed210" name="Changes" comment="" />
+    <list default="true" id="18a314fa-dbfd-4c5a-b8cb-92a3212ed210" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/App.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/DesignIdea/DesignConfig.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/Alert/CustomAlert.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/Badge/ServiceBadge.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/Banner/OfferBanner.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/Banner/SaleBanner.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/Category/CategoryList.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/FilterSidebar/FilterSidebar.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/Populer/PopularList.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/Product/ProductCard.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/SearchBar/SearchBar.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/SidebarMenu/SidebarMenu.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/States/Status.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/WoodworkerInfo/WoodworkerInfo.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/footer/footer.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/footer/footerBar/footerBar.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/modals/AddAddressModal.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/context/AuthContext.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/navigation/AppNavigator.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/navigation/AppNavigator.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/redux/slice/authSlice.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/redux/slice/cartSlice.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/redux/slice/designSlice.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/redux/slice/districtSlice.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/redux/slice/ghnSlice.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/redux/slice/paymentSlice.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/redux/slice/productSlice.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/redux/slice/provinceSlice.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/redux/slice/transactionSlice.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/redux/slice/userAddressSlice.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/redux/slice/userSlice.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/redux/slice/walletSlice.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/redux/slice/wardSlice.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/redux/slice/woodworkerRegisterSlice.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/redux/slice/woodworkerSlice.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/redux/store.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/assets/images/ghnLogo.webp" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/images/ghnLogo.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/assets/images/logo.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/images/logo.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/assets/images/logo.webp" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/images/logo.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Auth/EmailOTPLogin.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Auth/EmailOTPLogin.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Auth/ForgetPassword.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Auth/ForgetPassword.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Auth/Login.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Auth/Login.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Auth/PasswordLogin.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Auth/PasswordLogin.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Auth/Register.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Auth/Register.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Auth/VerifyPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Auth/VerifyPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Button/ActionButton.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Button/ActionButton.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Button/SubmitButton.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Button/SubmitButton.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Common/SignatureComponent.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Common/SignatureComponent.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Footer/Footer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Footer/Footer.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Header/AccountMenu.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Header/AccountMenu.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Header/BrandLogo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Header/BrandLogo.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Header/Header.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Header/Header.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Header/PublicProfileSwitch.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Header/PublicProfileSwitch.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Input/PasswordInput.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Input/PasswordInput.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Sidebar/CustomerSidebar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Sidebar/CustomerSidebar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Sidebar/WoodworkerSideBar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Sidebar/WoodworkerSideBar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Utility/AddressInput.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Utility/AddressInput.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Utility/CategorySearchCombobox.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Utility/CategorySearchCombobox.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Utility/CategorySelector.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Utility/CategorySelector.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Utility/CheckboxList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Utility/CheckboxList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Utility/ConfigDisplay.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Utility/ConfigDisplay.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Utility/FilterPill.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Utility/FilterPill.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Utility/ImageListSelector.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Utility/ImageListSelector.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Utility/ImageUpdateUploader.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Utility/ImageUpdateUploader.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Utility/ImageUpload.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Utility/ImageUpload.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Utility/Notify.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Utility/Notify.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Utility/PackageFrame.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Utility/PackageFrame.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Utility/Pagination.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Utility/Pagination.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Utility/RelativeTime.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Utility/RelativeTime.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Utility/RequireServicePack.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Utility/RequireServicePack.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Utility/StarRating.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Utility/StarRating.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/components/Utility/StarReview.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Utility/StarReview.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/config/appconfig.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/appconfig.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/config/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/context/AuthProvider.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/context/AuthProvider.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/context/CartContext.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/context/CartContext.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/data/orderId.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/data/orderId.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/hooks/useAuth.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/useAuth.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/hooks/useCart.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/useCart.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/hooks/useImageUpload.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/useImageUpload.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/hooks/useRefreshToken.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/useRefreshToken.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/layouts/CustomerLayout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/layouts/CustomerLayout.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/layouts/RootLayout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/layouts/RootLayout.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/layouts/WoodworkerLayout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/layouts/WoodworkerLayout.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/navigation/AppNavigator.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/Account/AccountPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/Account/AccountPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/Cart/Design/DesignCartItem.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/Cart/Design/DesignCartItem.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/Cart/Design/DesignCartItemDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/Cart/Design/DesignCartItemDetail.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/Cart/Design/DesignCartTab.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/Cart/Design/DesignCartTab.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/Cart/Design/DesignOrderSummary.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/Cart/Design/DesignOrderSummary.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/Cart/ManagePage/CartPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/Cart/ManagePage/CartPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/Cart/ManagePage/CartSidebar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/Cart/ManagePage/CartSidebar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/Cart/Product/ProductCartItem.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/Cart/Product/ProductCartItem.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/Cart/Product/ProductCartItemDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/Cart/Product/ProductCartItemDetail.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/Cart/Product/ProductCartTab.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/Cart/Product/ProductCartTab.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/Cart/Product/ProductOrderSummary.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/Cart/Product/ProductOrderSummary.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/Cart/components/AddressSelection.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/Cart/components/AddressSelection.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/ComplaintManagement/ActionModal/ComplaintCreateModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/ComplaintManagement/ActionModal/ComplaintCreateModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/ComplaintManagement/ActionModal/ComplaintDetailModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/ComplaintManagement/ActionModal/ComplaintDetailModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/ComplaintManagement/ComplaintList/ComplaintCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/ComplaintManagement/ComplaintList/ComplaintCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/ComplaintManagement/ComplaintList/CustomerComplaintPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/ComplaintManagement/ComplaintList/CustomerComplaintPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/ActionBar/ActionBar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/ActionBar/ActionBar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/FeedbackModal/AppointmentConfirmModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/FeedbackModal/AppointmentConfirmModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/FeedbackModal/CancelModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/FeedbackModal/CancelModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/FeedbackModal/FeedbackModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/FeedbackModal/FeedbackModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/FeedbackModal/PaymentModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/FeedbackModal/PaymentModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/FeedbackModal/QuotationConfirmModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/FeedbackModal/QuotationConfirmModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/FeedbackModal/ReviewModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/FeedbackModal/ReviewModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeOrder/GuaranteeOrderDetail/MainPage/CusGuaranteeOrderDetailPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeOrder/GuaranteeOrderDetail/MainPage/CusGuaranteeOrderDetailPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeOrder/GuaranteeOrderDetail/Tab/CustomizationProduct.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeOrder/GuaranteeOrderDetail/Tab/CustomizationProduct.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeOrder/GuaranteeOrderDetail/Tab/GeneralInformationTab.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeOrder/GuaranteeOrderDetail/Tab/GeneralInformationTab.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeOrder/GuaranteeOrderDetail/Tab/PersonalizationProduct.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeOrder/GuaranteeOrderDetail/Tab/PersonalizationProduct.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeOrder/GuaranteeOrderDetail/Tab/ProgressTab.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeOrder/GuaranteeOrderDetail/Tab/ProgressTab.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeOrder/GuaranteeOrderDetail/Tab/QuotationAndTransactionTab.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeOrder/GuaranteeOrderDetail/Tab/QuotationAndTransactionTab.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeOrder/GuaranteeOrderDetail/Tab/SaleProduct.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeOrder/GuaranteeOrderDetail/Tab/SaleProduct.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeOrder/GuaranteeOrderList/CusGuaranteeOrderListPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeOrder/GuaranteeOrderList/CusGuaranteeOrderListPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeOrder/GuaranteeOrderList/GuaranteeOrderCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeOrder/GuaranteeOrderList/GuaranteeOrderCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeOrder/GuaranteeOrderList/GuaranteeOrderList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeOrder/GuaranteeOrderList/GuaranteeOrderList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeRequest/GuaranteeRequestPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeRequest/GuaranteeRequestPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeRequest/components/GuaranteeErrorSelection.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeRequest/components/GuaranteeErrorSelection.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeRequest/components/OrderSelection.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeRequest/components/OrderSelection.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeRequest/components/ProductCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeRequest/components/ProductCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeRequest/components/ProductSelectionModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeRequest/components/ProductSelectionModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeRequest/components/ProductStatusForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeRequest/components/ProductStatusForm.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/GuaranteeRequest/components/ShippingAndPriceSection.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/GuaranteeRequest/components/ShippingAndPriceSection.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/PersonalizationRequest/AddPersonalizationProduct.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/PersonalizationRequest/AddPersonalizationProduct.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/PersonalizationRequest/AutoCompleteInput.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/PersonalizationRequest/AutoCompleteInput.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/PersonalizationRequest/PersonalizationProductList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/PersonalizationRequest/PersonalizationProductList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/PersonalizationRequest/PersonalizationRequestPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/PersonalizationRequest/PersonalizationRequestPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/PersonalizationRequest/WoodworkerBox.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/PersonalizationRequest/WoodworkerBox.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/Profile/Address/AddressList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/Profile/Address/AddressList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/Profile/Address/CreateAddressModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/Profile/Address/CreateAddressModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/Profile/Address/UpdateAddressModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/Profile/Address/UpdateAddressModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/Profile/Address/UserAddress.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/Profile/Address/UserAddress.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/Profile/ManagePage/CustomerProfilePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/Profile/ManagePage/CustomerProfilePage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/Profile/PersonalInformation/CustomerPasswordChangeForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/Profile/PersonalInformation/CustomerPasswordChangeForm.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/Profile/PersonalInformation/CustomerPersonalInfoForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/Profile/PersonalInformation/CustomerPersonalInfoForm.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/ServiceOrder/ServiceOrderDetail/ActionModal/ActionBar/ActionBar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/ServiceOrder/ServiceOrderDetail/ActionModal/ActionBar/ActionBar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/ServiceOrder/ServiceOrderDetail/ActionModal/FeedbackModal/AppointmentConfirmModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/ServiceOrder/ServiceOrderDetail/ActionModal/FeedbackModal/AppointmentConfirmModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/ServiceOrder/ServiceOrderDetail/ActionModal/FeedbackModal/CancelModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/ServiceOrder/ServiceOrderDetail/ActionModal/FeedbackModal/CancelModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/ServiceOrder/ServiceOrderDetail/ActionModal/FeedbackModal/ContractConfirmModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/ServiceOrder/ServiceOrderDetail/ActionModal/FeedbackModal/ContractConfirmModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/ServiceOrder/ServiceOrderDetail/ActionModal/FeedbackModal/DesignConfirmModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/ServiceOrder/ServiceOrderDetail/ActionModal/FeedbackModal/DesignConfirmModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/ServiceOrder/ServiceOrderDetail/ActionModal/FeedbackModal/FeedbackModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/ServiceOrder/ServiceOrderDetail/ActionModal/FeedbackModal/FeedbackModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/ServiceOrder/ServiceOrderDetail/ActionModal/FeedbackModal/PaymentModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/ServiceOrder/ServiceOrderDetail/ActionModal/FeedbackModal/PaymentModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/ServiceOrder/ServiceOrderDetail/ActionModal/FeedbackModal/ReviewModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/ServiceOrder/ServiceOrderDetail/ActionModal/FeedbackModal/ReviewModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/ServiceOrder/ServiceOrderDetail/MainPage/CusServiceOrderDetailPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/ServiceOrder/ServiceOrderDetail/MainPage/CusServiceOrderDetailPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/ServiceOrder/ServiceOrderDetail/Tab/ContractAndTransactionTab.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/ServiceOrder/ServiceOrderDetail/Tab/ContractAndTransactionTab.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/ServiceOrder/ServiceOrderDetail/Tab/CustomizationProductList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/ServiceOrder/ServiceOrderDetail/Tab/CustomizationProductList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/ServiceOrder/ServiceOrderDetail/Tab/GeneralInformationTab.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/ServiceOrder/ServiceOrderDetail/Tab/GeneralInformationTab.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/ServiceOrder/ServiceOrderDetail/Tab/PersonalizationProductList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/ServiceOrder/ServiceOrderDetail/Tab/PersonalizationProductList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/ServiceOrder/ServiceOrderDetail/Tab/ProgressTab.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/ServiceOrder/ServiceOrderDetail/Tab/ProgressTab.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/ServiceOrder/ServiceOrderDetail/Tab/SaleProductList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/ServiceOrder/ServiceOrderDetail/Tab/SaleProductList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/ServiceOrder/ServiceOrderList/CusServiceOrderListPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/ServiceOrder/ServiceOrderList/CusServiceOrderListPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/ServiceOrder/ServiceOrderList/ServiceOrderCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/ServiceOrder/ServiceOrderList/ServiceOrderCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/ServiceOrder/ServiceOrderList/ServiceOrderList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/ServiceOrder/ServiceOrderList/ServiceOrderList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/WalletManagement/ActionModal/DepositModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/WalletManagement/ActionModal/DepositModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/WalletManagement/ActionModal/TransactionDetailModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/WalletManagement/ActionModal/TransactionDetailModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/WalletManagement/ActionModal/WithdrawModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/WalletManagement/ActionModal/WithdrawModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/WalletManagement/WalletInformation/WalletInformation.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/WalletManagement/WalletInformation/WalletInformation.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/customer/WalletManagement/WalletList/CustomerWalletPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/customer/WalletManagement/WalletList/CustomerWalletPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Auth/AuthPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Auth/AuthPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Auth/Logout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Auth/Logout.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Auth/WWRegister.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Auth/WWRegister.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Contract/ContractPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Contract/ContractPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Design/DesignDetail/DesignDetailPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Design/DesignDetail/DesignDetailPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Design/DesignDetail/DesignVariantConfig.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Design/DesignDetail/DesignVariantConfig.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Design/DesignDetail/ReviewSection.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Design/DesignDetail/ReviewSection.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Design/DesignDetail/WoodworkerBox.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Design/DesignDetail/WoodworkerBox.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Design/DesignList/DesignList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Design/DesignList/DesignList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Design/DesignList/DesignsPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Design/DesignList/DesignsPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Design/DesignList/FiltersComponent.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Design/DesignList/FiltersComponent.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Home/HomePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Home/HomePage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/PaymentSuccess/BuyPackSuccessPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/PaymentSuccess/BuyPackSuccessPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/PaymentSuccess/OrderPaymentSuccessPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/PaymentSuccess/OrderPaymentSuccessPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/PaymentSuccess/PaymentSuccessPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/PaymentSuccess/PaymentSuccessPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/PaymentSuccess/TopUpWalletSuccessPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/PaymentSuccess/TopUpWalletSuccessPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Pricing/Pricing.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Pricing/Pricing.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Pricing/ServicePackUpgradeGuide.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Pricing/ServicePackUpgradeGuide.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Product/ProductDetail/ProductDetailPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Product/ProductDetail/ProductDetailPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Product/ProductDetail/ProductWoodworkerBox.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Product/ProductDetail/ProductWoodworkerBox.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Product/ProductDetail/ReviewSection.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Product/ProductDetail/ReviewSection.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Product/ProductList/FiltersComponent.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Product/ProductList/FiltersComponent.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Product/ProductList/ProductList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Product/ProductList/ProductList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Product/ProductList/ProductsPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Product/ProductList/ProductsPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/StatusPage/ErrorPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/StatusPage/ErrorPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/StatusPage/NotFoundPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/StatusPage/NotFoundPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/StatusPage/SuccessPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/StatusPage/SuccessPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/StatusPage/UnauthorizedPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/StatusPage/UnauthorizedPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Terms/TermsPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Terms/TermsPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Woodworker/WoodworkerDetail/Tab/DesignTab/DesignList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Woodworker/WoodworkerDetail/Tab/DesignTab/DesignList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Woodworker/WoodworkerDetail/Tab/DesignTab/FiltersComponent.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Woodworker/WoodworkerDetail/Tab/DesignTab/FiltersComponent.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Woodworker/WoodworkerDetail/Tab/DesignTab/WoodworkerDesignsTab.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Woodworker/WoodworkerDetail/Tab/DesignTab/WoodworkerDesignsTab.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Woodworker/WoodworkerDetail/Tab/PostTab/PostTab.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Woodworker/WoodworkerDetail/Tab/PostTab/PostTab.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Woodworker/WoodworkerDetail/Tab/ProductTab/FiltersComponent.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Woodworker/WoodworkerDetail/Tab/ProductTab/FiltersComponent.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Woodworker/WoodworkerDetail/Tab/ProductTab/ProductList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Woodworker/WoodworkerDetail/Tab/ProductTab/ProductList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Woodworker/WoodworkerDetail/Tab/ProductTab/WoodworkerProductTab.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Woodworker/WoodworkerDetail/Tab/ProductTab/WoodworkerProductTab.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Woodworker/WoodworkerDetail/Tab/ReviewTab/ReviewSection.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Woodworker/WoodworkerDetail/Tab/ReviewTab/ReviewSection.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Woodworker/WoodworkerDetail/Tab/ServiceTab/AvailableService.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Woodworker/WoodworkerDetail/Tab/ServiceTab/AvailableService.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Woodworker/WoodworkerDetail/WoodworkerDetailPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Woodworker/WoodworkerDetail/WoodworkerDetailPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Woodworker/WoodworkerList/FiltersComponent.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Woodworker/WoodworkerList/FiltersComponent.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Woodworker/WoodworkerList/WoodworkerList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Woodworker/WoodworkerList/WoodworkerList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/general/Woodworker/WoodworkerList/WoodworkersPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/general/Woodworker/WoodworkerList/WoodworkersPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ComplaintManagement/ActionModal/ComplaintDetailModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ComplaintManagement/ActionModal/ComplaintDetailModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ComplaintManagement/ComplaintList/WWComplaintManagementPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ComplaintManagement/ComplaintList/WWComplaintManagementPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/DesignManagement/ActionModal/DesignCreateModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/DesignManagement/ActionModal/DesignCreateModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/DesignManagement/ActionModal/DesignDeleteModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/DesignManagement/ActionModal/DesignDeleteModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/DesignManagement/ActionModal/DesignDetailModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/DesignManagement/ActionModal/DesignDetailModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/DesignManagement/ActionModal/DesignUpdateModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/DesignManagement/ActionModal/DesignUpdateModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/DesignManagement/DesignList/DesignManagementListPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/DesignManagement/DesignList/DesignManagementListPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/ActionBar/ActionBar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/ActionBar/ActionBar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/ActionBar/CancelModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/ActionBar/CancelModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/ActionBar/ReceiveConfirmationModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/ActionBar/ReceiveConfirmationModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/Appointment/AppointmentUpdateModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/Appointment/AppointmentUpdateModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/Finish/FinishUpdateModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/Finish/FinishUpdateModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/Quotation/GuaranteeAcceptModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/Quotation/GuaranteeAcceptModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/Quotation/QuotationUpdateModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/GuaranteeOrder/GuaranteeOrderDetail/ActionModal/Quotation/QuotationUpdateModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/GuaranteeOrder/GuaranteeOrderDetail/MainPage/WWGuaranteeOrderDetailPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/GuaranteeOrder/GuaranteeOrderDetail/MainPage/WWGuaranteeOrderDetailPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/GuaranteeOrder/GuaranteeOrderDetail/Tab/CustomizationProduct.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/GuaranteeOrder/GuaranteeOrderDetail/Tab/CustomizationProduct.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/GuaranteeOrder/GuaranteeOrderDetail/Tab/GeneralInformationTab.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/GuaranteeOrder/GuaranteeOrderDetail/Tab/GeneralInformationTab.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/GuaranteeOrder/GuaranteeOrderDetail/Tab/PersonalizationProduct.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/GuaranteeOrder/GuaranteeOrderDetail/Tab/PersonalizationProduct.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/GuaranteeOrder/GuaranteeOrderDetail/Tab/ProgressTab.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/GuaranteeOrder/GuaranteeOrderDetail/Tab/ProgressTab.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/GuaranteeOrder/GuaranteeOrderDetail/Tab/QuotationAndTransactionTab.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/GuaranteeOrder/GuaranteeOrderDetail/Tab/QuotationAndTransactionTab.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/GuaranteeOrder/GuaranteeOrderDetail/Tab/SaleProduct.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/GuaranteeOrder/GuaranteeOrderDetail/Tab/SaleProduct.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/GuaranteeOrder/GuaranteeOrderList/GuaranteeOrderList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/GuaranteeOrder/GuaranteeOrderList/GuaranteeOrderList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/GuaranteeOrder/GuaranteeOrderList/WWGuaranteeOrderListPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/GuaranteeOrder/GuaranteeOrderList/WWGuaranteeOrderListPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/PostManagement/ActionModal/PostCreateModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/PostManagement/ActionModal/PostCreateModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/PostManagement/ActionModal/PostDeleteModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/PostManagement/ActionModal/PostDeleteModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/PostManagement/ActionModal/PostDetailModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/PostManagement/ActionModal/PostDetailModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/PostManagement/ActionModal/PostUpdateModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/PostManagement/ActionModal/PostUpdateModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/PostManagement/PostList/PostManagementListPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/PostManagement/PostList/PostManagementListPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ProductManagement/ActionModal/ProductCreateModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ProductManagement/ActionModal/ProductCreateModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ProductManagement/ActionModal/ProductDeleteModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ProductManagement/ActionModal/ProductDeleteModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ProductManagement/ActionModal/ProductDetailModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ProductManagement/ActionModal/ProductDetailModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ProductManagement/ActionModal/ProductUpdateModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ProductManagement/ActionModal/ProductUpdateModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ProductManagement/ProductList/ProductManagementListPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ProductManagement/ProductList/ProductManagementListPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ProfileManagement/ActionModal/BuyPackByPaymentGateway.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ProfileManagement/ActionModal/BuyPackByPaymentGateway.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ProfileManagement/ActionModal/BuyPackByWalletModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ProfileManagement/ActionModal/BuyPackByWalletModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ProfileManagement/ProfilePage/ManagePage/WoodworkerProfileManagementPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ProfileManagement/ProfilePage/ManagePage/WoodworkerProfileManagementPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ProfileManagement/ProfilePage/Pack/PackManagement.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ProfileManagement/ProfilePage/Pack/PackManagement.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ProfileManagement/ProfilePage/PersonalInformation/PasswordChangeForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ProfileManagement/ProfilePage/PersonalInformation/PasswordChangeForm.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ProfileManagement/ProfilePage/PersonalInformation/PersonalInfoForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ProfileManagement/ProfilePage/PersonalInformation/PersonalInfoForm.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ProfileManagement/ProfilePage/PersonalInformation/PersonalInformationManagement.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ProfileManagement/ProfilePage/PersonalInformation/PersonalInformationManagement.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ProfileManagement/ProfilePage/WoodworkerInformation/WoodworkerInformationManagement.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ProfileManagement/ProfilePage/WoodworkerInformation/WoodworkerInformationManagement.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ReviewManagement/ActionModal/ReviewDetailModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ReviewManagement/ActionModal/ReviewDetailModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ReviewManagement/ReviewList/ReviewManagementListPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ReviewManagement/ReviewList/ReviewManagementListPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ServiceConfiguration/ServiceConfiguration.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ServiceConfiguration/ServiceConfiguration.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ServiceOrder/ServiceOrderDetail/ActionModal/ActionBar/ActionBar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ServiceOrder/ServiceOrderDetail/ActionModal/ActionBar/ActionBar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ServiceOrder/ServiceOrderDetail/ActionModal/ActionBar/CancelModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ServiceOrder/ServiceOrderDetail/ActionModal/ActionBar/CancelModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ServiceOrder/ServiceOrderDetail/ActionModal/Appointment/AppointmentUpdateModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ServiceOrder/ServiceOrderDetail/ActionModal/Appointment/AppointmentUpdateModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ServiceOrder/ServiceOrderDetail/ActionModal/Contract/ContractEditSection.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ServiceOrder/ServiceOrderDetail/ActionModal/Contract/ContractEditSection.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ServiceOrder/ServiceOrderDetail/ActionModal/Contract/ContractUpdateModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ServiceOrder/ServiceOrderDetail/ActionModal/Contract/ContractUpdateModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ServiceOrder/ServiceOrderDetail/ActionModal/Contract/PriceDetailSection.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ServiceOrder/ServiceOrderDetail/ActionModal/Contract/PriceDetailSection.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ServiceOrder/ServiceOrderDetail/ActionModal/Design/DesignUpdateModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ServiceOrder/ServiceOrderDetail/ActionModal/Design/DesignUpdateModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ServiceOrder/ServiceOrderDetail/ActionModal/Finish/FinishUpdateModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ServiceOrder/ServiceOrderDetail/ActionModal/Finish/FinishUpdateModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ServiceOrder/ServiceOrderDetail/MainPage/WWServiceOrderDetailPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ServiceOrder/ServiceOrderDetail/MainPage/WWServiceOrderDetailPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ServiceOrder/ServiceOrderDetail/Tab/ContractAndTransactionTab.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ServiceOrder/ServiceOrderDetail/Tab/ContractAndTransactionTab.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ServiceOrder/ServiceOrderDetail/Tab/CustomizationProductList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ServiceOrder/ServiceOrderDetail/Tab/CustomizationProductList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ServiceOrder/ServiceOrderDetail/Tab/GeneralInformationTab.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ServiceOrder/ServiceOrderDetail/Tab/GeneralInformationTab.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ServiceOrder/ServiceOrderDetail/Tab/PersonalizationProductList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ServiceOrder/ServiceOrderDetail/Tab/PersonalizationProductList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ServiceOrder/ServiceOrderDetail/Tab/ProgressTab.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ServiceOrder/ServiceOrderDetail/Tab/ProgressTab.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ServiceOrder/ServiceOrderDetail/Tab/SaleProductList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ServiceOrder/ServiceOrderDetail/Tab/SaleProductList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ServiceOrder/ServiceOrderList/ServiceOrderList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ServiceOrder/ServiceOrderList/ServiceOrderList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/ServiceOrder/ServiceOrderList/WWServiceOrderListPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/ServiceOrder/ServiceOrderList/WWServiceOrderListPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/WalletManagement/ActionModal/DepositModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/WalletManagement/ActionModal/DepositModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/WalletManagement/ActionModal/TransactionDetailModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/WalletManagement/ActionModal/TransactionDetailModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/WalletManagement/ActionModal/WithdrawModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/WalletManagement/ActionModal/WithdrawModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/WalletManagement/WalletInformation/WalletInformation.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/WalletManagement/WalletInformation/WalletInformation.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/WalletManagement/WalletList/WWWalletPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/WalletManagement/WalletList/WWWalletPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/pages/woodworker/Welcome/WoodworkerWelcomePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/woodworker/Welcome/WoodworkerWelcomePage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/authApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/authApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/availableServiceApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/availableServiceApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/categoryApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/categoryApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/complaintApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/complaintApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/configurationApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/configurationApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/contractApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/contractApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/decryptApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/decryptApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/designIdeaApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/designIdeaApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/ghnApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/ghnApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/guaranteeOrderApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/guaranteeOrderApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/orderDepositApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/orderDepositApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/orderProgressApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/orderProgressApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/paymentApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/paymentApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/postApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/postApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/productApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/productApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/quotationApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/quotationApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/reviewApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/reviewApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/serviceOrderApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/serviceOrderApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/servicePackApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/servicePackApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/shipmentApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/shipmentApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/techSpecApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/techSpecApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/transactionApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/transactionApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/twilioApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/twilioApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/userAddressApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/userAddressApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/userApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/userApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/walletApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/walletApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/services/woodworkerApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/woodworkerApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/store/store.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/store/store.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/utils/shippingUtils.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/shippingUtils.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/utils/utils.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/utils.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/remake/validations/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/validations/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/Admin/AdminScreen.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/Admin/WoodworkerRegistrationDetail.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/Admin/WoodworkerRegistrationManagement.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/Customer/CartScreen.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/Customer/CheckoutScreen.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/Customer/DesignIdeaDetailScreen.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/Customer/DesignIdeaScreen.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/Customer/LoginScreen.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/Customer/ProductDetailScreen.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/Customer/ProductScreen.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/Customer/ProfileScreen.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/Customer/WoodworkerDetailScreen.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/Customer/WoodworkerScreen.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/LoginScreen.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/Payment/PaymentSuccessScreen.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/Payment/TopUpScreen.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/Payment/WalletScreen.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/PricingScreen.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/RegisterScreen.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/SearchScreen.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/VerifyOTPScreen.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/Woodworker/WalletWWScreen.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/Woodworker/WoodworkerDashboard.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/Woodworker/WoodworkerDetailScreen.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/Woodworker/WoodworkerProfileScreen.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/Woodworker/WoodworkerRegistration.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/addressService.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/adminService.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/api.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/authService.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/theme/colors.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/AESUtil.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/addressUtils.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/locationResolver.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/servicePackageUtils.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/uploadToImgbb.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/urlHelpers.js" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -34,10 +371,25 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/games"
+    "last_opened_file_path": "C:/itn/SP25SE026_GSP48_WDCRBP_Mobile",
+    "nodejs_package_manager_path": "yarn",
+    "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\itn\SP25SE026_GSP48_WDCRBP_Mobile\src" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-WS-243.26053.12" />
+      </set>
+    </attachedChunks>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -46,7 +398,11 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1744795999777</updated>
+      <workItem from="1745567802728" duration="134000" />
     </task>
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
 </project>
