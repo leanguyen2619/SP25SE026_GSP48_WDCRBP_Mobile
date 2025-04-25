@@ -342,7 +342,7 @@ export default function ContractAndTransactionTab({
               <View style={styles.depositsList}>
                 {deposits.map((deposit) => (
                   <TransactionItem
-                    key={deposit.serviceDepositId}
+                    key={deposit.orderDepositId}
                     deposit={deposit}
                   />
                 ))}

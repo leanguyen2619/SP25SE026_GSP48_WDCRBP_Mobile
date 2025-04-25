@@ -6,8 +6,6 @@ import Header from "../components/Header/Header.jsx";
 
 export default function CustomerLayout({ children }) {
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const { width } = Dimensions.get("window");
-  const isMobile = width < 768;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -32,7 +30,7 @@ export default function CustomerLayout({ children }) {
           )}
 
           {/* Main Content - Only show when sidebar is collapsed or on desktop */}
-          {(isCollapsed || !isMobile) && (
+          {isCollapsed && (
             <View
               style={[
                 styles.mainContent,

@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { Linking } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useNavigation } from "@react-navigation/native";
 import useAuth from "../hooks/useAuth";
 
 import AuthPage from "../pages/general/Auth/AuthPage";
@@ -26,14 +28,43 @@ import WWServiceOrderListPage from "../pages/woodworker/ServiceOrder/ServiceOrde
 import CusServiceOrderListPage from "../pages/customer/ServiceOrder/ServiceOrderList/CusServiceOrderListPage";
 import CusServiceOrderDetailPage from "../pages/customer/ServiceOrder/ServiceOrderDetail/MainPage/CusServiceOrderDetailPage";
 // import WWServiceOrderDetailPage from "../pages/woodworker/ServiceOrder/ServiceOrderDetail/MainPage/WWServiceOrderDetailPage";
-import WoodworkerLayout from "../layouts/WoodworkerLayout";
-import CustomerLayout from "../layouts/CustomerLayout";
 import CustomerProfilePage from "../pages/customer/Profile/ManagePage/CustomerProfilePage";
+import WWWalletPage from "../pages/woodworker/WalletManagement/WalletList/WWWalletPage";
+import CustomerWalletPage from "../pages/customer/WalletManagement/WalletList/CustomerWalletPage";
 
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
   const { auth } = useAuth();
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    const handleDeepLink = (event) => {
+      const url = event.url;
+
+      if (url.includes("payment-success")) {
+        const urlObj = new URL(url);
+        const params = urlObj.searchParams;
+
+        const allParams = {};
+        for (const [key, value] of params.entries()) {
+          allParams[key] = value;
+        }
+
+        navigation.navigate("PaymentSuccess", allParams);
+      }
+    };
+
+    const subscription = Linking.addEventListener("url", handleDeepLink);
+
+    Linking.getInitialURL().then((url) => {
+      if (url && url.includes("payment-success")) {
+        handleDeepLink({ url });
+      }
+    });
+
+    return () => subscription.remove();
+  }, [navigation]);
 
   const getInitialRoute = () => {
     switch (auth?.role) {
@@ -67,14 +98,7 @@ const AppNavigator = () => {
       <Stack.Screen name="PaymentSuccess" component={PaymentSuccessPage} />
 
       {/* Customer */}
-      <Stack.Screen
-        name="CustomerProfile"
-        component={(props) => (
-          <CustomerLayout>
-            <CustomerProfilePage {...props} />
-          </CustomerLayout>
-        )}
-      />
+      <Stack.Screen name="CustomerProfile" component={CustomerProfilePage} />
       {/* <Stack.Screen
         name="PersonalizationRequest"
         component={PersonalizationRequestPage}
@@ -83,22 +107,14 @@ const AppNavigator = () => {
         name="CustomerComplaint"
         component={CustomerComplaintPage}
       /> */}
-      {/* <Stack.Screen name="CustomerWallet" component={CustomerWalletPage} /> */}
+      <Stack.Screen name="CustomerWallet" component={CustomerWalletPage} />
       <Stack.Screen
         name="CustomerServiceOrders"
-        component={(props) => (
-          <CustomerLayout>
-            <CusServiceOrderListPage {...props} />
-          </CustomerLayout>
-        )}
+        component={CusServiceOrderListPage}
       />
       <Stack.Screen
         name="CustomerServiceOrderDetail"
-        component={(props) => (
-          <CustomerLayout>
-            <CusServiceOrderDetailPage {...props} />
-          </CustomerLayout>
-        )}
+        component={CusServiceOrderDetailPage}
       />
       {/* <Stack.Screen name="GuaranteeRequest" component={GuaranteeRequestPage} /> */}
       {/* <Stack.Screen
@@ -111,6 +127,7 @@ const AppNavigator = () => {
       /> */}
 
       {/* Woodworker */}
+
       <Stack.Screen
         name="WoodworkerWelcome"
         component={WoodworkerWelcomePage}
@@ -133,7 +150,7 @@ const AppNavigator = () => {
         name="ReviewManagement"
         component={ReviewManagementListPage}
       /> */}
-      {/* <Stack.Screen name="WWWallet" component={WWWalletPage} /> */}
+      <Stack.Screen name="WWWallet" component={WWWalletPage} />
       {/* <Stack.Screen
         name="WoodworkerProfile"
         component={WoodworkerProfileManagementPage}
@@ -141,11 +158,7 @@ const AppNavigator = () => {
       <Stack.Screen name="WWServiceOrders" component={WWServiceOrderListPage} />
       {/* <Stack.Screen
         name="WWServiceOrderDetail"
-        component={(props) => (
-          <WoodworkerLayout>
-            <WWServiceOrderDetailPage {...props} />
-          </WoodworkerLayout>
-        )}
+        component={WWServiceOrderDetailPage}
       /> */}
       {/* <Stack.Screen
         name="WWGuaranteeOrders"

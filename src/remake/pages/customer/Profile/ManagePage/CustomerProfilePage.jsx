@@ -11,6 +11,7 @@ import { useGetUserInformationQuery } from "../../../../services/authApi.js";
 import useAuth from "../../../../hooks/useAuth.js";
 import CustomerPersonalInfoForm from "../PersonalInformation/CustomerPersonalInfoForm.jsx";
 import CustomerPasswordChangeForm from "../PersonalInformation/CustomerPasswordChangeForm.jsx";
+import CustomerLayout from "../../../../layouts/CustomerLayout.jsx";
 
 export default function CustomerProfilePage() {
   const { auth } = useAuth();
@@ -42,21 +43,23 @@ export default function CustomerProfilePage() {
   const userData = userDataResponse.data;
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.section}>
-        <UserAddress />
-      </View>
-
-      {/* Thông tin cá nhân */}
-      <View style={styles.section}>
-        <Text style={styles.heading}>Thông tin cá nhân</Text>
-
-        <View style={styles.card}>
-          <CustomerPersonalInfoForm userData={userData} refetch={refetch} />
-          <CustomerPasswordChangeForm refetch={refetch} />
+    <CustomerLayout>
+      <ScrollView style={styles.container}>
+        <View style={styles.section}>
+          <UserAddress />
         </View>
-      </View>
-    </ScrollView>
+
+        {/* Thông tin cá nhân */}
+        <View style={styles.section}>
+          <Text style={styles.heading}>Thông tin cá nhân</Text>
+
+          <View style={styles.card}>
+            <CustomerPersonalInfoForm userData={userData} refetch={refetch} />
+            <CustomerPasswordChangeForm refetch={refetch} />
+          </View>
+        </View>
+      </ScrollView>
+    </CustomerLayout>
   );
 }
 

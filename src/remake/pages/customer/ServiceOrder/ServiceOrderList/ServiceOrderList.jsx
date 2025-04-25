@@ -51,10 +51,17 @@ export default function ServiceOrderList() {
     data: apiResponse,
     error,
     isLoading,
-  } = useGetServiceOrdersQuery({
-    id: auth?.userId,
-    role: "Customer",
-  });
+  } = useGetServiceOrdersQuery(
+    {
+      id: auth?.userId,
+      role: "Customer",
+    },
+    {
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
+    }
+  );
 
   // Set initial filtered data when API data is loaded
   useEffect(() => {
@@ -114,6 +121,31 @@ export default function ServiceOrderList() {
     setServiceTypeFilter("");
   };
 
+  // Component hiển thị danh sách đơn hàng cho pagination
+  const OrderList = ({ data }) => {
+    if (!data || data.length === 0) {
+      return (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>
+            Không có đơn hàng nào phù hợp với bộ lọc.
+          </Text>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.orderListContainer}>
+        {data.map((item) => (
+          <ServiceOrderCard
+            key={item.orderId}
+            order={item}
+            onViewDetails={handleViewDetails}
+          />
+        ))}
+      </View>
+    );
+  };
+
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -145,22 +177,21 @@ export default function ServiceOrderList() {
         </TouchableOpacity>
       </View>
 
-      {filteredData.length > 0 ? (
-        <FlatList
-          data={filteredData}
-          keyExtractor={(item) => item.orderId.toString()}
-          renderItem={({ item }) => (
-            <ServiceOrderCard order={item} onViewDetails={handleViewDetails} />
-          )}
-          contentContainerStyle={styles.list}
-        />
-      ) : (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>
-            Không có đơn hàng nào phù hợp với bộ lọc.
-          </Text>
-        </View>
-      )}
+      <ScrollView style={styles.contentContainer}>
+        {filteredData.length > 0 ? (
+          <Pagination
+            dataList={filteredData}
+            DisplayComponent={OrderList}
+            itemsPerPage={4}
+          />
+        ) : (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>
+              Không có đơn hàng nào phù hợp với bộ lọc.
+            </Text>
+          </View>
+        )}
+      </ScrollView>
 
       {/* Filter Modal */}
       <Modal
@@ -288,6 +319,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
+  contentContainer: {
+    flex: 1,
+    padding: 16,
+  },
+  orderListContainer: {
+    width: "100%",
+  },
   filterButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -315,10 +353,6 @@ const styles = StyleSheet.create({
   errorText: {
     color: "red",
     fontSize: 16,
-  },
-  list: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
   },
   emptyContainer: {
     padding: 40,

@@ -1,14 +1,5 @@
-import {
-  Box,
-  Button,
-  Heading,
-  HStack,
-  Stack,
-  Text,
-  useDisclosure,
-  Spinner,
-  Center,
-} from "@chakra-ui/react";
+import React from "react";
+import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { appColorTheme } from "../../../../config/appconfig";
 import DepositModal from "../ActionModal/DepositModal";
 import WithdrawModal from "../ActionModal/WithdrawModal";
@@ -23,89 +14,89 @@ export default function WalletInformation() {
     isLoading,
     error,
     refetch,
-  } = useGetUserWalletQuery(auth?.userId);
+  } = useGetUserWalletQuery(auth?.userId, {
+    refetchOnMountOrArgChange: true,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
 
   const wallet = response?.data;
 
-  const {
-    isOpen: isDepositOpen,
-    onOpen: onDepositOpen,
-    onClose: onDepositClose,
-  } = useDisclosure();
-
-  const {
-    isOpen: isWithdrawOpen,
-    onOpen: onWithdrawOpen,
-    onClose: onWithdrawClose,
-  } = useDisclosure();
-
   if (isLoading) {
     return (
-      <Center h="200px">
-        <Spinner size="xl" color={appColorTheme.brown_2} />
-      </Center>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={appColorTheme.brown_2} />
+      </View>
     );
   }
 
   if (error) {
     return (
-      <Center h="200px">
+      <View style={styles.loadingContainer}>
         <Text>Đã có lỗi xảy ra khi tải thông tin ví</Text>
-      </Center>
+      </View>
     );
   }
 
   return (
-    <Box bg="white" p={5} borderRadius="lg" boxShadow="md">
-      <Stack spacing={6}>
-        {/* Account Balance */}
-        <Box>
-          <Heading size="md" mb={4}>
-            Số dư ví
-          </Heading>
-          <Text fontSize="2xl" fontWeight="bold" color={appColorTheme.brown_2}>
-            {formatPrice(wallet?.balance || 0)}
-          </Text>
-        </Box>
+    <View style={styles.container}>
+      <View style={styles.balanceSection}>
+        <Text style={styles.sectionTitle}>Số dư ví</Text>
+        <Text style={styles.balanceText}>
+          {formatPrice(wallet?.balance || 0)}
+        </Text>
+      </View>
 
-        {/* Action Buttons */}
-        <HStack spacing={4}>
-          <Button
-            colorScheme="green"
-            onClick={onDepositOpen}
-            leftIcon={<Text>+</Text>}
-          >
-            Nạp tiền
-          </Button>
-          <Button
-            colorScheme="purple"
-            onClick={onWithdrawOpen}
-            leftIcon={<Text>-</Text>}
-          >
-            Rút tiền
-          </Button>
-        </HStack>
-      </Stack>
+      <View style={styles.actionButtons}>
+        <DepositModal
+          wallet={wallet}
+          onSuccess={() => {
+            refetch();
+          }}
+        />
 
-      {/* Modals */}
-      <DepositModal
-        isOpen={isDepositOpen}
-        onClose={onDepositClose}
-        wallet={wallet}
-        onSuccess={() => {
-          refetch();
-          onDepositClose();
-        }}
-      />
-      <WithdrawModal
-        isOpen={isWithdrawOpen}
-        onClose={onWithdrawClose}
-        wallet={wallet}
-        onSuccess={() => {
-          refetch();
-          onWithdrawClose();
-        }}
-      />
-    </Box>
+        <WithdrawModal
+          wallet={wallet}
+          onSuccess={() => {
+            refetch();
+          }}
+        />
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "white",
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  loadingContainer: {
+    height: 200,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  balanceSection: {
+    padding: 16,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 8,
+  },
+  balanceText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: appColorTheme.brown_2,
+  },
+  actionButtons: {
+    flexDirection: "row",
+    padding: 16,
+    gap: 12,
+  },
+});

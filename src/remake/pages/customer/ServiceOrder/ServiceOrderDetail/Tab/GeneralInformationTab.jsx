@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Linking,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import {
   appColorTheme,
   getServiceTypeLabel,
@@ -21,6 +22,7 @@ import PersonalizationProductList from "./PersonalizationProductList.jsx";
 import SaleProductList from "./SaleProductList.jsx";
 
 export default function GeneralInformationTab({ order, isActive }) {
+  const navigation = useNavigation();
   const serviceName = order?.service?.service?.serviceName;
 
   return (
@@ -164,9 +166,9 @@ export default function GeneralInformationTab({ order, isActive }) {
               <View style={styles.linkContainer}>
                 <TouchableOpacity
                   onPress={() =>
-                    Linking.openURL(
-                      `/woodworker/${order?.service?.wwDto?.woodworkerId}`
-                    )
+                    navigation.navigate("WoodworkerDetail", {
+                      id: order?.service?.wwDto?.woodworkerId,
+                    })
                   }
                 >
                   <Text style={styles.linkText}>Xem xưởng</Text>

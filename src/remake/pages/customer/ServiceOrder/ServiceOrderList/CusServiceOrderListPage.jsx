@@ -2,12 +2,15 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import ServiceOrderList from "./ServiceOrderList.jsx";
 import { appColorTheme } from "../../../../config/appconfig";
+import CustomerLayout from "../../../../layouts/CustomerLayout.jsx";
 
 export default function CusServiceOrderListPage() {
   return (
-    <View style={styles.container}>
-      <ServiceOrderList />
-    </View>
+    <CustomerLayout>
+      <View style={styles.container}>
+        <ServiceOrderList />
+      </View>
+    </CustomerLayout>
   );
 }
 
