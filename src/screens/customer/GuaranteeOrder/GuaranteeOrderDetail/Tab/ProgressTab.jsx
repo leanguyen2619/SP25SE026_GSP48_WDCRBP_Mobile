@@ -1,19 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
-  Box,
+  View,
   Text,
-  HStack,
-  Circle,
-  Stack,
-  Spinner,
-  Center,
-  SimpleGrid,
-  Heading,
-  Divider,
-  Link,
+  ActivityIndicator,
+  StyleSheet,
+  ScrollView,
   Image,
-} from "@chakra-ui/react";
+  Linking,
+} from "react-native";
 import {
   appColorTheme,
   guaranteeOrderStatusConstants,
@@ -48,7 +43,6 @@ export default function ProgressTab({ order, activeTabIndex, isActive }) {
 
   const [trackOrderByCode] = useTrackOrderByCodeMutation();
 
-  // Refetch data when tab becomes active
   useEffect(() => {
     if (isActive) {
       refetchProgress();
@@ -56,7 +50,6 @@ export default function ProgressTab({ order, activeTabIndex, isActive }) {
     }
   }, [isActive, refetchProgress, refetchShipment]);
 
-  // Fetch tracking information when shipment data is available
   useEffect(() => {
     const fetchTrackingData = async () => {
       if (shipmentResponse?.data) {
@@ -87,11 +80,9 @@ export default function ProgressTab({ order, activeTabIndex, isActive }) {
   const progressItems = progressResponse?.data || [];
   const shipmentItems = shipmentResponse?.data || [];
 
-  // Check if order is cancelled
   const isOrderCancelled =
     order?.status == guaranteeOrderStatusConstants.DA_HUY;
 
-  // Define progress steps based on service type
   let progressSteps = [];
   if (order?.isGuarantee) {
     progressSteps = [
@@ -115,248 +106,319 @@ export default function ProgressTab({ order, activeTabIndex, isActive }) {
     ];
   }
 
-  // Display loading state
   if (isLoadingProgress || isLoadingShipment) {
     return (
-      <Center h="200px">
-        <Spinner size="xl" color={appColorTheme.brown_2} />
-      </Center>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={appColorTheme.brown_2} />
+      </View>
     );
   }
 
-  // Display error state
   if (progressError || shipmentError) {
     return (
-      <Center h="200px">
+      <View style={styles.errorContainer}>
         <Text>Đã có lỗi xảy ra khi tải thông tin</Text>
-      </Center>
+      </View>
     );
   }
 
-  // Map of status values that exist in API response
   const existingStatusMap = {};
   progressItems.forEach((item) => {
     existingStatusMap[item.status] = true;
   });
 
+  const handleTrackShipment = (orderCode) => {
+    Linking.openURL(`https://donhang.ghn.vn/?order_code=${orderCode}`);
+  };
+
   return (
-    <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-      {/* Left Column - Progress Timeline */}
-      <Box bg="white" borderRadius="10px" p={5} boxShadow="md">
-        <Heading as="h3" size="md" mb={4}>
-          Tiến độ đơn hàng
-        </Heading>
+    <ScrollView style={styles.container}>
+      <View style={styles.gridContainer}>
+        {/* Progress Timeline */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Tiến độ đơn hàng</Text>
 
-        {progressItems.length === 0 ? (
-          <Center p={8}>
-            <Text fontSize="lg" color="gray.500">
-              Chưa có thông tin tiến độ
-            </Text>
-          </Center>
-        ) : isOrderCancelled ? (
-          // If order is cancelled, only display actual progress from API
-          <Stack spacing={6} position="relative">
-            {progressItems.map((progress, index) => (
-              <HStack align="start" key={progress.progressId} spacing={4}>
-                <Box position="relative">
-                  <Circle
-                    size="32px"
-                    bg={appColorTheme.brown_2}
-                    color="white"
-                    fontWeight="bold"
-                  >
-                    {index + 1}
-                  </Circle>
-                  {index < progressItems.length - 1 && (
-                    <Box
-                      position="absolute"
-                      top="32px"
-                      left="50%"
-                      transform="translateX(-50%)"
-                      width="2px"
-                      height="70px"
-                      bg="gray.300"
-                    />
-                  )}
-                </Box>
-
-                <Box flex="1">
-                  <Text fontWeight="bold">{progress.status}</Text>
-                </Box>
-
-                <Text whiteSpace="nowrap">
-                  {formatDateTimeString(new Date(progress.createdTime))}
-                </Text>
-              </HStack>
-            ))}
-          </Stack>
-        ) : (
-          // If order is not cancelled, display the full predefined flow with opacity
-          <Stack spacing={6} position="relative">
-            {progressSteps.map((status, index) => {
-              const progress = progressItems.find((p) => p.status === status);
-              const isCompleted = !!progress;
-
-              return (
-                <HStack
-                  align="start"
-                  key={index}
-                  spacing={4}
-                  opacity={isCompleted ? 1 : 0.5}
-                >
-                  <Box position="relative">
-                    <Circle
-                      size="32px"
-                      bg={appColorTheme.brown_2}
-                      color="white"
-                      fontWeight="bold"
-                    >
-                      {index + 1}
-                    </Circle>
-                    {index < progressSteps.length - 1 && (
-                      <Box
-                        position="absolute"
-                        top="32px"
-                        left="50%"
-                        transform="translateX(-50%)"
-                        width="2px"
-                        height="70px"
-                        bg={isCompleted ? "gray.300" : "gray.100"}
-                      />
+          {progressItems.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>Chưa có thông tin tiến độ</Text>
+            </View>
+          ) : isOrderCancelled ? (
+            <View style={styles.progressContainer}>
+              {progressItems.map((progress, index) => (
+                <View key={progress.progressId} style={styles.progressItem}>
+                  <View style={styles.progressIndicator}>
+                    <View style={styles.progressCircle}>
+                      <Text style={styles.progressNumber}>{index + 1}</Text>
+                    </View>
+                    {index < progressItems.length - 1 && (
+                      <View style={styles.progressLine} />
                     )}
-                  </Box>
+                  </View>
 
-                  <Box flex="1">
-                    <Text fontWeight={isCompleted ? "bold" : "normal"}>
-                      {status}
+                  <View style={styles.progressContent}>
+                    <Text style={styles.progressStatus}>{progress.status}</Text>
+                    <Text style={styles.progressTime}>
+                      {formatDateTimeString(new Date(progress.createdTime))}
                     </Text>
-                  </Box>
+                  </View>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <View style={styles.progressContainer}>
+              {progressSteps.map((status, index) => {
+                const progress = progressItems.find((p) => p.status === status);
+                const isCompleted = !!progress;
 
-                  <Text whiteSpace="nowrap">
-                    {progress
-                      ? formatDateTimeString(new Date(progress.createdTime))
-                      : ""}
-                  </Text>
-                </HStack>
-              );
-            })}
-          </Stack>
-        )}
-      </Box>
-
-      {/* Right Column - Shipment Information */}
-      <Box bg="white" borderRadius="10px" p={5} boxShadow="md">
-        <Heading as="h3" size="md" mb={4}>
-          Thông tin vận chuyển
-        </Heading>
-
-        {shipmentItems.length === 0 ? (
-          <Center p={8}>
-            <Text fontSize="lg" color="gray.500">
-              Chưa có thông tin vận chuyển
-            </Text>
-          </Center>
-        ) : (
-          <Stack spacing={10}>
-            {shipmentItems.map((shipment) => (
-              <Box key={shipment.shipmentId}>
-                <Stack spacing={3} divider={<Divider />}>
-                  {shipment.shipType && (
-                    <HStack>
-                      {shipment.shipType.toLowerCase().includes("ghn") && (
-                        <Image
-                          src={ghnLogo}
-                          alt="GHN Logo"
-                          height="25px"
-                          objectFit="contain"
-                          ml={2}
+                return (
+                  <View
+                    key={index}
+                    style={[
+                      styles.progressItem,
+                      !isCompleted && styles.incompleteItem,
+                    ]}
+                  >
+                    <View style={styles.progressIndicator}>
+                      <View
+                        style={[
+                          styles.progressCircle,
+                          !isCompleted && styles.incompleteCircle,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.progressNumber,
+                            !isCompleted && styles.incompleteNumber,
+                          ]}
+                        >
+                          {index + 1}
+                        </Text>
+                      </View>
+                      {index < progressSteps.length - 1 && (
+                        <View
+                          style={[
+                            styles.progressLine,
+                            !isCompleted && styles.incompleteLine,
+                          ]}
                         />
                       )}
+                    </View>
+
+                    <View style={styles.progressContent}>
                       <Text
-                        color={appColorTheme.brown_2}
-                        fontWeight="bold"
-                        fontSize="18px"
+                        style={[
+                          styles.progressStatus,
+                          !isCompleted && styles.incompleteStatus,
+                        ]}
                       >
-                        {shipment.shipType}
+                        {status}
                       </Text>
-                    </HStack>
-                  )}
+                      {progress && (
+                        <Text style={styles.progressTime}>
+                          {formatDateTimeString(new Date(progress.createdTime))}
+                        </Text>
+                      )}
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          )}
+        </View>
 
-                  <HStack alignItems="flex-start">
-                    <Text fontWeight="bold" minW="120px">
-                      Địa chỉ giao:
+        {/* Shipment Information */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Thông tin vận chuyển</Text>
+
+          {shipmentItems.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>Chưa có thông tin vận chuyển</Text>
+            </View>
+          ) : (
+            <View style={styles.shipmentContainer}>
+              {shipmentItems.map((shipment, index) => (
+                <View key={shipment.shipmentId} style={styles.shipmentItem}>
+                  <View style={styles.shipmentHeader}>
+                    <Image source={ghnLogo} style={styles.shipmentLogo} />
+                    <Text style={styles.shipmentCode}>
+                      Mã vận đơn: {shipment.orderCode}
                     </Text>
-                    <Text>{shipment.toAddress || "Chưa cập nhật"}</Text>
-                  </HStack>
+                  </View>
 
-                  {shipment.fromAddress && (
-                    <HStack alignItems="flex-start">
-                      <Text fontWeight="bold" minW="120px">
-                        Địa chỉ lấy hàng:
-                      </Text>
-                      <Text>{shipment.fromAddress}</Text>
-                    </HStack>
-                  )}
+                  <View style={styles.shipmentInfo}>
+                    <Text style={styles.shipmentLabel}>Trạng thái:</Text>
+                    <Text style={styles.shipmentValue}>
+                      {translateShippingStatus(
+                        trackingData[shipment.orderCode]?.status
+                      )}
+                    </Text>
+                  </View>
 
-                  {shipment.shippingUnit && (
-                    <HStack>
-                      <Text fontWeight="bold" minW="120px">
-                        Đơn vị vận chuyển:
-                      </Text>
-                      <Text>{shipment.shippingUnit}</Text>
-                    </HStack>
-                  )}
+                  <View style={styles.shipmentInfo}>
+                    <Text style={styles.shipmentLabel}>Ngày tạo:</Text>
+                    <Text style={styles.shipmentValue}>
+                      {formatDateString(new Date(shipment.createdAt))}
+                    </Text>
+                  </View>
 
-                  {shipment.orderCode && shipment.orderCode !== "string" && (
-                    <Stack mt={5}>
-                      <HStack>
-                        <Text fontWeight="bold" minW="120px">
-                          Mã vận đơn:
-                        </Text>
-                        <Text>{shipment.orderCode}</Text>
-                      </HStack>
-                      <Link
-                        target="_blank"
-                        href={`https://donhang.ghn.vn/?order_code=${shipment.orderCode}`}
-                        color={appColorTheme.brown_2}
-                        mb={2}
-                      >
-                        Tra cứu
-                      </Link>
-                      <HStack>
-                        <Text fontWeight="bold" minW="120px">
-                          Ngày giao dự kiến:
-                        </Text>
-                        <Text>
-                          {trackingData[shipment.orderCode]?.leadtime
-                            ? formatDateString(
-                                new Date(
-                                  trackingData[shipment.orderCode].leadtime
-                                )
-                              )
-                            : "Không có thông tin"}
-                        </Text>
-                      </HStack>
-                      <HStack>
-                        <Text fontWeight="bold" minW="120px">
-                          Trạng thái vận chuyển:
-                        </Text>
-                        <Text>
-                          {trackingData[shipment.orderCode]?.status
-                            ? translateShippingStatus(
-                                trackingData[shipment.orderCode].status
-                              )
-                            : "Không có thông tin"}
-                        </Text>
-                      </HStack>
-                    </Stack>
-                  )}
-                </Stack>
-              </Box>
-            ))}
-          </Stack>
-        )}
-      </Box>
-    </SimpleGrid>
+                  <TouchableOpacity
+                    style={styles.trackButton}
+                    onPress={() => handleTrackShipment(shipment.orderCode)}
+                  >
+                    <Text style={styles.trackButtonText}>Theo dõi đơn hàng</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+      </View>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  gridContainer: {
+    padding: 16,
+    gap: 16,
+  },
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    color: appColorTheme.brown_2,
+  },
+  emptyContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  progressContainer: {
+    gap: 24,
+  },
+  progressItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  incompleteItem: {
+    opacity: 0.5,
+  },
+  progressIndicator: {
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  progressCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: appColorTheme.brown_2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  incompleteCircle: {
+    backgroundColor: '#ccc',
+  },
+  progressNumber: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  incompleteNumber: {
+    color: '#666',
+  },
+  progressLine: {
+    width: 2,
+    height: 70,
+    backgroundColor: '#ccc',
+    marginTop: 8,
+  },
+  incompleteLine: {
+    backgroundColor: '#eee',
+  },
+  progressContent: {
+    flex: 1,
+  },
+  progressStatus: {
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  incompleteStatus: {
+    fontWeight: 'normal',
+  },
+  progressTime: {
+    color: '#666',
+  },
+  shipmentContainer: {
+    gap: 16,
+  },
+  shipmentItem: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    padding: 12,
+  },
+  shipmentHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  shipmentLogo: {
+    width: 24,
+    height: 24,
+    marginRight: 8,
+  },
+  shipmentCode: {
+    fontWeight: 'bold',
+  },
+  shipmentInfo: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  shipmentLabel: {
+    fontWeight: 'bold',
+    marginRight: 8,
+  },
+  shipmentValue: {
+    flex: 1,
+  },
+  trackButton: {
+    backgroundColor: appColorTheme.brown_2,
+    padding: 8,
+    borderRadius: 4,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  trackButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+});
