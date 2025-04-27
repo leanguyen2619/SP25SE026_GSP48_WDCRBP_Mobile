@@ -70,7 +70,7 @@ export default function ComplaintCreateModal({ refetch, serviceOrders = [] }) {
     // Validate complaint data
     const errors = validateComplaintData(data);
     if (errors.length > 0) {
-      notify("Lỗi khi tạo khiếu nại", errors.join(" [---] "), "error", 3000);
+      notify("Lỗi khi tạo khiếu nại", errors.join("\n"), "error", 3000);
       return;
     }
 

@@ -38,7 +38,7 @@ export default function Register({ setRegisterEmail, changeTab }) {
       // Validate data
       const errors = validateRegister(formData);
       if (errors.length > 0) {
-        notify("Đăng ký thất bại", errors.join(" [---] "), "info", 5000);
+        notify("Đăng ký thất bại", errors.join("\n"), "info", 5000);
         return;
       }
 

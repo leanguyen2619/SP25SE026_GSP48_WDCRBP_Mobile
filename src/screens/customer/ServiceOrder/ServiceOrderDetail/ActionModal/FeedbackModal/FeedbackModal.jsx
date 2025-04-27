@@ -152,10 +152,13 @@ export default function FeedbackModal({ serviceOrderId, refetch }) {
                 style={[
                   styles.footerButton,
                   styles.submitButton,
-                  (!feedback || feedback.trim() === "" || !isChecked) && styles.disabledButton
+                  (!feedback || feedback.trim() === "" || !isChecked) &&
+                    styles.disabledButton,
                 ]}
                 onPress={handleSubmit}
-                disabled={isLoading || !feedback || feedback.trim() === "" || !isChecked}
+                disabled={
+                  isLoading || !feedback || feedback.trim() === "" || !isChecked
+                }
               >
                 {isLoading ? (
                   <ActivityIndicator size="small" color="white" />
@@ -201,8 +204,6 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 10,
     width: "90%",
-    maxHeight: "80%",
-    overflow: "hidden",
   },
   modalHeader: {
     flexDirection: "row",

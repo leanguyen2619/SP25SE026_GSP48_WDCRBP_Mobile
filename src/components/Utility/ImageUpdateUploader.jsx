@@ -170,6 +170,7 @@ export default function ImageUpdateUploader({
         Alert.alert("Cảnh báo", "Không có ảnh nào được chọn");
       }
     } catch (err) {
+      console.log(err);
       Alert.alert(
         "Cập nhật thất bại",
         error || "Có lỗi xảy ra khi tải lên ảnh. Vui lòng thử lại."

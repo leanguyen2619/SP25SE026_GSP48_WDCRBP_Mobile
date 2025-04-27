@@ -1,22 +1,31 @@
-import { Heading, Stack } from "@chakra-ui/react";
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-quartz.css";
+import React from "react";
+import { View, Text, StyleSheet, SafeAreaView } from "react-native";
 import { appColorTheme } from "../../../../config/appconfig";
 import GuaranteeOrderList from "./GuaranteeOrderList.jsx";
+import CustomerLayout from "../../../../layouts/CustomerLayout";
 
 export default function CusGuaranteeOrderListPage() {
   return (
-    <Stack spacing={6}>
-      <Heading
-        color={appColorTheme.brown_2}
-        as="h2"
-        fontSize="2xl"
-        fontFamily="Montserrat"
-      >
-        Đơn đặt dịch vụ bảo hành, sửa chữa
-      </Heading>
-
-      <GuaranteeOrderList />
-    </Stack>
+    <CustomerLayout>
+      <SafeAreaView style={styles.container}>
+        <GuaranteeOrderList />
+      </SafeAreaView>
+    </CustomerLayout>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  titleContainer: {
+    marginBottom: 24,
+  },
+  title: {
+    color: appColorTheme.brown_2,
+    fontSize: 20,
+    fontWeight: "bold",
+    fontFamily: "Montserrat",
+  },
+});

@@ -18,7 +18,6 @@ import { formatDateTimeString } from "../../../../utils/utils";
 import { FiStar } from "react-icons/fi";
 import { useGetWoodworkerResponseReviewsQuery } from "../../../../services/reviewApi";
 import useAuth from "../../../../hooks/useAuth";
-import RequireServicePack from "../../../../components/Utility/RequireServicePack";
 
 export default function ReviewManagementListPage() {
   const { auth } = useAuth();
@@ -125,35 +124,33 @@ export default function ReviewManagementListPage() {
   }
 
   return (
-    <RequireServicePack>
-      <Stack spacing={6}>
-        <Flex justify="space-between" align="center">
-          <Heading
-            color={appColorTheme.brown_2}
-            fontSize="2xl"
-            fontFamily="Montserrat"
-          >
-            Quản lý Đánh giá
-          </Heading>
-        </Flex>
+    <Stack spacing={6}>
+      <Flex justify="space-between" align="center">
+        <Heading
+          color={appColorTheme.brown_2}
+          fontSize="2xl"
+          fontFamily="Montserrat"
+        >
+          Quản lý Đánh giá
+        </Heading>
+      </Flex>
 
-        <Box>
-          <div
-            className="ag-theme-quartz"
-            style={{ height: 700, fontSize: "16px" }}
-          >
-            <AgGridReact
-              pagination
-              paginationPageSize={20}
-              paginationPageSizeSelector={[10, 20, 50, 100]}
-              defaultColDef={defaultColDef}
-              rowData={reviews || []}
-              columnDefs={colDefs}
-              overlayNoRowsTemplate="Không có đánh giá nào cần phản hồi"
-            />
-          </div>
-        </Box>
-      </Stack>
-    </RequireServicePack>
+      <Box>
+        <div
+          className="ag-theme-quartz"
+          style={{ height: 700, fontSize: "16px" }}
+        >
+          <AgGridReact
+            pagination
+            paginationPageSize={20}
+            paginationPageSizeSelector={[10, 20, 50, 100]}
+            defaultColDef={defaultColDef}
+            rowData={reviews || []}
+            columnDefs={colDefs}
+            overlayNoRowsTemplate="Không có đánh giá nào cần phản hồi"
+          />
+        </div>
+      </Box>
+    </Stack>
   );
 }

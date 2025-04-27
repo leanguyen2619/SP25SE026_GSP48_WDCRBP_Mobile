@@ -7,7 +7,6 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
-  Linking,
   ActivityIndicator,
 } from "react-native";
 import { appColorTheme } from "../../../../../config/appconfig.js";
@@ -391,6 +390,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 16,
+    color: appColorTheme.brown_2,
   },
   contractContent: {
     marginBottom: 16,

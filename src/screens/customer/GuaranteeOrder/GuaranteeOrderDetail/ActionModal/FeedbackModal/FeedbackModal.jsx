@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useSubmitFeedbackMutation } from "../../../../../../services/guaranteeOrderApi";
 import { useNotify } from "../../../../../../components/Utility/Notify";
-import { FiEdit, FiSend, FiXCircle } from "react-icons/fi";
+import { Ionicons } from "@expo/vector-icons";
 import CheckboxList from "../../../../../../components/Utility/CheckboxList";
 import { validateFeedback } from "../../../../../../validations";
 import {
@@ -12,10 +12,11 @@ import {
   Modal,
   TextInput,
   ActivityIndicator,
+  ScrollView,
 } from "react-native";
 
 export default function FeedbackModal({ serviceOrderId, refetch }) {
-  const [isModalVisible, setModalVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const notify = useNotify();
   const [sendFeedback, { isLoading }] = useSubmitFeedbackMutation();
   const [feedback, setFeedback] = useState("");
@@ -67,43 +68,48 @@ export default function FeedbackModal({ serviceOrderId, refetch }) {
     }
   };
 
+  const closeModal = () => {
+    if (!isLoading) {
+      setModalVisible(false);
+    }
+  };
+
   return (
     <>
       <TouchableOpacity
-        style={styles.button}
+        style={styles.feedbackButton}
         onPress={() => setModalVisible(true)}
       >
-        <FiEdit style={styles.buttonIcon} />
-        <Text style={styles.buttonText}>Gửi phản hồi</Text>
+        <Ionicons name="create-outline" size={20} color="#3182CE" />
+        <Text style={styles.feedbackButtonText}>Gửi phản hồi</Text>
       </TouchableOpacity>
 
       <Modal
-        visible={isModalVisible}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => !isLoading && setModalVisible(false)}
+        visible={modalVisible}
+        onRequestClose={closeModal}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Gửi phản hồi</Text>
-            {!isLoading && (
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setModalVisible(false)}
-              >
-                <FiXCircle style={styles.closeIcon} />
-              </TouchableOpacity>
-            )}
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalHeaderText}>Gửi phản hồi</Text>
+              {!isLoading && (
+                <TouchableOpacity onPress={closeModal}>
+                  <Ionicons name="close" size={24} color="#333" />
+                </TouchableOpacity>
+              )}
+            </View>
 
-            <View style={styles.modalBody}>
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Nội dung phản hồi</Text>
+            <ScrollView style={styles.modalBody}>
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Nội dung phản hồi</Text>
                 <TextInput
-                  style={styles.input}
+                  style={styles.textInput}
                   value={feedback}
                   onChangeText={handleFeedbackChange}
                   placeholder="Nhập phản hồi của bạn"
-                  multiline
+                  multiline={true}
                   numberOfLines={4}
                 />
               </View>
@@ -117,31 +123,41 @@ export default function FeedbackModal({ serviceOrderId, refetch }) {
                   />
                 </>
               )}
-            </View>
+            </ScrollView>
 
             <View style={styles.modalFooter}>
               <TouchableOpacity
-                style={[styles.footerButton, styles.cancelButton]}
-                onPress={() => setModalVisible(false)}
+                style={[styles.footerButton, styles.closeButton]}
+                onPress={closeModal}
                 disabled={isLoading}
               >
-                <FiXCircle style={styles.buttonIcon} />
-                <Text style={styles.buttonText}>Đóng</Text>
+                <Ionicons name="close-circle" size={20} color="#333" />
+                <Text style={styles.closeButtonText}>Đóng</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.footerButton, styles.submitButton]}
+                style={[
+                  styles.footerButton,
+                  styles.submitButton,
+                  (isCheckboxDisabled || !feedback || feedback.trim() === "") &&
+                    styles.disabledButton,
+                ]}
                 onPress={handleSubmit}
-                disabled={!feedback || feedback.trim() === "" || isCheckboxDisabled || isLoading}
+                disabled={
+                  isLoading ||
+                  !feedback ||
+                  feedback.trim() === "" ||
+                  isCheckboxDisabled
+                }
               >
                 {isLoading ? (
                   <ActivityIndicator size="small" color="white" />
                 ) : (
-                  <FiSend style={styles.buttonIcon} />
+                  <>
+                    <Ionicons name="send" size={20} color="white" />
+                    <Text style={styles.submitButtonText}>Gửi phản hồi</Text>
+                  </>
                 )}
-                <Text style={[styles.buttonText, styles.submitButtonText]}>
-                  Gửi phản hồi
-                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -152,94 +168,120 @@ export default function FeedbackModal({ serviceOrderId, refetch }) {
 }
 
 const styles = StyleSheet.create({
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
+  feedbackButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    justifyContent: "center",
     borderWidth: 1,
-    borderColor: '#3182CE',
-    padding: 8,
-    borderRadius: 4,
+    borderColor: "#3182CE",
   },
-  buttonIcon: {
-    color: '#3182CE',
-    marginRight: 8,
-  },
-  buttonText: {
-    color: '#3182CE',
-    fontWeight: 'bold',
+  feedbackButtonText: {
+    color: "#3182CE",
+    marginLeft: 8,
+    fontWeight: "600",
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 10,
-    width: '90%',
-    maxWidth: 500,
+    width: "90%",
   },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 16,
-    textAlign: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
   },
-  closeButton: {
-    position: 'absolute',
-    top: 16,
-    right: 16,
-  },
-  closeIcon: {
-    fontSize: 20,
-    color: '#666',
+  modalHeaderText: {
+    fontSize: 18,
+    fontWeight: "700",
   },
   modalBody: {
     padding: 16,
   },
-  inputContainer: {
+  formGroup: {
     marginBottom: 16,
   },
-  inputLabel: {
-    fontWeight: 'bold',
+  label: {
+    fontWeight: "600",
     marginBottom: 8,
   },
-  input: {
+  textInput: {
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    borderRadius: 4,
-    padding: 8,
+    borderColor: "#CBD5E0",
+    borderRadius: 6,
+    padding: 10,
     minHeight: 100,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
   divider: {
     height: 1,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: "#E2E8F0",
     marginVertical: 16,
   },
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: "#3182CE",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 8,
+  },
+  checkboxChecked: {
+    backgroundColor: "#3182CE",
+  },
+  checkboxLabel: {
+    flex: 1,
+  },
   modalFooter: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "flex-end",
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
+    borderTopColor: "#E2E8F0",
   },
   footerButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 8,
-    borderRadius: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 6,
     marginLeft: 8,
   },
-  cancelButton: {
-    backgroundColor: '#EDF2F7',
+  closeButton: {
+    backgroundColor: "#EDF2F7",
+  },
+  closeButtonText: {
+    marginLeft: 4,
+    color: "#1A202C",
   },
   submitButton: {
-    backgroundColor: '#3182CE',
+    backgroundColor: "#3182CE",
   },
   submitButtonText: {
-    color: 'white',
+    marginLeft: 4,
+    color: "white",
+    fontWeight: "600",
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
 });

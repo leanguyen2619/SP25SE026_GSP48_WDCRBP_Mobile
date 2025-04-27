@@ -1,20 +1,16 @@
 import {
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
+  View,
+  Text,
+  StyleSheet,
   Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  Stack,
-  Textarea,
-  useDisclosure,
-} from "@chakra-ui/react";
-import { useRef, useState } from "react";
-import { FiPlus, FiSave, FiX } from "react-icons/fi";
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { useState, useRef } from "react";
+import Icon from "react-native-vector-icons/Feather";
 import { appColorTheme } from "../../../../config/appconfig";
 import ImageUpload from "../../../../components/Utility/ImageUpload";
 import { useCreatePostMutation } from "../../../../services/postApi";
@@ -24,22 +20,35 @@ import CheckboxList from "../../../../components/Utility/CheckboxList";
 import { validatePostData } from "../../../../validations";
 
 export default function PostCreateModal({ refetch }) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const initialRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
   const [imgUrls, setImgUrls] = useState("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [buttonDisabled, setButtonDisabled] = useState(true);
+
   const notify = useNotify();
   const { auth } = useAuth();
-  const [buttonDisabled, setButtonDisabled] = useState(true);
 
   const [createPost, { isLoading }] = useCreatePostMutation();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
+  const openModal = () => setIsVisible(true);
+  const closeModal = () => {
+    if (!isLoading) {
+      setIsVisible(false);
+    }
+  };
 
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setImgUrls("");
+    setButtonDisabled(true);
+  };
+
+  const handleSubmit = async () => {
     const data = {
-      title: formData.get("title"),
-      description: formData.get("description"),
+      title: title,
+      description: description,
       imgUrls: imgUrls,
       woodworkerId: auth?.wwId,
     };
@@ -47,7 +56,7 @@ export default function PostCreateModal({ refetch }) {
     // Validate post data
     const errors = validatePostData(data);
     if (errors.length > 0) {
-      notify("Lỗi khi tạo bài viết", errors.join(" [---] "), "error", 3000);
+      notify("Lỗi khi tạo bài viết", errors.join("\n"), "error", 3000);
       return;
     }
 
@@ -56,8 +65,8 @@ export default function PostCreateModal({ refetch }) {
 
       notify("Bài viết đã được tạo thành công", "", "success", 3000);
 
-      setImgUrls("");
-      onClose();
+      resetForm();
+      closeModal();
       refetch?.();
     } catch (error) {
       notify(
@@ -71,62 +80,73 @@ export default function PostCreateModal({ refetch }) {
 
   return (
     <>
-      <Button
-        px={2}
-        color={appColorTheme.green_0}
-        bg="none"
-        border={`1px solid ${appColorTheme.green_0}`}
-        _hover={{ bg: appColorTheme.green_0, color: "white" }}
-        leftIcon={<FiPlus />}
-        onClick={onOpen}
-      >
-        Thêm bài viết mới
-      </Button>
+      <TouchableOpacity style={styles.addButton} onPress={openModal}>
+        <Icon name="plus" size={16} color={appColorTheme.green_0} />
+        <Text style={styles.addButtonText}>Thêm bài viết mới</Text>
+      </TouchableOpacity>
 
       <Modal
-        size="6xl"
-        initialFocusRef={initialRef}
-        isOpen={isOpen}
-        closeOnOverlayClick={false}
-        closeOnEsc={false}
-        onClose={onClose}
+        animationType="slide"
+        transparent={true}
+        visible={isVisible}
+        onRequestClose={closeModal}
       >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Thêm bài viết mới</ModalHeader>
-          {!isLoading && <ModalCloseButton />}
-          <ModalBody bgColor="app_grey.1" pb={6}>
-            <form onSubmit={handleSubmit}>
-              <Stack spacing={4}>
-                <FormControl isRequired>
-                  <FormLabel>Tiêu đề</FormLabel>
-                  <Input
-                    name="title"
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.centeredView}
+        >
+          <View style={styles.modalView}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Thêm bài viết mới</Text>
+              {!isLoading && (
+                <TouchableOpacity
+                  onPress={closeModal}
+                  style={styles.closeButton}
+                >
+                  <Icon name="x" size={24} color="#000" />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            <ScrollView style={styles.modalBody}>
+              <View style={styles.formContainer}>
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>
+                    Tiêu đề <Text style={styles.required}>*</Text>
+                  </Text>
+                  <TextInput
+                    style={styles.input}
                     placeholder="Nhập tiêu đề bài viết"
-                    bg="white"
+                    value={title}
+                    onChangeText={setTitle}
                   />
-                </FormControl>
+                </View>
 
-                <FormControl isRequired>
-                  <FormLabel>Mô tả</FormLabel>
-                  <Textarea
-                    whiteSpace={"pre-wrap"}
-                    name="description"
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>
+                    Mô tả <Text style={styles.required}>*</Text>
+                  </Text>
+                  <TextInput
+                    style={[styles.input, styles.textArea]}
                     placeholder="Nhập mô tả bài viết"
-                    bg="white"
-                    rows={10}
+                    value={description}
+                    onChangeText={setDescription}
+                    multiline
+                    numberOfLines={10}
                   />
-                </FormControl>
+                </View>
 
-                <FormControl isRequired>
-                  <FormLabel>Hình ảnh</FormLabel>
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>
+                    Hình ảnh <Text style={styles.required}>*</Text>
+                  </Text>
                   <ImageUpload
                     maxFiles={4}
                     onUploadComplete={(result) => {
                       setImgUrls(result);
                     }}
                   />
-                </FormControl>
+                </View>
 
                 <CheckboxList
                   items={[
@@ -139,29 +159,146 @@ export default function PostCreateModal({ refetch }) {
                   setButtonDisabled={setButtonDisabled}
                 />
 
-                <Stack direction="row" justify="flex-end" spacing={4}>
-                  <Button
-                    onClick={onClose}
-                    leftIcon={<FiX />}
-                    isDisabled={isLoading}
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity
+                    style={[styles.button, styles.closeBtn]}
+                    onPress={closeModal}
+                    disabled={isLoading}
                   >
-                    Đóng
-                  </Button>
-                  <Button
-                    colorScheme="green"
-                    type="submit"
-                    isLoading={isLoading}
-                    isDisabled={buttonDisabled}
-                    leftIcon={<FiSave />}
+                    <Icon name="x" size={16} color="#000" />
+                    <Text style={styles.buttonText}>Đóng</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.button,
+                      styles.saveBtn,
+                      (buttonDisabled || isLoading) && styles.disabledButton,
+                    ]}
+                    onPress={handleSubmit}
+                    disabled={buttonDisabled || isLoading}
                   >
-                    Lưu
-                  </Button>
-                </Stack>
-              </Stack>
-            </form>
-          </ModalBody>
-        </ModalContent>
+                    <Icon name="save" size={16} color="#fff" />
+                    <Text style={[styles.buttonText, styles.saveButtonText]}>
+                      {isLoading ? "Đang lưu..." : "Lưu"}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </ScrollView>
+          </View>
+        </KeyboardAvoidingView>
       </Modal>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  addButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 8,
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: appColorTheme.green_0,
+    borderRadius: 4,
+  },
+  addButtonText: {
+    marginLeft: 5,
+    color: appColorTheme.green_0,
+    fontWeight: "500",
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalView: {
+    width: "95%",
+    maxHeight: "90%",
+    backgroundColor: "white",
+    borderRadius: 10,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  closeButton: {
+    padding: 5,
+  },
+  modalBody: {
+    backgroundColor: "#f5f5f5",
+  },
+  formContainer: {
+    padding: 15,
+  },
+  formGroup: {
+    marginBottom: 15,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
+    fontWeight: "500",
+  },
+  required: {
+    color: "red",
+  },
+  input: {
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 5,
+    padding: 10,
+    fontSize: 16,
+  },
+  textArea: {
+    minHeight: 150,
+    textAlignVertical: "top",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 15,
+  },
+  button: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    borderRadius: 5,
+    marginLeft: 10,
+  },
+  closeBtn: {
+    backgroundColor: "#f0f0f0",
+  },
+  saveBtn: {
+    backgroundColor: appColorTheme.green_0,
+  },
+  disabledButton: {
+    backgroundColor: "#cccccc",
+    opacity: 0.7,
+  },
+  buttonText: {
+    marginLeft: 5,
+    fontSize: 16,
+  },
+  saveButtonText: {
+    color: "#fff",
+  },
+});

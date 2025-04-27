@@ -292,6 +292,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 16,
+    color: appColorTheme.brown_2,
   },
   productList: {
     // Bỏ maxHeight để hiển thị đầy đủ nội dung

@@ -1,52 +1,61 @@
+import React, { useMemo, useState, useEffect } from "react";
 import {
-  Box,
-  Button,
-  HStack,
-  Tooltip,
-  Spinner,
+  View,
   Text,
-  Select,
-} from "@chakra-ui/react";
-import { AgGridReact } from "ag-grid-react";
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-quartz.css";
-import { useMemo, useState, useRef, useEffect } from "react";
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  Modal,
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import { Ionicons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import {
   appColorTheme,
   guaranteeOrderStatusConstants,
 } from "../../../../config/appconfig";
-import { FiEye } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
 import { useGetGuaranteeOrdersQuery } from "../../../../services/guaranteeOrderApi";
 import useAuth from "../../../../hooks/useAuth";
+import GuaranteeOrderCard from "./GuaranteeOrderCard";
+import Pagination from "../../../../components/Utility/Pagination";
+import { useNavigation } from "@react-navigation/native";
 
-const ActionButton = (params) => {
-  const navigate = useNavigate();
-  const orderId = params.data.guaranteeOrderId;
-
+// Component to render guarantee order items (will be passed to Pagination)
+const GuaranteeOrderListItems = ({ data, onViewDetails }) => {
   return (
-    <HStack columnGap="4px">
-      <Tooltip label="Chi tiết" hasArrow>
-        <Button
-          p="1px"
-          onClick={() => navigate(`${orderId}`)}
-          color={appColorTheme.brown_2}
-          bg="none"
-          border={`1px solid ${appColorTheme.brown_2}`}
-          _hover={{ bg: appColorTheme.brown_2, color: "white" }}
-        >
-          <FiEye />
-        </Button>
-      </Tooltip>
-    </HStack>
+    <View style={styles.listContainer}>
+      {data.length > 0 ? (
+        data.map((order) => (
+          <GuaranteeOrderCard
+            key={order.guaranteeOrderId}
+            order={order}
+            onViewDetails={onViewDetails}
+          />
+        ))
+      ) : (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>
+            Không có đơn hàng nào phù hợp với bộ lọc.
+          </Text>
+        </View>
+      )}
+    </View>
   );
 };
 
+const { width, height } = Dimensions.get("window");
+
 export default function GuaranteeOrderList() {
   const { auth } = useAuth();
-  const gridRef = useRef();
+  const navigation = useNavigation();
   const [statusFilter, setStatusFilter] = useState("");
+  const [sortOption, setSortOption] = useState("orderIdDesc"); // Mặc định sắp xếp theo ID giảm dần
   const [filteredData, setFilteredData] = useState([]);
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
 
   // Get unique status values from the constants for the dropdown
   const statusValues = useMemo(() => {
@@ -57,164 +66,358 @@ export default function GuaranteeOrderList() {
     data: apiResponse,
     error,
     isLoading,
-  } = useGetGuaranteeOrdersQuery({
-    id: auth?.wwId,
-    role: "Woodworker",
-  });
+  } = useGetGuaranteeOrdersQuery(
+    {
+      id: auth?.userId,
+      role: "Customer",
+    },
+    {
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
+    }
+  );
 
   // Set initial filtered data when API data is loaded
   useEffect(() => {
     if (apiResponse?.data) {
-      setFilteredData(apiResponse.data);
+      // Mặc định sắp xếp theo ID giảm dần
+      const sortedData = [...apiResponse.data].sort(
+        (a, b) => b.guaranteeOrderId - a.guaranteeOrderId
+      );
+      setFilteredData(sortedData);
     }
   }, [apiResponse]);
 
-  // Filter data when filters change
+  // Filter and sort data when filters or sort option changes
   useEffect(() => {
     if (!apiResponse?.data) return;
 
     let filtered = apiResponse.data;
 
     // Apply status filter if selected
-    if (statusFilter !== "") {
+    if (statusFilter !== "" && statusFilter !== "All") {
       filtered = filtered.filter((item) => item.status === statusFilter);
     }
 
-    setFilteredData(filtered);
-  }, [statusFilter, apiResponse]);
+    // Apply sorting
+    const sorted = [...filtered].sort((a, b) => {
+      switch (sortOption) {
+        case "orderIdAsc":
+          return a.guaranteeOrderId - b.guaranteeOrderId;
+        case "orderIdDesc":
+        default:
+          return b.guaranteeOrderId - a.guaranteeOrderId;
+      }
+    });
 
-  const colDefs = useMemo(
-    () => [
-      {
-        headerName: "Mã yêu cầu",
-        field: "guaranteeOrderId",
-        sort: "desc",
-      },
-      {
-        headerName: "Mã sản phẩm",
-        field: "requestedProduct.requestedProductId",
-      },
-      {
-        headerName: "SĐT k.hàng",
-        valueGetter: (params) => params.data.user?.phone || "N/A",
-      },
-      {
-        headerName: "Trạng thái",
-        field: "status",
-      },
-      {
-        headerName: "Cần lắp đặt",
-        field: "install",
-      },
-      {
-        headerName: "Hình thức",
-        valueGetter: (params) => {
-          return params.data.isGuarantee ? "Bảo hành" : "Sửa chữa";
-        },
-      },
-      {
-        headerName: "Cần phản hồi?",
-        valueGetter: (params) => {
-          if (params?.data?.role === "Woodworker") {
-            return "Cần bạn phản hồi";
-          } else if (params?.data?.role === "Customer") {
-            return "Chờ phản hồi từ khách hàng";
-          }
-          return "";
-        },
-        cellRenderer: (params) => {
-          return params.value === "Cần bạn phản hồi" ? (
-            <Text color="green.500">{params.value}</Text>
-          ) : (
-            <Text>{params.value}</Text>
-          );
-        },
-      },
-      {
-        headerName: "Thao tác",
-        cellRenderer: ActionButton,
-      },
-    ],
-    []
-  );
+    setFilteredData(sorted);
+  }, [statusFilter, sortOption, apiResponse]);
 
-  const defaultColDef = useMemo(() => {
-    return {
-      filter: true,
-      floatingFilter: true,
-    };
-  }, []);
+  const handleViewDetails = (orderId) => {
+    navigation.navigate("CustomerGuaranteeOrderDetail", { id: orderId });
+  };
 
-  // Handle filter changes
-  const handleStatusFilterChange = (e) => {
-    setStatusFilter(e.target.value);
+  const handleApplyFilters = () => {
+    setFilterModalVisible(false);
+  };
+
+  const resetFilters = () => {
+    setStatusFilter("");
+    setSortOption("orderIdDesc");
   };
 
   if (isLoading) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="500px"
-      >
-        <Spinner size="xl" color={appColorTheme.brown_2} />
-      </Box>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={appColorTheme.brown_2} />
+      </View>
     );
   }
 
   if (error) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="500px"
-      >
-        <Text color="red.500">
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>
           Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại.
         </Text>
-      </Box>
+      </View>
     );
   }
 
   return (
-    <Box>
-      <HStack mb={4} spacing={4}>
-        <HStack>
-          <Text fontWeight="medium">Lọc theo trạng thái:</Text>
-          <Select
-            width="300px"
-            bgColor="white"
-            value={statusFilter}
-            onChange={handleStatusFilterChange}
-          >
-            <option value="">Tất cả trạng thái</option>
-            {statusValues.map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
-          </Select>
-        </HStack>
-      </HStack>
-
-      <Box>
-        <div
-          className="ag-theme-quartz"
-          style={{ height: 700, fontSize: "16px" }}
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Đơn bảo hành, sửa chữa</Text>
+        <TouchableOpacity
+          style={styles.filterButton}
+          onPress={() => setFilterModalVisible(true)}
         >
-          <AgGridReact
-            ref={gridRef}
-            pagination
-            paginationPageSize={20}
-            paginationPageSizeSelector={[10, 20, 50, 100]}
-            defaultColDef={defaultColDef}
-            rowData={filteredData}
-            columnDefs={colDefs}
+          <Ionicons name="filter" size={20} color="white" />
+          <Text style={styles.filterButtonText}>Lọc</Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView style={styles.contentContainer}>
+        {filteredData.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>
+              Không có đơn hàng nào phù hợp với bộ lọc.
+            </Text>
+          </View>
+        ) : (
+          <Pagination
+            dataList={filteredData}
+            DisplayComponent={(props) => (
+              <GuaranteeOrderListItems
+                {...props}
+                onViewDetails={handleViewDetails}
+              />
+            )}
+            itemsPerPage={5}
           />
-        </div>
-      </Box>
-    </Box>
+        )}
+      </ScrollView>
+
+      {/* Filter Modal */}
+      <Modal
+        visible={filterModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setFilterModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.modalContainer}
+        >
+          <View style={styles.modalContent}>
+            {/* Header */}
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Bộ lọc đơn hàng</Text>
+              <TouchableOpacity
+                onPress={() => setFilterModalVisible(false)}
+                style={styles.closeButton}
+              >
+                <Ionicons name="close" size={24} color="#4A5568" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.scrollView}>
+              {/* Trạng thái */}
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Trạng thái:</Text>
+                <View style={styles.pickerContainer}>
+                  <Picker
+                    selectedValue={statusFilter}
+                    onValueChange={(value) => setStatusFilter(value)}
+                    style={styles.picker}
+                    dropdownIconColor={appColorTheme.brown_2}
+                    mode="dropdown"
+                  >
+                    <Picker.Item label="Tất cả trạng thái" value="All" />
+                    {statusValues.map((status) => (
+                      <Picker.Item key={status} label={status} value={status} />
+                    ))}
+                  </Picker>
+                </View>
+              </View>
+
+              {/* Sắp xếp */}
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Sắp xếp theo:</Text>
+                <View style={styles.pickerContainer}>
+                  <Picker
+                    selectedValue={sortOption}
+                    onValueChange={(value) => setSortOption(value)}
+                    style={styles.picker}
+                    dropdownIconColor={appColorTheme.brown_2}
+                    mode="dropdown"
+                  >
+                    <Picker.Item label="Mã giảm dần" value="orderIdDesc" />
+                    <Picker.Item label="Mã tăng dần" value="orderIdAsc" />
+                  </Picker>
+                </View>
+              </View>
+            </ScrollView>
+
+            {/* Button footer */}
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={styles.resetButton}
+                onPress={resetFilters}
+              >
+                <Text style={styles.resetButtonText}>Đặt lại</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.applyButton}
+                onPress={handleApplyFilters}
+              >
+                <Ionicons
+                  name="filter"
+                  size={20}
+                  color="white"
+                  style={styles.buttonIcon}
+                />
+                <Text style={styles.applyButtonText}>Áp dụng</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 15,
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  contentContainer: {
+    flex: 1,
+    padding: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 400,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 400,
+  },
+  errorText: {
+    color: "red",
+    fontSize: 16,
+    textAlign: "center",
+  },
+  filterButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: appColorTheme.brown_2,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 5,
+  },
+  filterButtonText: {
+    color: "white",
+    marginLeft: 5,
+    fontWeight: "bold",
+  },
+  listContainer: {
+    marginTop: 8,
+  },
+  emptyContainer: {
+    padding: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#718096",
+    textAlign: "center",
+  },
+  // Modal styles
+  modalContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    maxHeight: height * 0.7,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingBottom: Platform.OS === "ios" ? 30 : 16,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  closeButton: {
+    padding: 4,
+  },
+  scrollView: {
+    maxHeight: height * 0.5,
+  },
+  section: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 10,
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    backgroundColor: "white",
+    marginBottom: 5,
+    overflow: "hidden",
+  },
+  picker: {
+    height: 50,
+    width: "100%",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#E2E8F0",
+  },
+  resetButton: {
+    flex: 1,
+    backgroundColor: "#EDF2F7",
+    padding: 14,
+    borderRadius: 8,
+    marginRight: 8,
+    alignItems: "center",
+  },
+  resetButtonText: {
+    color: "#4A5568",
+    fontWeight: "600",
+  },
+  applyButton: {
+    flex: 2,
+    backgroundColor: appColorTheme.brown_2,
+    padding: 14,
+    borderRadius: 8,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  applyButtonText: {
+    color: "white",
+    fontWeight: "600",
+  },
+  buttonIcon: {
+    marginRight: 8,
+  },
+});

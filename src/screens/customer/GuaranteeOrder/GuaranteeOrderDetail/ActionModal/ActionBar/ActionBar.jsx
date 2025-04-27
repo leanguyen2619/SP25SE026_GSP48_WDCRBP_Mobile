@@ -109,7 +109,7 @@ export default function ActionBar({
     showCancelButton = false;
 
     return (
-      <View style={styles.container}>
+      <View style={styles.actionButtons}>
         {showFeedbackButton && (
           <FeedbackModal
             serviceOrderId={order?.guaranteeOrderId}
@@ -166,11 +166,11 @@ export default function ActionBar({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+  actionButtons: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    flexWrap: "wrap",
     gap: 8,
-    padding: 16,
   },
 });

@@ -1,66 +1,71 @@
-import { useParams } from "react-router-dom";
+import React, { useState } from "react";
+import { useRoute } from "@react-navigation/native";
 import {
-  Box,
-  Heading,
+  View,
   Text,
-  Spinner,
-  Center,
-  HStack,
-  Spacer,
-  Tabs,
-  TabList,
-  Tab,
-  Flex,
-  Icon,
-  TabPanels,
-  TabPanel,
-} from "@chakra-ui/react";
+  ActivityIndicator,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import { useGetGuaranteeOrderByIdQuery } from "../../../../../services/guaranteeOrderApi";
 import { appColorTheme } from "../../../../../config/appconfig";
 import useAuth from "../../../../../hooks/useAuth";
 import ActionBar from "../ActionModal/ActionBar/ActionBar.jsx";
-import { FiActivity, FiFile, FiFileText } from "react-icons/fi";
+import { Ionicons } from "@expo/vector-icons";
 import GeneralInformationTab from "../Tab/GeneralInformationTab.jsx";
 import ProcessTab from "../Tab/ProgressTab.jsx";
-import { useGetAllOrderDepositByGuaranteeOrderIdQuery } from "../../../../../services/orderDepositApi";
-import { useState } from "react";
+import { useGetAllOrderDepositByGuaranteeOrderIdQuery } from "../../../../../services/orderDepositApi.js";
 import QuotationAndTransactionTab from "../Tab/QuotationAndTransactionTab.jsx";
+import WoodworkerLayout from "../../../../../layouts/WoodworkerLayout.jsx";
 
 export default function WWGuaranteeOrderDetailPage() {
-  const { id } = useParams();
-  const { data, isLoading, error, refetch } = useGetGuaranteeOrderByIdQuery(id);
+  const route = useRoute();
+  const { id: orderId } = route.params;
+  const { data, isLoading, error, refetch } = useGetGuaranteeOrderByIdQuery(
+    orderId,
+    {
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
+    }
+  );
 
   const {
     data: depositsResponse,
     isLoading: isDepositsLoading,
     error: depositsError,
-  } = useGetAllOrderDepositByGuaranteeOrderIdQuery(id);
+    refetch: refetchDeposit,
+  } = useGetAllOrderDepositByGuaranteeOrderIdQuery(orderId, {
+    refetchOnMountOrArgChange: true,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
 
   const order = data?.data;
   const deposits = depositsResponse?.data || [];
   const { auth } = useAuth();
 
-  // Track active tab index
   const [activeTabIndex, setActiveTabIndex] = useState(0);
 
-  // Handle tab change
   const handleTabChange = (index) => {
     setActiveTabIndex(index);
   };
 
   if (isLoading || isDepositsLoading) {
     return (
-      <Center h="200px">
-        <Spinner size="xl" color={appColorTheme.brown_2} />
-      </Center>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={appColorTheme.brown_2} />
+      </View>
     );
   }
 
   if (error || depositsError) {
     return (
-      <Center h="200px">
-        <Text>Đã có lỗi xảy ra khi tải thông tin đơn bảo hành</Text>
-      </Center>
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>
+          Đã có lỗi xảy ra khi tải thông tin đơn bảo hành
+        </Text>
+      </View>
     );
   }
 
@@ -69,120 +74,226 @@ export default function WWGuaranteeOrderDetailPage() {
     auth?.wwId != order?.woodworker?.woodworkerId
   ) {
     return (
-      <Center h="200px">
-        <Text>Không có quyền truy cập vào thông tin đơn bảo hành này</Text>
-      </Center>
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>
+          Không có quyền truy cập vào thông tin đơn bảo hành này
+        </Text>
+      </View>
     );
   }
 
+  const tabs = [
+    { label: "Chung", icon: "document-text-outline" },
+    { label: "Tiến độ", icon: "pulse-outline" },
+    { label: "Báo giá & GD", icon: "document-outline" },
+  ];
+
   return (
-    <Box>
-      <HStack mb={6}>
-        <Box>
-          <HStack spacing={2}>
-            <Heading
-              color={appColorTheme.brown_2}
-              fontSize="2xl"
-              fontFamily="Montserrat"
-            >
-              Chi tiết đơn #{order.guaranteeOrderId}
-            </Heading>
+    <WoodworkerLayout>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.titleContainer}>
+            <View style={styles.titleRow}>
+              <Text style={styles.title}>
+                Chi tiết đơn #{order.guaranteeOrderId}
+              </Text>
+            </View>
 
-            <Box
-              top={5}
-              right={5}
-              bgColor={appColorTheme.brown_2}
-              p={2}
-              color="white"
-              borderRadius="15px"
-            >
-              {order?.status || "Đang xử lý"}
-            </Box>
-          </HStack>
+            <View style={styles.statusContainer}>
+              <View style={styles.statusBadge}>
+                <Text style={styles.statusText}>
+                  {order?.status || "Đang xử lý"}
+                </Text>
+              </View>
+            </View>
 
-          {order?.feedback && (
-            <Text mt={2} fontSize="md">
-              <b>Phản hồi của khách hàng:</b> {order?.feedback}
-            </Text>
-          )}
-        </Box>
+            {order?.feedback && (
+              <Text style={styles.feedback}>
+                <Text style={styles.boldText}>Phản hồi của bạn:</Text>{" "}
+                {order?.feedback}
+              </Text>
+            )}
+          </View>
 
-        <Spacer />
-
-        <Box>
-          <HStack spacing={4}>
+          <View style={styles.actionContainer}>
             <ActionBar
-              order={order}
               deposits={deposits}
+              order={order}
+              refetchDeposit={refetchDeposit}
               refetch={refetch}
               status={order?.status}
               feedback={order?.feedback}
             />
-          </HStack>
-        </Box>
-      </HStack>
+          </View>
+        </View>
 
-      <Box color="black">
-        <Tabs
-          variant="unstyled"
-          onChange={handleTabChange}
-          index={activeTabIndex}
-        >
-          <TabList
-            overflowX="auto"
-            display="flex"
-            flexWrap={{ base: "nowrap", md: "wrap" }}
-            whiteSpace="nowrap"
-          >
-            {[
-              { label: "Chung", icon: FiFileText },
-              { label: "Tiến độ", icon: FiActivity },
-              { label: "Báo giá & Giao dịch", icon: FiFile },
-            ].map((tab, index) => (
-              <Tab
+        <View style={styles.tabsContainer}>
+          <View style={styles.tabHeaderContainer}>
+            {tabs.map((tab, index) => (
+              <TouchableOpacity
                 key={index}
-                _selected={{
-                  bgColor: "app_brown.0",
-                }}
-                borderBottom="2px solid"
-                borderBottomColor="app_brown.1"
-                borderTopLeftRadius="10px"
-                borderTopRightRadius="10px"
-                mr={1}
+                style={[
+                  styles.tabButton,
+                  activeTabIndex === index && styles.activeTabButton,
+                ]}
+                onPress={() => handleTabChange(index)}
               >
-                <Flex align="center" gap={1}>
-                  <Icon as={tab.icon} />
-                  <Text>{tab.label}</Text>
-                </Flex>
-              </Tab>
+                <Ionicons
+                  name={tab.icon}
+                  size={16}
+                  color={
+                    activeTabIndex === index ? appColorTheme.brown_2 : "#4A5568"
+                  }
+                />
+                <Text
+                  style={[
+                    styles.tabLabel,
+                    activeTabIndex === index && styles.activeTabLabel,
+                  ]}
+                >
+                  {tab.label}
+                </Text>
+              </TouchableOpacity>
             ))}
-          </TabList>
+          </View>
 
-          <TabPanels>
-            <TabPanel p={0}>
+          <View style={styles.tabContent}>
+            {activeTabIndex === 0 && (
               <GeneralInformationTab
                 order={order}
                 activeTabIndex={activeTabIndex}
                 isActive={activeTabIndex === 0}
               />
-            </TabPanel>
-            <TabPanel p={0}>
+            )}
+            {activeTabIndex === 1 && (
               <ProcessTab
                 order={order}
                 activeTabIndex={activeTabIndex}
                 isActive={activeTabIndex === 1}
               />
-            </TabPanel>
-            <TabPanel p={0}>
+            )}
+            {activeTabIndex === 2 && (
               <QuotationAndTransactionTab
                 order={order}
                 activeTabIndex={activeTabIndex}
                 isActive={activeTabIndex === 2}
               />
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
-      </Box>
-    </Box>
+            )}
+          </View>
+        </View>
+      </View>
+    </WoodworkerLayout>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f8f9fa",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  errorText: {
+    color: "red",
+    textAlign: "center",
+    fontSize: 16,
+  },
+  header: {
+    padding: 16,
+    backgroundColor: "white",
+    marginBottom: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+  },
+  titleContainer: {
+    marginBottom: 16,
+  },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  title: {
+    color: appColorTheme.brown_2,
+    fontSize: 22,
+    fontWeight: "bold",
+  },
+  statusContainer: {
+    marginBottom: 12,
+  },
+  statusBadge: {
+    backgroundColor: appColorTheme.brown_2,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 15,
+    alignSelf: "flex-start",
+  },
+  statusText: {
+    color: "white",
+    fontWeight: "600",
+    fontSize: 12,
+  },
+  feedback: {
+    fontSize: 14,
+    marginTop: 8,
+  },
+  boldText: {
+    fontWeight: "bold",
+  },
+  actionContainer: {
+    alignItems: "flex-end",
+  },
+  tabsContainer: {
+    flex: 1,
+  },
+  tabHeaderContainer: {
+    flexDirection: "row",
+    backgroundColor: "white",
+    paddingHorizontal: 8,
+    paddingTop: 8,
+    paddingBottom: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+    marginBottom: 0,
+  },
+  tabButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderBottomWidth: 2,
+    borderBottomColor: "#E2E8F0",
+    marginRight: 8,
+    flex: 1,
+    justifyContent: "center",
+  },
+  activeTabButton: {
+    backgroundColor: appColorTheme.brown_0,
+    borderBottomColor: appColorTheme.brown_1,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+  },
+  tabLabel: {
+    marginLeft: 4,
+    fontSize: 14,
+    color: "#4A5568",
+  },
+  activeTabLabel: {
+    color: appColorTheme.brown_2,
+    fontWeight: "bold",
+  },
+  tabContent: {
+    flex: 1,
+    paddingTop: 8,
+    paddingHorizontal: 0,
+  },
+});

@@ -25,6 +25,8 @@ const CategorySelector = ({
   const [selectedCategoryId, setSelectedCategoryId] = useState(
     initialCategoryId || null
   );
+  const [tempSelectedCategoryId, setTempSelectedCategoryId] = useState(null);
+  const [tempCategoryName, setTempCategoryName] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [hoveredCategory, setHoveredCategory] = useState(null);
@@ -74,21 +76,40 @@ const CategorySelector = ({
     }
   }, [initialCategoryId, categories]);
 
-  // Handle category selection
+  // Handle category selection (just for UI display now)
   const handleCategorySelect = (category, level) => {
     // Trim path to the selected level and add the new category
     const newPath = [...selectedCategoryPath.slice(0, level), category];
     setSelectedCategoryPath(newPath);
 
-    // If it's a leaf category or allowLevel1Selection is true, update the selected ID
+    // If it's a leaf category or allowLevel1Selection is true, update the temp selected ID
     const isLeaf = !category.children || category.children.length === 0;
     if (isLeaf || (level === 0 && allowLevel1Selection)) {
-      setSelectedCategoryId(category.id);
-      setCategoryId(category.id);
-      setDisplayName(category.categoryName);
-      if (setCategoryName) setCategoryName(category.categoryName);
-      setIsOpen(false); // Close dropdown after selection
+      setTempSelectedCategoryId(category.id);
+      setTempCategoryName(category.categoryName);
     }
+  };
+
+  // Handle confirm button click
+  const handleConfirmSelection = () => {
+    if (tempSelectedCategoryId) {
+      setSelectedCategoryId(tempSelectedCategoryId);
+      setDisplayName(tempCategoryName);
+
+      // Call the parent component's callbacks
+      setCategoryId(tempSelectedCategoryId);
+      if (setCategoryName) setCategoryName(tempCategoryName);
+
+      // Close the modal
+      setIsOpen(false);
+    }
+  };
+
+  // Reset temp selection when modal opens
+  const handleOpenModal = () => {
+    setTempSelectedCategoryId(selectedCategoryId);
+    setTempCategoryName(displayName);
+    setIsOpen(true);
   };
 
   if (isLoading) {
@@ -113,7 +134,7 @@ const CategorySelector = ({
     <View style={styles.container}>
       <TouchableOpacity
         activeOpacity={0.7}
-        onPress={() => setIsOpen(true)}
+        onPress={handleOpenModal}
         style={styles.inputContainer}
       >
         <TextInput
@@ -153,7 +174,7 @@ const CategorySelector = ({
                         styles.categoryItem,
                         hoveredCategory === category.id &&
                           styles.hoveredCategory,
-                        selectedCategoryId === category.id &&
+                        tempSelectedCategoryId === category.id &&
                           styles.selectedCategory,
                       ]}
                       onPress={() => handleCategorySelect(category, 0)}
@@ -163,7 +184,7 @@ const CategorySelector = ({
                         <Text
                           style={[
                             styles.categoryText,
-                            selectedCategoryId === category.id &&
+                            tempSelectedCategoryId === category.id &&
                               styles.selectedCategoryText,
                           ]}
                         >
@@ -174,7 +195,7 @@ const CategorySelector = ({
                         )}
                       </View>
 
-                      {selectedCategoryId === category.id && (
+                      {tempSelectedCategoryId === category.id && (
                         <View style={styles.badge}>
                           <Text style={styles.badgeText}>✓</Text>
                         </View>
@@ -201,7 +222,7 @@ const CategorySelector = ({
                             key={subCategory.id}
                             style={[
                               styles.subCategoryItem,
-                              selectedCategoryId === subCategory.id &&
+                              tempSelectedCategoryId === subCategory.id &&
                                 styles.selectedSubCategory,
                             ]}
                             onPress={() => handleCategorySelect(subCategory, 1)}
@@ -209,7 +230,7 @@ const CategorySelector = ({
                             <Text
                               style={[
                                 styles.subCategoryText,
-                                selectedCategoryId === subCategory.id &&
+                                tempSelectedCategoryId === subCategory.id &&
                                   styles.selectedSubCategoryText,
                               ]}
                             >
@@ -229,6 +250,20 @@ const CategorySelector = ({
                   )}
                 </ScrollView>
               </View>
+            </View>
+
+            {/* Confirm button */}
+            <View style={styles.confirmButtonContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.confirmButton,
+                  !tempSelectedCategoryId && styles.disabledButton,
+                ]}
+                onPress={handleConfirmSelection}
+                disabled={!tempSelectedCategoryId}
+              >
+                <Text style={styles.confirmButtonText}>Chọn</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -383,6 +418,25 @@ const styles = StyleSheet.create({
   emptyRightPanelText: {
     color: "#718096",
     textAlign: "center",
+  },
+  confirmButtonContainer: {
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#E2E8F0",
+  },
+  confirmButton: {
+    backgroundColor: appColorTheme.brown_2,
+    padding: 12,
+    borderRadius: 4,
+    alignItems: "center",
+  },
+  confirmButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
 });
 

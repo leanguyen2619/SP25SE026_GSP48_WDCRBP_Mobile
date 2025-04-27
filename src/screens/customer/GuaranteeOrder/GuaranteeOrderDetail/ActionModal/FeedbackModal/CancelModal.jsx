@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useSendServiceOrderFeedbackMutation } from "../../../../../../services/serviceOrderApi";
 import { useNotify } from "../../../../../../components/Utility/Notify";
-import { FiAlertCircle, FiXCircle, FiXOctagon } from "react-icons/fi";
+import { Feather } from "@expo/vector-icons";
 import CheckboxList from "../../../../../../components/Utility/CheckboxList";
 import { validateFeedback } from "../../../../../../validations";
 import {
@@ -76,7 +76,7 @@ export default function CancelModal({ serviceOrderId, refetch }) {
         style={styles.button}
         onPress={() => setModalVisible(true)}
       >
-        <FiXOctagon style={styles.buttonIcon} />
+        <Feather name="x-octagon" size={18} style={styles.buttonIcon} />
         <Text style={styles.buttonText}>Yêu cầu hủy đơn</Text>
       </TouchableOpacity>
 
@@ -94,13 +94,14 @@ export default function CancelModal({ serviceOrderId, refetch }) {
                 style={styles.closeButton}
                 onPress={() => setModalVisible(false)}
               >
-                <FiXCircle style={styles.closeIcon} />
+                <Feather name="x-circle" size={20} style={styles.closeIcon} />
               </TouchableOpacity>
             )}
 
             <View style={styles.modalBody}>
               <Text style={styles.warningText}>
-                Bạn đang yêu cầu hủy đơn hàng này. Vui lòng cung cấp lý do rõ ràng.
+                Bạn đang yêu cầu hủy đơn hàng này. Vui lòng cung cấp lý do rõ
+                ràng.
               </Text>
 
               <View style={styles.inputContainer}>
@@ -132,19 +133,28 @@ export default function CancelModal({ serviceOrderId, refetch }) {
                 onPress={() => setModalVisible(false)}
                 disabled={isLoading}
               >
-                <FiXCircle style={styles.buttonIcon} />
+                <Feather name="x-circle" size={18} style={styles.buttonIcon} />
                 <Text style={styles.buttonText}>Đóng</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={[styles.footerButton, styles.submitButton]}
                 onPress={handleSubmit}
-                disabled={!reason || reason.trim() === "" || isCheckboxDisabled || isLoading}
+                disabled={
+                  !reason ||
+                  reason.trim() === "" ||
+                  isCheckboxDisabled ||
+                  isLoading
+                }
               >
                 {isLoading ? (
                   <ActivityIndicator size="small" color="white" />
                 ) : (
-                  <FiAlertCircle style={styles.buttonIcon} />
+                  <Feather
+                    name="alert-circle"
+                    size={18}
+                    style={styles.buttonIcon}
+                  />
                 )}
                 <Text style={[styles.buttonText, styles.submitButtonText]}>
                   Gửi yêu cầu hủy
@@ -160,97 +170,97 @@ export default function CancelModal({ serviceOrderId, refetch }) {
 
 const styles = StyleSheet.create({
   button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "transparent",
     borderWidth: 1,
-    borderColor: '#E53E3E',
+    borderColor: "#E53E3E",
     padding: 8,
     borderRadius: 4,
   },
   buttonIcon: {
-    color: '#E53E3E',
+    color: "#E53E3E",
     marginRight: 8,
   },
   buttonText: {
-    color: '#E53E3E',
-    fontWeight: 'bold',
+    color: "#E53E3E",
+    fontWeight: "bold",
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 10,
-    width: '90%',
+    width: "90%",
     maxWidth: 500,
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     padding: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   closeButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 16,
     right: 16,
   },
   closeIcon: {
     fontSize: 20,
-    color: '#666',
+    color: "#666",
   },
   modalBody: {
     padding: 16,
   },
   warningText: {
-    color: '#E53E3E',
+    color: "#E53E3E",
     marginBottom: 16,
   },
   inputContainer: {
     marginBottom: 16,
   },
   inputLabel: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: "#E2E8F0",
     borderRadius: 4,
     padding: 8,
     minHeight: 100,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
   divider: {
     height: 1,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: "#E2E8F0",
     marginVertical: 16,
   },
   modalFooter: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "flex-end",
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
+    borderTopColor: "#E2E8F0",
   },
   footerButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 8,
     borderRadius: 4,
     marginLeft: 8,
   },
   cancelButton: {
-    backgroundColor: '#EDF2F7',
+    backgroundColor: "#EDF2F7",
   },
   submitButton: {
-    backgroundColor: '#E53E3E',
+    backgroundColor: "#E53E3E",
   },
   submitButtonText: {
-    color: 'white',
+    color: "white",
   },
 });

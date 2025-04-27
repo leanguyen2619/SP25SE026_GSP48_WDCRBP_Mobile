@@ -18,17 +18,23 @@ import StarRating from "../../../../../components/Utility/StarRating.jsx";
 import PersonalizationProduct from "./PersonalizationProduct.jsx";
 import CustomizationProduct from "./CustomizationProduct.jsx";
 import SaleProduct from "./SaleProduct.jsx";
+import { useNavigation } from "@react-navigation/native";
 
 export default function GeneralInformationTab({ order }) {
   const serviceName = order?.serviceOrderDetail?.service?.service?.serviceName;
   const serviceOrder = order?.serviceOrderDetail;
+  const navigation = useNavigation();
 
   const handleViewOrderDetail = () => {
-    Linking.openURL(`/cus/service-order/${order?.serviceOrderDetail?.orderId}`);
+    navigation.navigate("CustomerServiceOrderDetail", {
+      orderId: order?.serviceOrderDetail?.orderId,
+    });
   };
 
   const handleViewWoodworker = () => {
-    Linking.openURL(`/woodworker/${order?.service?.wwDto?.woodworkerId}`);
+    navigation.navigate("WoodworkerDetail", {
+      id: order?.woodworker?.woodworkerId,
+    });
   };
 
   return (
@@ -92,7 +98,9 @@ export default function GeneralInformationTab({ order }) {
 
             <View style={styles.infoRow}>
               <Text style={styles.label}>Mã đơn hàng đã đặt:</Text>
-              <Text>{getServiceTypeLabel(order?.serviceOrderDetail?.orderId)}</Text>
+              <Text>
+                {getServiceTypeLabel(order?.serviceOrderDetail?.orderId)}
+              </Text>
               <TouchableOpacity onPress={handleViewOrderDetail}>
                 <Text style={styles.link}>Xem chi tiết</Text>
               </TouchableOpacity>
@@ -166,12 +174,12 @@ export default function GeneralInformationTab({ order }) {
             <View style={styles.infoContainer}>
               <Text>
                 <Text style={styles.label}>Tên xưởng mộc:</Text>{" "}
-                {order?.service?.wwDto?.brandName || "Chưa cập nhật"}
+                {order?.woodworker?.brandName || "Chưa cập nhật"}
               </Text>
 
               <Text>
                 <Text style={styles.label}>Địa chỉ:</Text>{" "}
-                {order?.service?.wwDto?.address || "Chưa cập nhật"}
+                {order?.woodworker?.address || "Chưa cập nhật"}
               </Text>
 
               <TouchableOpacity onPress={handleViewWoodworker}>
@@ -205,7 +213,9 @@ export default function GeneralInformationTab({ order }) {
                     </View>
                   </View>
                 ) : (
-                  <Text style={styles.noDataText}>(Đánh giá chưa được duyệt)</Text>
+                  <Text style={styles.noDataText}>
+                    (Đánh giá chưa được duyệt)
+                  </Text>
                 )}
               </>
             ) : (
@@ -221,19 +231,19 @@ export default function GeneralInformationTab({ order }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   gridContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     padding: 16,
     gap: 16,
   },
   card: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 10,
     padding: 16,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -242,11 +252,11 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
     flex: 1,
-    minWidth: '100%',
+    minWidth: "100%",
   },
   cardTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 16,
     color: appColorTheme.brown_2,
   },
@@ -254,24 +264,24 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
     gap: 8,
   },
   label: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   link: {
     color: appColorTheme.brown_2,
-    textDecorationLine: 'underline',
+    textDecorationLine: "underline",
   },
   noDataText: {
-    color: '#666',
-    fontStyle: 'italic',
+    color: "#666",
+    fontStyle: "italic",
   },
   infoSection: {
     flex: 1,
-    minWidth: '100%',
+    minWidth: "100%",
   },
 });
