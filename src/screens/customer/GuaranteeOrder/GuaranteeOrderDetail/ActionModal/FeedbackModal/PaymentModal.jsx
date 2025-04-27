@@ -1,24 +1,3 @@
-import {
-  Button,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Stack,
-  Text,
-  Divider,
-  useDisclosure,
-  Box,
-  Grid,
-  GridItem,
-  RadioGroup,
-  Radio,
-  Center,
-  Spinner,
-} from "@chakra-ui/react";
 import { useState } from "react";
 import { useNotify } from "../../../../../../components/Utility/Notify";
 import { FiCheck, FiCreditCard, FiXCircle } from "react-icons/fi";
@@ -38,31 +17,36 @@ import {
   useUpdateGuaranteeOrderShipmentOrderCodeMutation,
 } from "../../../../../../services/shipmentApi";
 import { useCreateShipmentForServiceOrderMutation } from "../../../../../../services/ghnApi";
-// Import the utility function
 import { createAndUpdateShipmentForGuaranteeGetProductFromCustomer } from "../../../../../../utils/shippingUtils";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  ActivityIndicator,
+  ScrollView,
+} from "react-native";
 
 export default function PaymentModal({ deposit, order, refetch, buttonText }) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isModalVisible, setModalVisible] = useState(false);
   const notify = useNotify();
   const { auth } = useAuth();
   const navigate = useNavigate();
-  const [orderPayment, { isLoading: isWalletLoading }] =
-    useOrderPaymentMutation();
-  const [createPayment, { isLoading: isGatewayLoading }] =
-    useCreatePaymentMutation();
+  const [orderPayment, { isLoading: isWalletLoading }] = useOrderPaymentMutation();
+  const [createPayment, { isLoading: isGatewayLoading }] = useCreatePaymentMutation();
   const [isCheckboxDisabled, setIsCheckboxDisabled] = useState(true);
-  const [paymentMethod, setPaymentMethod] = useState("wallet"); // wallet or gateway
+  const [paymentMethod, setPaymentMethod] = useState("wallet");
   const [processingShipment, setProcessingShipment] = useState(false);
 
-  // Shipment related API hooks
-  const { data: shipmentData, isLoading: loadingShipment } =
-    useGetShipmentsByGuaranteeOrderIdQuery(order?.guaranteeOrderId, {
-      skip: !isOpen,
-    });
-  const [createShipment, { isLoading: creatingShipment }] =
-    useCreateShipmentForServiceOrderMutation();
-  const [updateShipmentOrderCode, { isLoading: updatingShipment }] =
-    useUpdateGuaranteeOrderShipmentOrderCodeMutation();
+  const { data: shipmentData, isLoading: loadingShipment } = useGetShipmentsByGuaranteeOrderIdQuery(
+    order?.guaranteeOrderId,
+    {
+      skip: !isModalVisible,
+    }
+  );
+  const [createShipment, { isLoading: creatingShipment }] = useCreateShipmentForServiceOrderMutation();
+  const [updateShipmentOrderCode, { isLoading: updatingShipment }] = useUpdateGuaranteeOrderShipmentOrderCodeMutation();
 
   const isLoading =
     isWalletLoading ||
@@ -79,13 +63,12 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
     },
   ];
 
-  // Process GHN shipment creation
   const processShipment = async () => {
     if (
       order?.status !== guaranteeOrderStatusConstants.DA_DUYET_BAO_GIA ||
       !shipmentData?.data?.length
     ) {
-      return true; // No need to create shipment
+      return true;
     }
 
     try {
@@ -96,17 +79,15 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
           item.requestedProductId == order?.requestedProduct?.requestedProductId
       );
 
-      // Use the utility function
-      const result =
-        await createAndUpdateShipmentForGuaranteeGetProductFromCustomer({
-          order,
-          product,
-          shipmentData,
-          guaranteeOrderId: order.guaranteeOrderId,
-          createShipment,
-          updateShipmentOrderCode,
-          notify,
-        });
+      const result = await createAndUpdateShipmentForGuaranteeGetProductFromCustomer({
+        order,
+        product,
+        shipmentData,
+        guaranteeOrderId: order.guaranteeOrderId,
+        createShipment,
+        updateShipmentOrderCode,
+        notify,
+      });
 
       return result.success;
     } catch (error) {
@@ -123,10 +104,9 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
 
   const handleSubmit = async () => {
     try {
-      // Check if we need to create a shipment first
       if (order?.status === "Đã duyệt báo giá") {
         const shipmentCreated = await processShipment();
-        if (!shipmentCreated) return; // Stop payment if shipment creation failed
+        if (!shipmentCreated) return;
       }
 
       const postData = {
@@ -138,7 +118,6 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
       };
 
       if (paymentMethod === "wallet") {
-        // Using wallet for payment
         postData.transactionType = transactionTypeConstants.THANH_TOAN_BANG_VI;
         await orderPayment(postData).unwrap();
 
@@ -147,14 +126,13 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
           { replace: true }
         );
 
-        onClose();
-        refetch(); // Refresh data
+        setModalVisible(false);
+        refetch();
       } else {
         postData.transactionType = transactionTypeConstants.THANH_TOAN_QUA_CONG;
         const response = await createPayment(postData).unwrap();
 
-        onClose();
-
+        setModalVisible(false);
         window.location.href = response.url || response.data.url;
       }
     } catch (err) {
@@ -168,133 +146,295 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
 
   return (
     <>
-      <Button leftIcon={<FiCreditCard />} colorScheme="blue" onClick={onOpen}>
-        {buttonText ? buttonText : `Thanh toán lần #${deposit.depositNumber}`}
-      </Button>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => setModalVisible(true)}
+      >
+        <FiCreditCard style={styles.buttonIcon} />
+        <Text style={styles.buttonText}>
+          {buttonText ? buttonText : `Thanh toán lần #${deposit.depositNumber}`}
+        </Text>
+      </TouchableOpacity>
 
       <Modal
-        isOpen={isOpen}
-        onClose={isLoading ? null : onClose}
-        closeOnOverlayClick={false}
-        closeOnEsc={false}
-        size="2xl"
+        visible={isModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => !isLoading && setModalVisible(false)}
       >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Thanh toán đặt cọc</ModalHeader>
-          {!isLoading && <ModalCloseButton />}
-          <ModalBody pb={6}>
-            {processingShipment ? (
-              <Center py={8} flexDirection="column">
-                <Spinner size="xl" color={appColorTheme.brown_2} mb={4} />
-                <Text>Đang xử lý vận đơn...</Text>
-              </Center>
-            ) : (
-              <Stack spacing={4}>
-                <Text fontSize="lg" fontWeight="bold">
-                  Chi tiết đặt cọc
-                </Text>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Thanh toán đặt cọc</Text>
+            {!isLoading && (
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <FiXCircle style={styles.closeIcon} />
+              </TouchableOpacity>
+            )}
 
-                <Box p={4} bg="gray.50" borderRadius="md" boxShadow="sm">
-                  <Grid templateColumns="150px 1fr" gap={3}>
-                    <GridItem>
-                      <Text fontWeight="semibold">Mã đơn dịch vụ:</Text>
-                    </GridItem>
-                    <GridItem>
-                      <Text>#{order.guaranteeOrderId}</Text>
-                    </GridItem>
+            <ScrollView style={styles.modalBody}>
+              {processingShipment ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="large" color={appColorTheme.brown_2} />
+                  <Text style={styles.loadingText}>Đang xử lý vận đơn...</Text>
+                </View>
+              ) : (
+                <View style={styles.contentContainer}>
+                  <Text style={styles.sectionTitle}>Chi tiết đặt cọc</Text>
 
-                    <GridItem>
-                      <Text fontWeight="semibold">Đặt cọc lần:</Text>
-                    </GridItem>
-                    <GridItem>
-                      <Text>{deposit.depositNumber}</Text>
-                    </GridItem>
+                  <View style={styles.detailsCard}>
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Mã đơn dịch vụ:</Text>
+                      <Text style={styles.detailValue}>#{order.guaranteeOrderId}</Text>
+                    </View>
 
-                    <GridItem>
-                      <Text fontWeight="semibold">Phần trăm:</Text>
-                    </GridItem>
-                    <GridItem>
-                      <Text>{deposit.percent}%</Text>
-                    </GridItem>
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Đặt cọc lần:</Text>
+                      <Text style={styles.detailValue}>{deposit.depositNumber}</Text>
+                    </View>
 
-                    <GridItem>
-                      <Text fontWeight="semibold">Số tiền:</Text>
-                    </GridItem>
-                    <GridItem>
-                      <Text fontWeight="bold" color={appColorTheme.brown_2}>
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Phần trăm:</Text>
+                      <Text style={styles.detailValue}>{deposit.percent}%</Text>
+                    </View>
+
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Số tiền:</Text>
+                      <Text style={[styles.detailValue, styles.amountText]}>
                         {formatPrice(deposit.amount)}
                       </Text>
-                    </GridItem>
+                    </View>
 
-                    {order?.status ==
-                      guaranteeOrderStatusConstants.DA_DUYET_BAO_GIA && (
-                      <>
-                        <GridItem>
-                          <Text fontWeight="semibold">Lưu ý:</Text>
-                        </GridItem>
-                        <GridItem>
-                          <Text color="blue.600">
-                            Vận đơn GHN sẽ được tạo khi bạn thanh toán
-                          </Text>
-                        </GridItem>
-                      </>
+                    {order?.status == guaranteeOrderStatusConstants.DA_DUYET_BAO_GIA && (
+                      <View style={styles.detailRow}>
+                        <Text style={styles.detailLabel}>Lưu ý:</Text>
+                        <Text style={[styles.detailValue, styles.noteText]}>
+                          Vận đơn GHN sẽ được tạo khi bạn thanh toán
+                        </Text>
+                      </View>
                     )}
-                  </Grid>
-                </Box>
+                  </View>
 
-                <Box p={4}>
-                  <Text fontSize="md" fontWeight="bold" mb={3}>
-                    Chọn phương thức thanh toán:
-                  </Text>
-                  <RadioGroup onChange={setPaymentMethod} value={paymentMethod}>
-                    <Stack spacing={4}>
-                      <Radio value="wallet">Thanh toán bằng ví</Radio>
-                      <Radio value="gateway">
-                        Thanh toán qua cổng thanh toán
-                      </Radio>
-                    </Stack>
-                  </RadioGroup>
-                </Box>
+                  <View style={styles.paymentMethodContainer}>
+                    <Text style={styles.sectionTitle}>Chọn phương thức thanh toán:</Text>
+                    <View style={styles.radioGroup}>
+                      <TouchableOpacity
+                        style={[
+                          styles.radioButton,
+                          paymentMethod === "wallet" && styles.radioButtonSelected,
+                        ]}
+                        onPress={() => setPaymentMethod("wallet")}
+                      >
+                        <View style={styles.radioCircle}>
+                          {paymentMethod === "wallet" && <View style={styles.radioInner} />}
+                        </View>
+                        <Text style={styles.radioLabel}>Thanh toán bằng ví</Text>
+                      </TouchableOpacity>
 
-                <Divider my={2} />
-                <CheckboxList
-                  items={checkboxItems}
-                  setButtonDisabled={setIsCheckboxDisabled}
-                />
-              </Stack>
-            )}
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              isLoading={isLoading}
-              variant="ghost"
-              mr={3}
-              onClick={onClose}
-              leftIcon={<FiXCircle />}
-              isDisabled={isLoading}
-            >
-              Đóng
-            </Button>
-            <Button
-              colorScheme="blue"
-              onClick={handleSubmit}
-              isLoading={isLoading}
-              isDisabled={isCheckboxDisabled}
-              leftIcon={<FiCheck />}
-              loadingText={
-                processingShipment
-                  ? "Đang xử lý vận đơn"
-                  : paymentMethod === "wallet"
-                  ? "Đang xử lý thanh toán"
-                  : "Đang chuyển hướng"
-              }
-            >
-              Thanh toán
-            </Button>
-          </ModalFooter>
-        </ModalContent>
+                      <TouchableOpacity
+                        style={[
+                          styles.radioButton,
+                          paymentMethod === "gateway" && styles.radioButtonSelected,
+                        ]}
+                        onPress={() => setPaymentMethod("gateway")}
+                      >
+                        <View style={styles.radioCircle}>
+                          {paymentMethod === "gateway" && <View style={styles.radioInner} />}
+                        </View>
+                        <Text style={styles.radioLabel}>Thanh toán qua cổng thanh toán</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+
+                  <View style={styles.divider} />
+                  <CheckboxList
+                    items={checkboxItems}
+                    setButtonDisabled={setIsCheckboxDisabled}
+                  />
+                </View>
+              )}
+            </ScrollView>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={[styles.footerButton, styles.cancelButton]}
+                onPress={() => setModalVisible(false)}
+                disabled={isLoading}
+              >
+                <FiXCircle style={styles.buttonIcon} />
+                <Text style={styles.buttonText}>Đóng</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.footerButton, styles.submitButton]}
+                onPress={handleSubmit}
+                disabled={isLoading || isCheckboxDisabled}
+              >
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <FiCheck style={styles.buttonIcon} />
+                )}
+                <Text style={[styles.buttonText, styles.submitButtonText]}>
+                  Thanh toán
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       </Modal>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#3182CE',
+    padding: 8,
+    borderRadius: 4,
+  },
+  buttonIcon: {
+    color: 'white',
+    marginRight: 8,
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    width: '90%',
+    maxWidth: 500,
+    maxHeight: '80%',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    padding: 16,
+    textAlign: 'center',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+  },
+  closeIcon: {
+    fontSize: 20,
+    color: '#666',
+  },
+  modalBody: {
+    flex: 1,
+  },
+  loadingContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+  },
+  contentContainer: {
+    padding: 16,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  detailsCard: {
+    backgroundColor: '#F7FAFC',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  detailLabel: {
+    fontWeight: '600',
+    width: 120,
+  },
+  detailValue: {
+    flex: 1,
+  },
+  amountText: {
+    fontWeight: 'bold',
+    color: appColorTheme.brown_2,
+  },
+  noteText: {
+    color: '#3182CE',
+  },
+  paymentMethodContainer: {
+    padding: 16,
+  },
+  radioGroup: {
+    marginTop: 8,
+  },
+  radioButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  radioButtonSelected: {
+    backgroundColor: '#EBF8FF',
+  },
+  radioCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#3182CE',
+    marginRight: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  radioInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#3182CE',
+  },
+  radioLabel: {
+    fontSize: 16,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#E2E8F0',
+    marginVertical: 16,
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
+  },
+  footerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  cancelButton: {
+    backgroundColor: '#EDF2F7',
+  },
+  submitButton: {
+    backgroundColor: '#3182CE',
+  },
+  submitButtonText: {
+    color: 'white',
+  },
+});

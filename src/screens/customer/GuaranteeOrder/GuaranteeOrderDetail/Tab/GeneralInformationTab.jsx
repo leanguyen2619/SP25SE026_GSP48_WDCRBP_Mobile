@@ -1,13 +1,11 @@
 import {
-  Box,
-  Heading,
-  HStack,
-  SimpleGrid,
-  Stack,
+  View,
   Text,
-  Spacer,
-  Link,
-} from "@chakra-ui/react";
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Linking,
+} from "react-native";
 import {
   appColorTheme,
   getServiceTypeLabel,
@@ -25,8 +23,16 @@ export default function GeneralInformationTab({ order }) {
   const serviceName = order?.serviceOrderDetail?.service?.service?.serviceName;
   const serviceOrder = order?.serviceOrderDetail;
 
+  const handleViewOrderDetail = () => {
+    Linking.openURL(`/cus/service-order/${order?.serviceOrderDetail?.orderId}`);
+  };
+
+  const handleViewWoodworker = () => {
+    Linking.openURL(`/woodworker/${order?.service?.wwDto?.woodworkerId}`);
+  };
+
   return (
-    <Box>
+    <ScrollView style={styles.container}>
       {serviceName == "Personalization" && (
         <PersonalizationProduct
           orderId={serviceOrder?.orderId}
@@ -74,177 +80,198 @@ export default function GeneralInformationTab({ order }) {
         />
       )}
 
-      <SimpleGrid
-        mt={6}
-        columns={{
-          base: 1,
-          xl: 2,
-        }}
-        spacing={6}
-      >
-        <Box p={5} bgColor="white" boxShadow="md" borderRadius="10px">
-          <Box>
-            <Heading fontWeight="bold" as="h3" fontSize="20px" mb={6}>
-              Thông tin đơn hàng
-            </Heading>
+      <View style={styles.gridContainer}>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Thông tin đơn hàng</Text>
 
-            <Stack spacing={4}>
-              <HStack>
-                <Text fontWeight="bold">Mã yêu cầu:</Text>
-                <Text>{order?.guaranteeOrderId || "Chưa cập nhật"}</Text>
-              </HStack>
+          <View style={styles.infoContainer}>
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>Mã yêu cầu:</Text>
+              <Text>{order?.guaranteeOrderId || "Chưa cập nhật"}</Text>
+            </View>
 
-              <HStack>
-                <Text fontWeight="bold">Mã đơn hàng đã đặt:</Text>
-                <Text>
-                  {getServiceTypeLabel(order?.serviceOrderDetail?.orderId)}
-                </Text>
-                <Link
-                  target="_blank"
-                  color={appColorTheme.brown_2}
-                  href={`/cus/service-order/${order?.serviceOrderDetail?.orderId}`}
-                >
-                  Xem chi tiết
-                </Link>
-              </HStack>
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>Mã đơn hàng đã đặt:</Text>
+              <Text>{getServiceTypeLabel(order?.serviceOrderDetail?.orderId)}</Text>
+              <TouchableOpacity onPress={handleViewOrderDetail}>
+                <Text style={styles.link}>Xem chi tiết</Text>
+              </TouchableOpacity>
+            </View>
 
-              <HStack>
-                <Text fontWeight="bold">Ngày đặt:</Text>
-                <Text>
-                  {order?.createdAt
-                    ? formatDateTimeString(new Date(order?.createdAt))
-                    : "Chưa cập nhật"}
-                </Text>
-              </HStack>
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>Ngày đặt:</Text>
+              <Text>
+                {order?.createdAt
+                  ? formatDateTimeString(new Date(order?.createdAt))
+                  : "Chưa cập nhật"}
+              </Text>
+            </View>
 
-              <HStack>
-                <Text fontWeight="bold">Yêu cầu lắp đặt bởi xưởng:</Text>
-                <Text>
-                  {order?.install ? "Có lắp đặt" : "Không cần lắp đặt"}
-                </Text>
-              </HStack>
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>Yêu cầu lắp đặt bởi xưởng:</Text>
+              <Text>{order?.install ? "Có lắp đặt" : "Không cần lắp đặt"}</Text>
+            </View>
 
-              <Box>
-                <Text fontWeight="bold">Ghi chú:</Text>
-                <Text>{order?.description || "Không có ghi chú"}</Text>
-              </Box>
-            </Stack>
-          </Box>
-        </Box>
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>Ghi chú:</Text>
+              <Text>{order?.description || "Không có ghi chú"}</Text>
+            </View>
+          </View>
+        </View>
 
-        <Box bgColor="white" boxShadow="md" p={5} borderRadius="10px">
-          <Heading fontWeight="bold" as="h3" fontSize="20px" mb={4}>
-            Thông tin lịch hẹn tư vấn
-          </Heading>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Thông tin lịch hẹn tư vấn</Text>
 
-          <Stack spacing={4}>
+          <View style={styles.infoContainer}>
             {order?.consultantAppointment ? (
               <>
-                <HStack>
-                  <Text fontWeight="bold">Hình thức:</Text>
+                <View style={styles.infoRow}>
+                  <Text style={styles.label}>Hình thức:</Text>
                   <Text>{order.consultantAppointment.form}</Text>
-                </HStack>
+                </View>
 
-                <HStack>
-                  <Text fontWeight="bold">Địa điểm:</Text>
+                <View style={styles.infoRow}>
+                  <Text style={styles.label}>Địa điểm:</Text>
                   <Text>{order.consultantAppointment.meetAddress}</Text>
-                </HStack>
+                </View>
 
-                <HStack>
-                  <Text fontWeight="bold">Ngày giờ hẹn:</Text>
+                <View style={styles.infoRow}>
+                  <Text style={styles.label}>Ngày giờ hẹn:</Text>
                   <Text>
                     {formatDateTimeToVietnamese(
                       new Date(order.consultantAppointment.dateTime)
                     )}
                   </Text>
-                </HStack>
+                </View>
 
-                <HStack>
-                  <Text fontWeight="bold">Mô tả:</Text>
+                <View style={styles.infoRow}>
+                  <Text style={styles.label}>Mô tả:</Text>
                   <Text>
                     {order.consultantAppointment.content || "Không có mô tả"}
                   </Text>
-                </HStack>
+                </View>
               </>
             ) : (
-              <Text color="gray.500">Không có lịch hẹn tư vấn</Text>
+              <Text style={styles.noDataText}>Không có lịch hẹn tư vấn</Text>
             )}
-          </Stack>
-        </Box>
-      </SimpleGrid>
+          </View>
+        </View>
+      </View>
 
-      <Box bgColor="white" boxShadow="md" p={5} borderRadius="10px" mt={6}>
-        <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={20}>
-          <Box>
-            <Stack spacing={3}>
-              <Heading fontWeight="bold" as="h3" fontSize="20px" mb={4}>
-                Thông tin xưởng mộc
-              </Heading>
+      <View style={styles.card}>
+        <View style={styles.gridContainer}>
+          <View style={styles.infoSection}>
+            <Text style={styles.cardTitle}>Thông tin xưởng mộc</Text>
 
+            <View style={styles.infoContainer}>
               <Text>
-                <b>Tên xưởng mộc:</b>{" "}
+                <Text style={styles.label}>Tên xưởng mộc:</Text>{" "}
                 {order?.service?.wwDto?.brandName || "Chưa cập nhật"}
               </Text>
 
               <Text>
-                <b>Địa chỉ:</b>{" "}
+                <Text style={styles.label}>Địa chỉ:</Text>{" "}
                 {order?.service?.wwDto?.address || "Chưa cập nhật"}
               </Text>
 
-              <HStack>
-                <Spacer />
-                <Link to={`/woodworker/${order?.service?.wwDto?.woodworkerId}`}>
-                  <Text
-                    color={appColorTheme.brown_2}
-                    _hover={{ textDecoration: "underline" }}
-                  >
-                    Xem xưởng
-                  </Text>
-                </Link>
-              </HStack>
-            </Stack>
-          </Box>
+              <TouchableOpacity onPress={handleViewWoodworker}>
+                <Text style={styles.link}>Xem xưởng</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
 
-          <Box>
+          <View style={styles.infoSection}>
             {order?.review ? (
               <>
                 {order?.review?.status ? (
-                  <>
-                    <Stack spacing={3}>
-                      <Heading fontWeight="bold" as="h3" fontSize="20px" mb={4}>
-                        Đánh giá
-                      </Heading>
+                  <View style={styles.infoContainer}>
+                    <Text style={styles.cardTitle}>Đánh giá</Text>
 
-                      <HStack>
-                        <Text fontWeight="bold">Số sao:</Text>
-                        <StarRating rating={order.review.rating} />
-                      </HStack>
+                    <View style={styles.infoRow}>
+                      <Text style={styles.label}>Số sao:</Text>
+                      <StarRating rating={order.review.rating} />
+                    </View>
 
-                      <HStack>
-                        <Text fontWeight="bold">Bình luận:</Text>
-                        <Text>{order.review.comment}</Text>
-                      </HStack>
+                    <View style={styles.infoRow}>
+                      <Text style={styles.label}>Bình luận:</Text>
+                      <Text>{order.review.comment}</Text>
+                    </View>
 
-                      <HStack>
-                        <Text fontWeight="bold">Ngày đăng:</Text>
-                        <Text>
-                          {formatDateTimeString(
-                            new Date(order.review.createdAt)
-                          )}
-                        </Text>
-                      </HStack>
-                    </Stack>
-                  </>
+                    <View style={styles.infoRow}>
+                      <Text style={styles.label}>Ngày đăng:</Text>
+                      <Text>
+                        {formatDateTimeString(new Date(order.review.createdAt))}
+                      </Text>
+                    </View>
+                  </View>
                 ) : (
-                  <Text color="gray.500">(Đánh giá chưa được duyệt)</Text>
+                  <Text style={styles.noDataText}>(Đánh giá chưa được duyệt)</Text>
                 )}
               </>
             ) : (
-              <Text color="gray.500">(Chưa có đánh giá)</Text>
+              <Text style={styles.noDataText}>(Chưa có đánh giá)</Text>
             )}
-          </Box>
-        </SimpleGrid>
-      </Box>
-    </Box>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    padding: 16,
+    gap: 16,
+  },
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    flex: 1,
+    minWidth: '100%',
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    color: appColorTheme.brown_2,
+  },
+  infoContainer: {
+    gap: 12,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  label: {
+    fontWeight: 'bold',
+  },
+  link: {
+    color: appColorTheme.brown_2,
+    textDecorationLine: 'underline',
+  },
+  noDataText: {
+    color: '#666',
+    fontStyle: 'italic',
+  },
+  infoSection: {
+    flex: 1,
+    minWidth: '100%',
+  },
+});

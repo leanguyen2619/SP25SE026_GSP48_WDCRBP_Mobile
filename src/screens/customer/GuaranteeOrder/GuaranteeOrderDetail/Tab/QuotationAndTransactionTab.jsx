@@ -1,22 +1,11 @@
 import { useEffect, useState } from "react";
 import {
-  Box,
-  Heading,
-  Stack,
-  HStack,
+  View,
   Text,
-  SimpleGrid,
-  Badge,
-  Spacer,
-  Center,
-  Spinner,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-} from "@chakra-ui/react";
+  ActivityIndicator,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
 import { appColorTheme } from "../../../../../config/appconfig.js";
 import { useGetByGuaranteeOrderMutation } from "../../../../../services/quotationApi.js";
 import { useGetAllOrderDepositByGuaranteeOrderIdQuery } from "../../../../../services/orderDepositApi.js";
@@ -34,10 +23,8 @@ export default function QuotationAndTransactionTab({
   const [isQuotationLoading, setIsQuotationLoading] = useState(false);
   const [quotationError, setQuotationError] = useState(null);
 
-  // Use the API hook
   const [getByGuaranteeOrder] = useGetByGuaranteeOrderMutation();
 
-  // Fetch deposit data using guaranteeOrderId from the order
   const {
     data: depositsResponse,
     isLoading: isDepositsLoading,
@@ -45,7 +32,6 @@ export default function QuotationAndTransactionTab({
     refetch: refetchDeposits,
   } = useGetAllOrderDepositByGuaranteeOrderIdQuery(order?.guaranteeOrderId);
 
-  // Function to fetch quotation data
   const fetchQuotationData = async () => {
     if (!order?.guaranteeOrderId) return;
 
@@ -65,7 +51,6 @@ export default function QuotationAndTransactionTab({
     }
   };
 
-  // Refetch data when tab becomes active
   useEffect(() => {
     if (isActive && order?.guaranteeOrderId) {
       fetchQuotationData();
@@ -75,7 +60,6 @@ export default function QuotationAndTransactionTab({
 
   const deposits = depositsResponse?.data || [];
 
-  // Calculate total quotation amount
   const calculateTotalPrice = (quotationDetails = []) => {
     return (
       quotationDetails?.reduce(
@@ -88,196 +72,313 @@ export default function QuotationAndTransactionTab({
   const quotationDetails = quotationData?.quotationDetails || [];
   const totalQuotationAmount = calculateTotalPrice(quotationDetails);
 
-  // Loading state
   if (isQuotationLoading) {
     return (
-      <Center h="200px">
-        <Spinner size="xl" color={appColorTheme.brown_2} />
-      </Center>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={appColorTheme.brown_2} />
+      </View>
     );
   }
 
   return (
-    <Box>
-      <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={6}>
+    <ScrollView style={styles.container}>
+      <View style={styles.gridContainer}>
         {/* Quotation Information */}
-        <Box p={5} bgColor="white" boxShadow="md" borderRadius="10px">
-          <Heading fontWeight="bold" as="h3" fontSize="20px" mb={6}>
-            Báo giá chi tiết
-          </Heading>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Báo giá chi tiết</Text>
 
           {isQuotationLoading ? (
-            <Center py={8}>
-              <Spinner size="md" color={appColorTheme.brown_2} />
-            </Center>
+            <View style={styles.centerContainer}>
+              <ActivityIndicator size="large" color={appColorTheme.brown_2} />
+            </View>
           ) : quotationError ? (
-            <Center py={8}>
-              <Text color="red.500">
+            <View style={styles.centerContainer}>
+              <Text style={styles.errorText}>
                 Đã có lỗi xảy ra khi tải thông tin báo giá
               </Text>
-            </Center>
+            </View>
           ) : quotationDetails.length === 0 ? (
-            <Center py={8}>
-              <Text color="gray.500">Chưa có thông tin báo giá</Text>
-            </Center>
+            <View style={styles.centerContainer}>
+              <Text style={styles.emptyText}>Chưa có thông tin báo giá</Text>
+            </View>
           ) : (
-            <Stack spacing={4}>
-              <Box overflowX="auto">
-                <Table variant="simple" size="lg">
-                  <Thead>
-                    <Tr>
-                      <Th>STT</Th>
-                      <Th>Loại chi phí</Th>
-                      <Th>Số lượng cần dùng</Th>
-                      <Th>Chi phí</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {quotationDetails.map((detail, index) => (
-                      <Tr key={index}>
-                        <Td>{index + 1}</Td>
-                        <Td>{detail.costType}</Td>
-                        <Td>{detail.quantityRequired}</Td>
-                        <Td>{formatPrice(detail.costAmount)}</Td>
-                      </Tr>
-                    ))}
-                    <Tr>
-                      <Td colSpan={3} textAlign="right" fontWeight="bold">
-                        Phí vận chuyển:
-                      </Td>
-                      <Td>{formatPrice(order?.shipFee)}</Td>
-                    </Tr>
-                    <Tr>
-                      <Td colSpan={3} textAlign="right" fontWeight="bold">
-                        Tổng chi phí:
-                      </Td>
-                      <Td
-                        fontSize="20px"
-                        color={appColorTheme.brown_2}
-                        fontWeight="bold"
-                      >
-                        {formatPrice(totalQuotationAmount + order?.shipFee)}
-                      </Td>
-                    </Tr>
-                  </Tbody>
-                </Table>
-              </Box>
-            </Stack>
+            <View style={styles.tableContainer}>
+              <View style={styles.tableHeader}>
+                <Text style={styles.headerCell}>STT</Text>
+                <Text style={styles.headerCell}>Loại chi phí</Text>
+                <Text style={styles.headerCell}>Số lượng</Text>
+                <Text style={styles.headerCell}>Chi phí</Text>
+              </View>
+
+              {quotationDetails.map((detail, index) => (
+                <View key={index} style={styles.tableRow}>
+                  <Text style={styles.cell}>{index + 1}</Text>
+                  <Text style={styles.cell}>{detail.costType}</Text>
+                  <Text style={styles.cell}>{detail.quantityRequired}</Text>
+                  <Text style={styles.cell}>{formatPrice(detail.costAmount)}</Text>
+                </View>
+              ))}
+
+              <View style={styles.tableRow}>
+                <Text style={[styles.cell, styles.boldText, styles.rightAlign]}>
+                  Phí vận chuyển:
+                </Text>
+                <Text style={styles.cell}>{formatPrice(order?.shipFee)}</Text>
+              </View>
+
+              <View style={styles.tableRow}>
+                <Text style={[styles.cell, styles.boldText, styles.rightAlign]}>
+                  Tổng chi phí:
+                </Text>
+                <Text style={[styles.cell, styles.totalPrice]}>
+                  {formatPrice(totalQuotationAmount + order?.shipFee)}
+                </Text>
+              </View>
+            </View>
           )}
-        </Box>
+        </View>
 
         {/* Deposit/Transaction Information */}
-        <Box p={5} bgColor="white" boxShadow="md" borderRadius="10px">
-          <Heading fontWeight="bold" as="h3" fontSize="20px" mb={6}>
-            Thông tin giao dịch
-          </Heading>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Thông tin giao dịch</Text>
 
           {isDepositsLoading ? (
-            <Center py={8}>
-              <Spinner size="md" color={appColorTheme.brown_2} />
-            </Center>
+            <View style={styles.centerContainer}>
+              <ActivityIndicator size="large" color={appColorTheme.brown_2} />
+            </View>
           ) : depositsError ? (
-            <Center py={8}>
-              <Text color="red.500">
+            <View style={styles.centerContainer}>
+              <Text style={styles.errorText}>
                 Đã có lỗi xảy ra khi tải thông tin thanh toán
               </Text>
-            </Center>
+            </View>
           ) : deposits.length === 0 ? (
-            <Center py={8}>
-              <Text color="gray.500">Chưa có thông tin thanh toán</Text>
-            </Center>
+            <View style={styles.centerContainer}>
+              <Text style={styles.emptyText}>Chưa có thông tin thanh toán</Text>
+            </View>
           ) : (
-            <Stack spacing={4}>
-              <Stack spacing={4}>
-                <HStack>
-                  <Text fontWeight="bold">Thành tiền:</Text>
-                  <Text fontWeight="bold" color={appColorTheme.brown_2}>
+            <View style={styles.transactionContainer}>
+              <View style={styles.amountInfo}>
+                <View style={styles.amountRow}>
+                  <Text style={styles.amountLabel}>Thành tiền:</Text>
+                  <Text style={styles.amountValue}>
                     {formatPrice(order?.totalAmount)}
                   </Text>
-                </HStack>
+                </View>
 
-                <HStack>
-                  <Text fontWeight="bold">Số tiền đã thanh toán:</Text>
-                  <Text fontWeight="bold" color={appColorTheme.brown_2}>
+                <View style={styles.amountRow}>
+                  <Text style={styles.amountLabel}>Số tiền đã thanh toán:</Text>
+                  <Text style={styles.amountValue}>
                     {formatPrice(order?.amountPaid || 0)}
                   </Text>
-                </HStack>
+                </View>
 
-                <HStack>
-                  <Text fontWeight="bold">Số tiền còn lại:</Text>
-                  <Text fontWeight="bold" color={appColorTheme.brown_2}>
+                <View style={styles.amountRow}>
+                  <Text style={styles.amountLabel}>Số tiền còn lại:</Text>
+                  <Text style={styles.amountValue}>
                     {formatPrice(order?.amountRemaining || 0)}
                   </Text>
-                </HStack>
-              </Stack>
+                </View>
+              </View>
 
-              <Spacer height="20px" />
+              <View style={styles.depositsContainer}>
+                {deposits.map((deposit) => (
+                  <View
+                    key={deposit.serviceDepositId}
+                    style={[
+                      styles.depositCard,
+                      deposit.status && styles.paidDeposit,
+                    ]}
+                  >
+                    <View style={styles.depositHeader}>
+                      <Text style={styles.depositTitle}>
+                        Đặt cọc lần {deposit.depositNumber}:
+                      </Text>
+                      <View
+                        style={[
+                          styles.statusBadge,
+                          deposit.status && styles.paidBadge,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.statusText,
+                            deposit.status && styles.paidStatusText,
+                          ]}
+                        >
+                          {deposit.status ? "Đã thanh toán" : "Chưa thanh toán"}
+                        </Text>
+                      </View>
+                    </View>
 
-              {deposits.map((deposit) => (
-                <Stack
-                  key={deposit.serviceDepositId}
-                  spacing={4}
-                  p={3}
-                  bg={deposit.status ? "green.50" : "gray.50"}
-                  borderRadius="md"
-                >
-                  <HStack>
-                    <Text fontWeight="bold">
-                      Đặt cọc lần {deposit.depositNumber}:
-                    </Text>
-                    <Badge colorScheme={deposit.status ? "green" : "gray"}>
-                      {deposit.status ? "Đã thanh toán" : "Chưa thanh toán"}
-                    </Badge>
-                  </HStack>
+                    <View style={styles.depositInfo}>
+                      <Text style={styles.depositLabel}>Ngày tạo:</Text>
+                      <Text>
+                        {deposit.createdAt
+                          ? formatDateTimeString(new Date(deposit.createdAt))
+                          : "Chưa cập nhật"}
+                      </Text>
+                    </View>
 
-                  <HStack>
-                    <Text fontWeight="bold">Ngày tạo:</Text>
-                    <Text>
-                      {deposit.createdAt
-                        ? formatDateTimeString(new Date(deposit.createdAt))
-                        : "Chưa cập nhật"}
-                    </Text>
-                  </HStack>
-
-                  <HStack>
-                    <Text fontWeight="bold">Ngày thanh toán:</Text>
-                    <Text>
-                      {deposit.updatedAt
-                        ? formatDateTimeString(new Date(deposit.updatedAt))
-                        : "Chưa cập nhật"}
-                    </Text>
-                  </HStack>
-
-                  <HStack>
-                    <Text fontWeight="bold">Số tiền thanh toán:</Text>
-                    <Text fontWeight="bold" color={appColorTheme.brown_2}>
-                      {deposit.amount
-                        ? formatPrice(deposit.amount)
-                        : "Chưa cập nhật"}
-                    </Text>
-                  </HStack>
-
-                  <HStack>
-                    <Text fontWeight="bold">Phần trăm cọc:</Text>
-                    <Text>
-                      {deposit.percent
-                        ? `${deposit.percent}%`
-                        : "Chưa cập nhật"}
-                    </Text>
-                  </HStack>
-
-                  {deposit.description && (
-                    <HStack>
-                      <Text fontWeight="bold">Ghi chú:</Text>
-                      <Text>{deposit.description}</Text>
-                    </HStack>
-                  )}
-                </Stack>
-              ))}
-            </Stack>
+                    <View style={styles.depositInfo}>
+                      <Text style={styles.depositLabel}>Ngày thanh toán:</Text>
+                      <Text>
+                        {deposit.updatedAt
+                          ? formatDateTimeString(new Date(deposit.updatedAt))
+                          : "Chưa cập nhật"}
+                      </Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </View>
           )}
-        </Box>
-      </SimpleGrid>
-    </Box>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  centerContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 16,
+  },
+  emptyText: {
+    color: '#666',
+    fontSize: 16,
+  },
+  gridContainer: {
+    padding: 16,
+    gap: 16,
+  },
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    color: appColorTheme.brown_2,
+  },
+  tableContainer: {
+    marginBottom: 16,
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    paddingBottom: 8,
+    marginBottom: 8,
+  },
+  headerCell: {
+    flex: 1,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  tableRow: {
+    flexDirection: 'row',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  cell: {
+    flex: 1,
+    textAlign: 'center',
+  },
+  boldText: {
+    fontWeight: 'bold',
+  },
+  rightAlign: {
+    textAlign: 'right',
+  },
+  totalPrice: {
+    fontSize: 18,
+    color: appColorTheme.brown_2,
+    fontWeight: 'bold',
+  },
+  transactionContainer: {
+    gap: 16,
+  },
+  amountInfo: {
+    gap: 8,
+  },
+  amountRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  amountLabel: {
+    fontWeight: 'bold',
+  },
+  amountValue: {
+    color: appColorTheme.brown_2,
+    fontWeight: 'bold',
+  },
+  depositsContainer: {
+    gap: 12,
+  },
+  depositCard: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    padding: 12,
+  },
+  paidDeposit: {
+    backgroundColor: '#e6ffe6',
+  },
+  depositHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  depositTitle: {
+    fontWeight: 'bold',
+  },
+  statusBadge: {
+    backgroundColor: '#ddd',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  paidBadge: {
+    backgroundColor: '#4CAF50',
+  },
+  statusText: {
+    color: '#666',
+    fontSize: 12,
+  },
+  paidStatusText: {
+    color: 'white',
+  },
+  depositInfo: {
+    flexDirection: 'row',
+    marginBottom: 4,
+  },
+  depositLabel: {
+    fontWeight: 'bold',
+    marginRight: 8,
+  },
+});

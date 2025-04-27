@@ -1,32 +1,23 @@
-import {
-  Button,
-  FormControl,
-  FormLabel,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Stack,
-  Textarea,
-  Divider,
-  Text,
-  useDisclosure,
-} from "@chakra-ui/react";
 import { useRef, useState } from "react";
 import { useSendServiceOrderFeedbackMutation } from "../../../../../../services/serviceOrderApi";
 import { useNotify } from "../../../../../../components/Utility/Notify";
 import { FiAlertCircle, FiXCircle, FiXOctagon } from "react-icons/fi";
 import CheckboxList from "../../../../../../components/Utility/CheckboxList";
 import { validateFeedback } from "../../../../../../validations";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  TextInput,
+  ActivityIndicator,
+} from "react-native";
 
 export default function CancelModal({ serviceOrderId, refetch }) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isModalVisible, setModalVisible] = useState(false);
   const notify = useNotify();
   const [sendFeedback, { isLoading }] = useSendServiceOrderFeedbackMutation();
-  const initialRef = useRef(null);
   const [reason, setReason] = useState("");
   const [isCheckboxDisabled, setIsCheckboxDisabled] = useState(true);
 
@@ -37,8 +28,8 @@ export default function CancelModal({ serviceOrderId, refetch }) {
     },
   ];
 
-  const handleReasonChange = (e) => {
-    setReason(e.target.value);
+  const handleReasonChange = (text) => {
+    setReason(text);
   };
 
   const handleSubmit = async () => {
@@ -67,7 +58,7 @@ export default function CancelModal({ serviceOrderId, refetch }) {
         "success"
       );
 
-      onClose();
+      setModalVisible(false);
       setReason(""); // Reset form
       refetch(); // Refresh data
     } catch (err) {
@@ -81,76 +72,185 @@ export default function CancelModal({ serviceOrderId, refetch }) {
 
   return (
     <>
-      <Button
-        leftIcon={<FiXOctagon />}
-        colorScheme="red"
-        variant="outline"
-        onClick={onOpen}
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => setModalVisible(true)}
       >
-        Yêu cầu hủy đơn
-      </Button>
+        <FiXOctagon style={styles.buttonIcon} />
+        <Text style={styles.buttonText}>Yêu cầu hủy đơn</Text>
+      </TouchableOpacity>
 
       <Modal
-        isOpen={isOpen}
-        onClose={isLoading ? null : onClose}
-        closeOnOverlayClick={false}
-        closeOnEsc={false}
-        initialFocusRef={initialRef}
+        visible={isModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => !isLoading && setModalVisible(false)}
       >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Yêu cầu hủy đơn</ModalHeader>
-          {!isLoading && <ModalCloseButton />}
-          <ModalBody pb={6}>
-            <Stack spacing={4}>
-              <Text color="red.500">
-                Bạn đang yêu cầu hủy đơn hàng này. Vui lòng cung cấp lý do rõ
-                ràng.
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Yêu cầu hủy đơn</Text>
+            {!isLoading && (
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <FiXCircle style={styles.closeIcon} />
+              </TouchableOpacity>
+            )}
+
+            <View style={styles.modalBody}>
+              <Text style={styles.warningText}>
+                Bạn đang yêu cầu hủy đơn hàng này. Vui lòng cung cấp lý do rõ ràng.
               </Text>
-              <FormControl>
-                <FormLabel>Lý do hủy đơn</FormLabel>
-                <Textarea
-                  ref={initialRef}
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Lý do hủy đơn</Text>
+                <TextInput
+                  style={styles.input}
                   value={reason}
-                  onChange={handleReasonChange}
+                  onChangeText={handleReasonChange}
                   placeholder="Nhập lý do hủy đơn của bạn"
-                  rows={4}
+                  multiline
+                  numberOfLines={4}
                 />
-              </FormControl>
+              </View>
 
               {reason && reason.trim() !== "" && (
                 <>
-                  <Divider my={2} />
+                  <View style={styles.divider} />
                   <CheckboxList
                     items={checkboxItems}
                     setButtonDisabled={setIsCheckboxDisabled}
                   />
                 </>
               )}
-            </Stack>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              isLoading={isLoading}
-              variant="ghost"
-              mr={3}
-              onClick={onClose}
-              leftIcon={<FiXCircle />}
-            >
-              Đóng
-            </Button>
-            <Button
-              colorScheme="red"
-              onClick={handleSubmit}
-              isLoading={isLoading}
-              isDisabled={!reason || reason.trim() === "" || isCheckboxDisabled}
-              leftIcon={<FiAlertCircle />}
-            >
-              Gửi yêu cầu hủy
-            </Button>
-          </ModalFooter>
-        </ModalContent>
+            </View>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={[styles.footerButton, styles.cancelButton]}
+                onPress={() => setModalVisible(false)}
+                disabled={isLoading}
+              >
+                <FiXCircle style={styles.buttonIcon} />
+                <Text style={styles.buttonText}>Đóng</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.footerButton, styles.submitButton]}
+                onPress={handleSubmit}
+                disabled={!reason || reason.trim() === "" || isCheckboxDisabled || isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <FiAlertCircle style={styles.buttonIcon} />
+                )}
+                <Text style={[styles.buttonText, styles.submitButtonText]}>
+                  Gửi yêu cầu hủy
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       </Modal>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#E53E3E',
+    padding: 8,
+    borderRadius: 4,
+  },
+  buttonIcon: {
+    color: '#E53E3E',
+    marginRight: 8,
+  },
+  buttonText: {
+    color: '#E53E3E',
+    fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    width: '90%',
+    maxWidth: 500,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    padding: 16,
+    textAlign: 'center',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+  },
+  closeIcon: {
+    fontSize: 20,
+    color: '#666',
+  },
+  modalBody: {
+    padding: 16,
+  },
+  warningText: {
+    color: '#E53E3E',
+    marginBottom: 16,
+  },
+  inputContainer: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 4,
+    padding: 8,
+    minHeight: 100,
+    textAlignVertical: 'top',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#E2E8F0',
+    marginVertical: 16,
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
+  },
+  footerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  cancelButton: {
+    backgroundColor: '#EDF2F7',
+  },
+  submitButton: {
+    backgroundColor: '#E53E3E',
+  },
+  submitButtonText: {
+    color: 'white',
+  },
+});

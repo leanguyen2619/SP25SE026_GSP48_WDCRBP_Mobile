@@ -1,26 +1,17 @@
-import {
-  Button,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Stack,
-  Text,
-  Divider,
-  useDisclosure,
-  Box,
-  Grid,
-  GridItem,
-} from "@chakra-ui/react";
 import { useState } from "react";
 import { useAcceptGuaranteeOrderMutation } from "../../../../../../services/guaranteeOrderApi";
 import { useNotify } from "../../../../../../components/Utility/Notify";
 import { FiCheck, FiCheckCircle, FiXCircle } from "react-icons/fi";
 import CheckboxList from "../../../../../../components/Utility/CheckboxList";
 import { formatDateTimeToVietnamese } from "../../../../../../utils/utils";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  ActivityIndicator,
+} from "react-native";
 
 export default function AppointmentConfirmModal({
   serviceOrderId,
@@ -28,7 +19,7 @@ export default function AppointmentConfirmModal({
   buttonText = "Xác nhận",
   refetch,
 }) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isModalVisible, setModalVisible] = useState(false);
   const notify = useNotify();
   const [acceptOrder, { isLoading }] = useAcceptGuaranteeOrderMutation();
   const [isCheckboxDisabled, setIsCheckboxDisabled] = useState(true);
@@ -52,7 +43,7 @@ export default function AppointmentConfirmModal({
         "success"
       );
 
-      onClose();
+      setModalVisible(false);
       refetch(); // Refresh data
     } catch (err) {
       notify(
@@ -65,92 +56,201 @@ export default function AppointmentConfirmModal({
 
   return (
     <>
-      <Button leftIcon={<FiCheckCircle />} colorScheme="green" onClick={onOpen}>
-        {buttonText}
-      </Button>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => setModalVisible(true)}
+      >
+        <FiCheckCircle style={styles.buttonIcon} />
+        <Text style={styles.buttonText}>{buttonText}</Text>
+      </TouchableOpacity>
 
       <Modal
-        isOpen={isOpen}
-        onClose={isLoading ? null : onClose}
-        closeOnOverlayClick={false}
-        closeOnEsc={false}
-        size="2xl"
+        visible={isModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => !isLoading && setModalVisible(false)}
       >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>{buttonText}</ModalHeader>
-          {!isLoading && <ModalCloseButton />}
-          <ModalBody pb={6}>
-            <Stack spacing={4}>
-              <Text fontSize="lg" fontWeight="bold">
-                Chi tiết lịch hẹn
-              </Text>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{buttonText}</Text>
+            {!isLoading && (
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <FiXCircle style={styles.closeIcon} />
+              </TouchableOpacity>
+            )}
+
+            <View style={styles.modalBody}>
+              <Text style={styles.sectionTitle}>Chi tiết lịch hẹn</Text>
 
               {appointment && (
-                <Box p={4} bg="gray.50" borderRadius="md" boxShadow="sm">
-                  <Grid templateColumns="120px 1fr" gap={3}>
-                    <GridItem>
-                      <Text fontWeight="semibold">Ngày hẹn:</Text>
-                    </GridItem>
-                    <GridItem>
-                      <Text>
-                        {formatDateTimeToVietnamese(appointment.dateTime)}
-                      </Text>
-                    </GridItem>
+                <View style={styles.appointmentDetails}>
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>Ngày hẹn:</Text>
+                    <Text style={styles.detailValue}>
+                      {formatDateTimeToVietnamese(appointment.dateTime)}
+                    </Text>
+                  </View>
 
-                    <GridItem>
-                      <Text fontWeight="semibold">Hình thức:</Text>
-                    </GridItem>
-                    <GridItem>
-                      <Text>{appointment.form || "Không có"}</Text>
-                    </GridItem>
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>Hình thức:</Text>
+                    <Text style={styles.detailValue}>
+                      {appointment.form || "Không có"}
+                    </Text>
+                  </View>
 
-                    <GridItem>
-                      <Text fontWeight="semibold">Địa điểm:</Text>
-                    </GridItem>
-                    <GridItem>
-                      <Text>{appointment.meetAddress || "Không có"}</Text>
-                    </GridItem>
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>Địa điểm:</Text>
+                    <Text style={styles.detailValue}>
+                      {appointment.meetAddress || "Không có"}
+                    </Text>
+                  </View>
 
-                    <GridItem>
-                      <Text fontWeight="semibold">Mô tả:</Text>
-                    </GridItem>
-                    <GridItem>
-                      <Text>{appointment.content || "Không có"}</Text>
-                    </GridItem>
-                  </Grid>
-                </Box>
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>Mô tả:</Text>
+                    <Text style={styles.detailValue}>
+                      {appointment.content || "Không có"}
+                    </Text>
+                  </View>
+                </View>
               )}
 
-              <Divider my={2} />
+              <View style={styles.divider} />
+
               <CheckboxList
                 items={checkboxItems}
                 setButtonDisabled={setIsCheckboxDisabled}
               />
-            </Stack>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              isLoading={isLoading}
-              variant="ghost"
-              mr={3}
-              onClick={onClose}
-              leftIcon={<FiXCircle />}
-            >
-              Đóng
-            </Button>
-            <Button
-              colorScheme="green"
-              onClick={handleSubmit}
-              isLoading={isLoading}
-              isDisabled={isCheckboxDisabled}
-              leftIcon={<FiCheck />}
-            >
-              Xác nhận
-            </Button>
-          </ModalFooter>
-        </ModalContent>
+            </View>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={[styles.footerButton, styles.cancelButton]}
+                onPress={() => setModalVisible(false)}
+                disabled={isLoading}
+              >
+                <FiXCircle style={styles.buttonIcon} />
+                <Text style={styles.buttonText}>Đóng</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.footerButton, styles.confirmButton]}
+                onPress={handleSubmit}
+                disabled={isLoading || isCheckboxDisabled}
+              >
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <FiCheck style={styles.buttonIcon} />
+                )}
+                <Text style={[styles.buttonText, styles.confirmButtonText]}>
+                  Xác nhận
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       </Modal>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#38A169',
+    padding: 8,
+    borderRadius: 4,
+  },
+  buttonIcon: {
+    color: 'white',
+    marginRight: 8,
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    width: '90%',
+    maxWidth: 500,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    padding: 16,
+    textAlign: 'center',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+  },
+  closeIcon: {
+    fontSize: 20,
+    color: '#666',
+  },
+  modalBody: {
+    padding: 16,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  appointmentDetails: {
+    backgroundColor: '#F7FAFC',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  detailLabel: {
+    fontWeight: '600',
+    width: 100,
+  },
+  detailValue: {
+    flex: 1,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#E2E8F0',
+    marginVertical: 16,
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
+  },
+  footerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  cancelButton: {
+    backgroundColor: '#EDF2F7',
+  },
+  confirmButton: {
+    backgroundColor: '#38A169',
+  },
+  confirmButtonText: {
+    color: 'white',
+  },
+});
