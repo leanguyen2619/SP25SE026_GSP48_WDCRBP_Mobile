@@ -33,6 +33,11 @@ import WoodworkerProfileManagementPage from "../screens/woodworker/ProfileManage
 import PricingPage from "../screens/general/Pricing/PricingPage";
 import WWServiceOrderDetailPage from "../screens/woodworker/ServiceOrder/ServiceOrderDetail/MainPage/WWServiceOrderDetailPage";
 import PersonalizationRequestPage from "../screens/customer/PersonalizationRequest/PersonalizationRequestPage";
+import DesignManagementListPage from "../screens/woodworker/DesignManagement/DesignList/DesignManagementListPage";
+import PostManagementListPage from "../screens/woodworker/PostManagement/PostList/PostManagementListPage";
+import ProductManagementListPage from "../screens/woodworker/ProductManagement/ProductList/ProductManagementListPage";
+import CusGuaranteeOrderListPage from "../screens/customer/GuaranteeOrder/GuaranteeOrderList/CusGuaranteeOrderListPage";
+import CusGuaranteeOrderDetailPage from "../screens/customer/GuaranteeOrder/GuaranteeOrderDetail/MainPage/CusGuaranteeOrderDetailPage";
 
 const Stack = createNativeStackNavigator();
 
@@ -119,14 +124,14 @@ const AppNavigator = () => {
         component={CusServiceOrderDetailPage}
       />
       {/* <Stack.Screen name="GuaranteeRequest" component={GuaranteeRequestPage} /> */}
-      {/* <Stack.Screen
+      <Stack.Screen
         name="CustomerGuaranteeOrders"
         component={CusGuaranteeOrderListPage}
-      /> */}
-      {/* <Stack.Screen
+      />
+      <Stack.Screen
         name="CustomerGuaranteeOrderDetail"
         component={CusGuaranteeOrderDetailPage}
-      /> */}
+      />
 
       {/* Woodworker */}
 
@@ -134,15 +139,15 @@ const AppNavigator = () => {
         name="WoodworkerWelcome"
         component={WoodworkerWelcomePage}
       />
-      {/* <Stack.Screen
+      <Stack.Screen
         name="DesignManagement"
         component={DesignManagementListPage}
-      /> */}
-      {/* <Stack.Screen
+      />
+      <Stack.Screen
         name="ProductManagement"
         component={ProductManagementListPage}
-      /> */}
-      {/* <Stack.Screen name="PostManagement" component={PostManagementListPage} /> */}
+      />
+      <Stack.Screen name="PostManagement" component={PostManagementListPage} />
       {/* <Stack.Screen name="ServiceConfig" component={ServiceConfiguration} /> */}
       {/* <Stack.Screen
         name="WWComplaintManagement"

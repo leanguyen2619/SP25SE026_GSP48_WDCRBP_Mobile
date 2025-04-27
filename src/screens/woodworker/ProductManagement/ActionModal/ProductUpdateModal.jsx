@@ -1,30 +1,16 @@
+import React, { useState } from "react";
 import {
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  Stack,
+  View,
   Text,
-  HStack,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
-  NumberIncrementStepper,
-  NumberDecrementStepper,
-  useDisclosure,
-  Textarea,
-  Tooltip,
-  Box,
-  Checkbox,
-} from "@chakra-ui/react";
-import { useRef, useState } from "react";
-import { FiEdit2, FiSave, FiX } from "react-icons/fi";
+  TextInput,
+  Modal,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  Switch,
+} from "react-native";
+import { Feather } from "@expo/vector-icons";
 import { appColorTheme } from "../../../../config/appconfig";
 import { formatPrice } from "../../../../utils/utils";
 import ImageUpdateUploader from "../../../../components/Utility/ImageUpdateUploader";
@@ -35,13 +21,30 @@ import CategorySelector from "../../../../components/Utility/CategorySelector";
 import { validateProductData } from "../../../../validations";
 
 export default function ProductUpdateModal({ product, refetch }) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const initialRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
   const [price, setPrice] = useState(product?.price);
   const [mediaUrls, setMediaUrls] = useState(product?.mediaUrls || "");
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const [isInstall, setIsInstall] = useState(product?.isInstall || false);
   const notify = useNotify();
+
+  // State for form values
+  const [formValues, setFormValues] = useState({
+    productId: product?.productId,
+    productName: product?.productName || "",
+    description: product?.description || "",
+    stock: product?.stock?.toString() || "0",
+    warrantyDuration: product?.warrantyDuration?.toString() || "0",
+    length: product?.length?.toString() || "0",
+    width: product?.width?.toString() || "0",
+    height: product?.height?.toString() || "0",
+    woodType: product?.woodType || "",
+    color: product?.color || "",
+    specialFeature: product?.specialFeature || "",
+    style: product?.style || "",
+    sculpture: product?.sculpture || "",
+    scent: product?.scent || "",
+  });
 
   // State for category
   const [categoryId, setCategoryId] = useState(product?.categoryId);
@@ -49,24 +52,27 @@ export default function ProductUpdateModal({ product, refetch }) {
   // Mutation hook for updating products
   const [updateProduct, { isLoading }] = useUpdateProductMutation();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const formEntries = Object.fromEntries(formData.entries());
+  const handleInputChange = (field, value) => {
+    setFormValues({
+      ...formValues,
+      [field]: value,
+    });
+  };
 
+  const handleSubmit = async () => {
     try {
       // Use spread operator for cleaner code
       const productData = {
-        ...formEntries,
+        ...formValues,
         // Add id and required properties
         id: product.productId,
         // Convert string values to numbers
-        price: Number(formEntries.price),
-        stock: Number(formEntries.stock),
-        warrantyDuration: Number(formEntries.warrantyDuration),
-        length: Number(formEntries.length),
-        width: Number(formEntries.width),
-        height: Number(formEntries.height),
+        price: Number(price),
+        stock: Number(formValues.stock),
+        warrantyDuration: Number(formValues.warrantyDuration),
+        length: Number(formValues.length),
+        width: Number(formValues.width),
+        height: Number(formValues.height),
         // Add additional properties
         mediaUrls: mediaUrls,
         status: true,
@@ -78,12 +84,7 @@ export default function ProductUpdateModal({ product, refetch }) {
       // Validate product data
       const errors = validateProductData(productData);
       if (errors.length > 0) {
-        notify(
-          "Lỗi khi cập nhật sản phẩm",
-          errors.join(" [---] "),
-          "error",
-          3000
-        );
+        notify("Lỗi khi cập nhật sản phẩm", errors.join("\n"), "error", 3000);
         return;
       }
 
@@ -91,7 +92,7 @@ export default function ProductUpdateModal({ product, refetch }) {
       await updateProduct(productData).unwrap();
 
       notify("Thành công", "Sản phẩm đã được cập nhật thành công", "success");
-      onClose();
+      setIsOpen(false);
       refetch?.();
     } catch (error) {
       console.error("Error updating product:", error);
@@ -104,279 +105,197 @@ export default function ProductUpdateModal({ product, refetch }) {
     }
   };
 
+  const renderFormField = (label, field, placeholder, editable = true) => (
+    <View style={styles.formControl}>
+      <Text style={styles.label}>
+        {label} <Text style={styles.required}>*</Text>
+      </Text>
+      <TextInput
+        style={[styles.input, !editable && styles.disabledInput]}
+        placeholder={placeholder}
+        value={formValues[field]}
+        onChangeText={(text) => handleInputChange(field, text)}
+        editable={editable}
+      />
+    </View>
+  );
+
+  const renderTextArea = (label, field, placeholder) => (
+    <View style={styles.formControl}>
+      <Text style={styles.label}>
+        {label} <Text style={styles.required}>*</Text>
+      </Text>
+      <TextInput
+        style={[styles.input, styles.textArea]}
+        placeholder={placeholder}
+        value={formValues[field]}
+        onChangeText={(text) => handleInputChange(field, text)}
+        multiline
+        numberOfLines={5}
+      />
+    </View>
+  );
+
+  const renderNumberInput = (label, field, placeholder) => (
+    <View style={styles.formControl}>
+      <Text style={styles.label}>
+        {label} <Text style={styles.required}>*</Text>
+      </Text>
+      <TextInput
+        style={styles.input}
+        placeholder={placeholder}
+        value={formValues[field]}
+        onChangeText={(text) => handleInputChange(field, text)}
+        keyboardType="numeric"
+      />
+    </View>
+  );
+
   return (
     <>
-      <Tooltip label="Chỉnh sửa" hasArrow>
-        <Button
-          p="1px"
-          color={appColorTheme.blue_0}
-          bg="none"
-          border={`1px solid ${appColorTheme.blue_0}`}
-          _hover={{ bg: appColorTheme.blue_0, color: "white" }}
-          onClick={onOpen}
-        >
-          <FiEdit2 />
-        </Button>
-      </Tooltip>
+      <TouchableOpacity
+        style={styles.editButton}
+        onPress={() => setIsOpen(true)}
+      >
+        <Feather name="edit-2" size={16} color={appColorTheme.blue_0} />
+      </TouchableOpacity>
 
       <Modal
-        size="6xl"
-        initialFocusRef={initialRef}
-        isOpen={isOpen}
-        closeOnOverlayClick={false}
-        closeOnEsc={false}
-        onClose={onClose}
+        visible={isOpen}
+        animationType="slide"
+        onRequestClose={() => !isLoading && setIsOpen(false)}
       >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Chỉnh sửa sản phẩm</ModalHeader>
-          {!isLoading && <ModalCloseButton />}
-          <ModalBody bgColor="app_grey.1" pb={6}>
-            <form onSubmit={handleSubmit}>
-              <Stack spacing={4}>
-                <FormControl isRequired>
-                  <FormLabel>Mã sản phẩm</FormLabel>
-                  <Input
-                    name="productId"
-                    bg="white"
-                    value={product?.productId}
-                    bgColor={"app_grey.2"}
-                    isReadOnly
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalHeaderText}>Chỉnh sửa sản phẩm</Text>
+            {!isLoading && (
+              <TouchableOpacity onPress={() => setIsOpen(false)}>
+                <Text style={styles.closeButton}>X</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <ScrollView
+            style={styles.modalBody}
+            contentContainerStyle={styles.scrollContent}
+          >
+            <View style={styles.formGroup}>
+              <View style={styles.formControl}>
+                <Text style={styles.label}>
+                  Danh mục <Text style={styles.required}>*</Text>
+                </Text>
+                <View style={styles.categoryContainer}>
+                  <CategorySelector
+                    setCategoryId={setCategoryId}
+                    initialCategoryId={product?.categoryId}
                   />
-                </FormControl>
+                </View>
+              </View>
 
-                <FormControl isRequired>
-                  <FormLabel>Danh mục</FormLabel>
-                  <Box bg="white" borderRadius="md" p={4}>
-                    <CategorySelector
-                      setCategoryId={setCategoryId}
-                      initialCategoryId={product?.categoryId}
-                    />
-                  </Box>
-                </FormControl>
+              {renderFormField(
+                "Tên sản phẩm",
+                "productName",
+                "Nhập tên sản phẩm"
+              )}
+              {renderTextArea("Mô tả", "description", "Nhập mô tả")}
 
-                <FormControl isRequired>
-                  <FormLabel>Tên sản phẩm</FormLabel>
-                  <Input
-                    name="productName"
-                    placeholder="Nhập tên sản phẩm"
-                    bg="white"
-                    defaultValue={product?.productName}
+              <View style={styles.formControl}>
+                <Text style={styles.label}>
+                  Hình ảnh <Text style={styles.required}>*</Text>
+                </Text>
+                <ImageUpdateUploader
+                  imgUrls={product?.mediaUrls}
+                  onUploadComplete={(result) => {
+                    setMediaUrls(result);
+                  }}
+                  maxFiles={4}
+                />
+              </View>
+
+              <View style={styles.switchContainer}>
+                <Text style={styles.switchLabel}>
+                  Cần giao hàng + lắp đặt bởi xưởng
+                </Text>
+                <Switch
+                  value={isInstall}
+                  onValueChange={setIsInstall}
+                  trackColor={{ false: "#767577", true: appColorTheme.green_0 }}
+                />
+              </View>
+
+              <View style={styles.rowContainer}>
+                <View style={styles.halfWidth}>
+                  <Text style={styles.label}>
+                    Giá <Text style={styles.required}>*</Text>
+                  </Text>
+                  <Text style={styles.priceText}>{formatPrice(price)}</Text>
+                  <TextInput
+                    style={styles.input}
+                    keyboardType="numeric"
+                    value={price.toString()}
+                    onChangeText={(text) => setPrice(Number(text) || 0)}
                   />
-                </FormControl>
+                </View>
 
-                <FormControl isRequired>
-                  <FormLabel>Mô tả</FormLabel>
-                  <Textarea
-                    name="description"
-                    whiteSpace={"pre-wrap"}
-                    placeholder="Nhập mô tả"
-                    bg="white"
-                    rows={5}
-                    defaultValue={product?.description}
-                  />
-                </FormControl>
+                <View style={styles.halfWidth}>
+                  {renderNumberInput("Tồn kho", "stock", "0")}
+                </View>
+              </View>
 
-                <Box py={2}>
-                  <Checkbox
-                    isChecked={isInstall}
-                    onChange={(e) => setIsInstall(e.target.checked)}
-                    size="md"
-                    colorScheme="green"
-                  >
-                    <Text fontWeight="medium">
-                      Cần giao hàng + lắp đặt bởi xưởng
-                    </Text>
-                  </Checkbox>
-                </Box>
+              <View style={styles.rowContainer}>
+                <View style={styles.halfWidth}>
+                  {renderNumberInput(
+                    "Bảo hành (tháng)",
+                    "warrantyDuration",
+                    "0"
+                  )}
+                </View>
+                <View style={styles.halfWidth}>
+                  {renderNumberInput("Chiều dài (cm)", "length", "0")}
+                </View>
+              </View>
 
-                <HStack spacing={4}>
-                  <FormControl flex="1" isRequired>
-                    <FormLabel>Giá</FormLabel>
-                    <HStack>
-                      <Text flex="1" as="b" color={appColorTheme.brown_2}>
-                        {formatPrice(price)}
-                      </Text>
+              <View style={styles.rowContainer}>
+                <View style={styles.halfWidth}>
+                  {renderNumberInput("Chiều cao (cm)", "height", "0")}
+                </View>
+                <View style={styles.halfWidth}>
+                  {renderNumberInput("Chiều rộng (cm)", "width", "0")}
+                </View>
+              </View>
 
-                      <NumberInput
-                        name="price"
-                        min={0}
-                        flex="1"
-                        max={50000000}
-                        step={1000}
-                        value={price}
-                        onChange={(value) => setPrice(Number(value))}
-                      >
-                        <NumberInputField bg="white" />
-                        <NumberInputStepper>
-                          <NumberIncrementStepper />
-                          <NumberDecrementStepper />
-                        </NumberInputStepper>
-                      </NumberInput>
-                    </HStack>
-                  </FormControl>
+              <View style={styles.rowContainer}>
+                <View style={styles.halfWidth}>
+                  {renderFormField("Loại gỗ", "woodType", "Nhập loại gỗ")}
+                </View>
+                <View style={styles.halfWidth}>
+                  {renderFormField("Màu sắc", "color", "Nhập màu sắc")}
+                </View>
+              </View>
 
-                  <FormControl flex="1" isRequired>
-                    <FormLabel>Tồn kho</FormLabel>
-                    <NumberInput
-                      name="stock"
-                      min={0}
-                      max={1000}
-                      step={1}
-                      defaultValue={product?.stock}
-                    >
-                      <NumberInputField bg="white" />
-                      <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                      </NumberInputStepper>
-                    </NumberInput>
-                  </FormControl>
-                </HStack>
+              <View style={styles.rowContainer}>
+                <View style={styles.halfWidth}>
+                  {renderFormField(
+                    "Tính năng đặc biệt",
+                    "specialFeature",
+                    "Nhập tính năng đặc biệt"
+                  )}
+                </View>
+                <View style={styles.halfWidth}>
+                  {renderFormField("Phong cách", "style", "Nhập phong cách")}
+                </View>
+              </View>
 
-                <HStack spacing={4}>
-                  <FormControl isRequired>
-                    <FormLabel>Bảo hành (tháng)</FormLabel>
-                    <NumberInput
-                      name="warrantyDuration"
-                      min={0}
-                      max={120}
-                      step={1}
-                      defaultValue={product?.warrantyDuration}
-                    >
-                      <NumberInputField bg="white" />
-                      <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                      </NumberInputStepper>
-                    </NumberInput>
-                  </FormControl>
+              <View style={styles.rowContainer}>
+                <View style={styles.halfWidth}>
+                  {renderFormField("Điêu khắc", "sculpture", "Nhập điêu khắc")}
+                </View>
+                <View style={styles.halfWidth}>
+                  {renderFormField("Mùi hương", "scent", "Nhập mùi hương")}
+                </View>
+              </View>
 
-                  <FormControl isRequired>
-                    <FormLabel>Chiều dài (cm)</FormLabel>
-                    <NumberInput
-                      name="length"
-                      min={0}
-                      max={1000}
-                      step={1}
-                      defaultValue={product?.length}
-                    >
-                      <NumberInputField bg="white" />
-                      <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                      </NumberInputStepper>
-                    </NumberInput>
-                  </FormControl>
-                </HStack>
-
-                <HStack spacing={4}>
-                  <FormControl isRequired>
-                    <FormLabel>Chiều cao (cm)</FormLabel>
-                    <NumberInput
-                      name="height"
-                      min={0}
-                      max={1000}
-                      step={1}
-                      defaultValue={product?.height}
-                    >
-                      <NumberInputField bg="white" />
-                      <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                      </NumberInputStepper>
-                    </NumberInput>
-                  </FormControl>
-
-                  <FormControl isRequired>
-                    <FormLabel>Chiều rộng (cm)</FormLabel>
-                    <NumberInput
-                      name="width"
-                      min={0}
-                      max={1000}
-                      step={1}
-                      defaultValue={product?.width}
-                    >
-                      <NumberInputField bg="white" />
-                      <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                      </NumberInputStepper>
-                    </NumberInput>
-                  </FormControl>
-                </HStack>
-
-                <FormControl isRequired>
-                  <FormLabel>Loại gỗ</FormLabel>
-                  <Input
-                    name="woodType"
-                    placeholder="Nhập loại gỗ"
-                    bg="white"
-                    defaultValue={product?.woodType}
-                  />
-                </FormControl>
-
-                <FormControl isRequired>
-                  <FormLabel>Màu sắc</FormLabel>
-                  <Input
-                    name="color"
-                    placeholder="Nhập màu sắc"
-                    bg="white"
-                    defaultValue={product?.color}
-                  />
-                </FormControl>
-
-                <FormControl isRequired>
-                  <FormLabel>Tính năng đặc biệt</FormLabel>
-                  <Input
-                    name="specialFeature"
-                    placeholder="Nhập tính năng đặc biệt"
-                    bg="white"
-                    defaultValue={product?.specialFeature}
-                  />
-                </FormControl>
-
-                <FormControl isRequired>
-                  <FormLabel>Phong cách</FormLabel>
-                  <Input
-                    name="style"
-                    placeholder="Nhập phong cách"
-                    bg="white"
-                    defaultValue={product?.style}
-                  />
-                </FormControl>
-
-                <FormControl isRequired>
-                  <FormLabel>Điêu khắc</FormLabel>
-                  <Input
-                    name="sculpture"
-                    placeholder="Nhập kiểu điêu khắc"
-                    bg="white"
-                    defaultValue={product?.sculpture}
-                  />
-                </FormControl>
-
-                <FormControl isRequired>
-                  <FormLabel>Mùi hương</FormLabel>
-                  <Input
-                    name="scent"
-                    placeholder="Nhập mùi hương"
-                    bg="white"
-                    defaultValue={product?.scent}
-                  />
-                </FormControl>
-
-                <FormControl isRequired>
-                  <FormLabel>Hình ảnh</FormLabel>
-                  <ImageUpdateUploader
-                    maxFiles={4}
-                    onUploadComplete={(result) => {
-                      setMediaUrls(result);
-                    }}
-                    imgUrls={mediaUrls}
-                  />
-                </FormControl>
-
+              <View style={styles.checkboxContainer}>
                 <CheckboxList
                   items={[
                     {
@@ -387,30 +306,176 @@ export default function ProductUpdateModal({ product, refetch }) {
                   ]}
                   setButtonDisabled={setButtonDisabled}
                 />
+              </View>
 
-                <HStack justify="flex-end" mt={4}>
-                  <Button
-                    onClick={onClose}
-                    leftIcon={<FiX />}
-                    isDisabled={isLoading}
-                  >
-                    Đóng
-                  </Button>
-                  <Button
-                    colorScheme="blue"
-                    type="submit"
-                    isLoading={isLoading}
-                    isDisabled={buttonDisabled || !categoryId}
-                    leftIcon={<FiSave />}
-                  >
-                    Cập nhật
-                  </Button>
-                </HStack>
-              </Stack>
-            </form>
-          </ModalBody>
-        </ModalContent>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => setIsOpen(false)}
+                  disabled={isLoading}
+                >
+                  <Feather name="x" size={16} color="#333" />
+                  <Text style={styles.cancelButtonText}>Đóng</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.saveButton,
+                    (buttonDisabled || isLoading) && styles.disabledButton,
+                  ]}
+                  onPress={handleSubmit}
+                  disabled={buttonDisabled || isLoading}
+                >
+                  {isLoading ? (
+                    <ActivityIndicator size="small" color="white" />
+                  ) : (
+                    <>
+                      <Feather name="save" size={16} color="white" />
+                      <Text style={styles.buttonText}>Lưu</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </ScrollView>
+        </View>
       </Modal>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  editButton: {
+    padding: 8,
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: appColorTheme.blue_0,
+    borderRadius: 4,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+    backgroundColor: "white",
+  },
+  modalHeaderText: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  closeButton: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  modalBody: {
+    flex: 1,
+    padding: 16,
+  },
+  scrollContent: {
+    paddingBottom: 80,
+  },
+  formGroup: {
+    gap: 16,
+  },
+  formControl: {
+    marginBottom: 12,
+  },
+  label: {
+    marginBottom: 8,
+    fontWeight: "500",
+  },
+  required: {
+    color: "red",
+  },
+  input: {
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 4,
+    padding: 10,
+  },
+  disabledInput: {
+    backgroundColor: "#f0f0f0",
+    color: "#888",
+  },
+  textArea: {
+    minHeight: 100,
+    textAlignVertical: "top",
+  },
+  categoryContainer: {
+    backgroundColor: "white",
+    borderRadius: 4,
+    padding: 10,
+  },
+  switchContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 10,
+    backgroundColor: "white",
+    borderRadius: 4,
+    marginBottom: 12,
+  },
+  switchLabel: {
+    fontWeight: "500",
+  },
+  rowContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  halfWidth: {
+    flex: 1,
+  },
+  priceText: {
+    fontWeight: "bold",
+    color: appColorTheme.brown_2,
+    marginBottom: 8,
+  },
+  checkboxContainer: {
+    marginTop: 12,
+    marginBottom: 12,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 20,
+    gap: 12,
+  },
+  cancelButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 12,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    backgroundColor: "white",
+    gap: 8,
+  },
+  saveButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 12,
+    borderRadius: 4,
+    backgroundColor: appColorTheme.blue_0,
+    gap: 8,
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  cancelButtonText: {
+    color: "#333",
+  },
+  disabledButton: {
+    opacity: 0.7,
+  },
+});

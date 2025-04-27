@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAcceptGuaranteeOrderMutation } from "../../../../../../services/guaranteeOrderApi";
 import { useNotify } from "../../../../../../components/Utility/Notify";
-import { FiCheck, FiCheckCircle, FiXCircle } from "react-icons/fi";
+import { Feather } from "@expo/vector-icons";
 import CheckboxList from "../../../../../../components/Utility/CheckboxList";
 import { formatDateTimeToVietnamese } from "../../../../../../utils/utils";
 import {
@@ -60,7 +60,7 @@ export default function AppointmentConfirmModal({
         style={styles.button}
         onPress={() => setModalVisible(true)}
       >
-        <FiCheckCircle style={styles.buttonIcon} />
+        <Feather name="check-circle" size={18} style={styles.buttonIcon} />
         <Text style={styles.buttonText}>{buttonText}</Text>
       </TouchableOpacity>
 
@@ -78,7 +78,7 @@ export default function AppointmentConfirmModal({
                 style={styles.closeButton}
                 onPress={() => setModalVisible(false)}
               >
-                <FiXCircle style={styles.closeIcon} />
+                <Feather name="x-circle" size={20} style={styles.closeIcon} />
               </TouchableOpacity>
             )}
 
@@ -131,7 +131,7 @@ export default function AppointmentConfirmModal({
                 onPress={() => setModalVisible(false)}
                 disabled={isLoading}
               >
-                <FiXCircle style={styles.buttonIcon} />
+                <Feather name="x-circle" size={18} style={styles.buttonIcon} />
                 <Text style={styles.buttonText}>Đóng</Text>
               </TouchableOpacity>
 
@@ -143,7 +143,7 @@ export default function AppointmentConfirmModal({
                 {isLoading ? (
                   <ActivityIndicator size="small" color="white" />
                 ) : (
-                  <FiCheck style={styles.buttonIcon} />
+                  <Feather name="check" size={18} style={styles.buttonIcon} />
                 )}
                 <Text style={[styles.buttonText, styles.confirmButtonText]}>
                   Xác nhận
@@ -159,67 +159,67 @@ export default function AppointmentConfirmModal({
 
 const styles = StyleSheet.create({
   button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#38A169',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#38A169",
     padding: 8,
     borderRadius: 4,
   },
   buttonIcon: {
-    color: 'white',
+    color: "white",
     marginRight: 8,
   },
   buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 10,
-    width: '90%',
+    width: "90%",
     maxWidth: 500,
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     padding: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   closeButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 16,
     right: 16,
   },
   closeIcon: {
     fontSize: 20,
-    color: '#666',
+    color: "#666",
   },
   modalBody: {
     padding: 16,
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 16,
   },
   appointmentDetails: {
-    backgroundColor: '#F7FAFC',
+    backgroundColor: "#F7FAFC",
     padding: 16,
     borderRadius: 8,
     marginBottom: 16,
   },
   detailRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginBottom: 8,
   },
   detailLabel: {
-    fontWeight: '600',
+    fontWeight: "600",
     width: 100,
   },
   detailValue: {
@@ -227,30 +227,30 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: "#E2E8F0",
     marginVertical: 16,
   },
   modalFooter: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "flex-end",
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
+    borderTopColor: "#E2E8F0",
   },
   footerButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 8,
     borderRadius: 4,
     marginLeft: 8,
   },
   cancelButton: {
-    backgroundColor: '#EDF2F7',
+    backgroundColor: "#EDF2F7",
   },
   confirmButton: {
-    backgroundColor: '#38A169',
+    backgroundColor: "#38A169",
   },
   confirmButtonText: {
-    color: 'white',
+    color: "white",
   },
 });

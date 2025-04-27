@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { format, add } from "date-fns";
 import {
   View,
@@ -6,12 +6,63 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
+  ScrollView,
+  Image,
 } from "react-native";
 import { appColorTheme } from "../../../../../config/appconfig.js";
 import { formatPrice } from "../../../../../utils/utils.js";
 import ImageListSelector from "../../../../../components/Utility/ImageListSelector.jsx";
 import { useGetByServiceOrderMutation } from "../../../../../services/quotationApi";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
+
+// Custom Accordion Component
+const AccordionItem = ({
+  title,
+  children,
+  image,
+  badge,
+  defaultExpanded = false,
+}) => {
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+
+  return (
+    <View style={styles.accordionItem}>
+      <TouchableOpacity
+        style={[
+          styles.accordionButton,
+          isExpanded && styles.accordionButtonExpanded,
+        ]}
+        onPress={() => setIsExpanded(!isExpanded)}
+      >
+        <View style={styles.accordionHeaderContent}>
+          <View style={styles.accordionTitleContainer}>
+            {image && (
+              <Image
+                source={{ uri: image }}
+                style={styles.productImage}
+                resizeMode="cover"
+              />
+            )}
+            <View style={styles.titleContainer}>
+              <Text style={styles.accordionTitle}>{title}</Text>
+              {badge && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{badge}</Text>
+                </View>
+              )}
+            </View>
+          </View>
+          <Ionicons
+            name={isExpanded ? "chevron-up" : "chevron-down"}
+            size={24}
+            color="#333"
+          />
+        </View>
+      </TouchableOpacity>
+      {isExpanded && <View style={styles.accordionPanel}>{children}</View>}
+    </View>
+  );
+};
 
 const TechSpecItem = ({ name, value, optionType }) => {
   if (optionType === "file" && value) {
@@ -90,25 +141,11 @@ export default function PersonalizationProduct({
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.productCard}>
-        <View style={styles.productHeader}>
-          <View style={styles.productInfo}>
-            <View style={styles.productDetails}>
-              <Text style={styles.productTitle}>
-                #{product.requestedProductId}.{" "}
-                {product.category?.categoryName} x {product.quantity}
-              </Text>
-              <View style={styles.categoryBadge}>
-                <Text style={styles.categoryText}>
-                  {product.category?.categoryName || "Không phân loại"}
-                </Text>
-              </View>
-            </View>
-          </View>
-          <MaterialCommunityIcons name="chevron-down" size={24} color="#666" />
-        </View>
-
+    <ScrollView style={styles.container}>
+      <AccordionItem
+        title={`#${product.requestedProductId}. ${product.category?.categoryName} x ${product.quantity}`}
+        badge={product.category?.categoryName || "Không phân loại"}
+      >
         <View style={styles.productContent}>
           {/* Quotation Details */}
           <View style={styles.section}>
@@ -132,12 +169,16 @@ export default function PersonalizationProduct({
                     <Text style={styles.cell}>{index + 1}</Text>
                     <Text style={styles.cell}>{detail.costType}</Text>
                     <Text style={styles.cell}>{detail.quantityRequired}</Text>
-                    <Text style={styles.cell}>{formatPrice(detail.costAmount)}</Text>
+                    <Text style={styles.cell}>
+                      {formatPrice(detail.costAmount)}
+                    </Text>
                   </View>
                 ))}
 
                 <View style={styles.tableRow}>
-                  <Text style={[styles.cell, styles.boldText, styles.rightAlign]}>
+                  <Text
+                    style={[styles.cell, styles.boldText, styles.rightAlign]}
+                  >
                     Tổng chi phí:
                   </Text>
                   <Text style={[styles.cell, styles.totalPrice]}>
@@ -146,7 +187,9 @@ export default function PersonalizationProduct({
                 </View>
               </View>
             ) : (
-              <Text style={styles.emptyText}>Chưa có báo giá cho sản phẩm này</Text>
+              <Text style={styles.emptyText}>
+                Chưa có báo giá cho sản phẩm này
+              </Text>
             )}
           </View>
 
@@ -154,10 +197,7 @@ export default function PersonalizationProduct({
           {product?.finishImgUrls && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Ảnh hoàn thành sản phẩm:</Text>
-              <ImageListSelector
-                imgUrls={product.finishImgUrls}
-                imgH={200}
-              />
+              <ImageListSelector imgUrls={product.finishImgUrls} imgH={200} />
             </View>
           )}
 
@@ -187,10 +227,10 @@ export default function PersonalizationProduct({
             </View>
           </View>
         </View>
-      </View>
+      </AccordionItem>
 
       {/* Thông tin sửa chữa */}
-      <View style={styles.repairInfo}>
+      <View style={styles.repairInfoCard}>
         <Text style={styles.repairTitle}>Thông tin sửa chữa:</Text>
 
         <View style={styles.repairContent}>
@@ -248,164 +288,202 @@ export default function PersonalizationProduct({
           )}
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
     padding: 16,
   },
-  productCard: {
-    backgroundColor: 'white',
+  accordionItem: {
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
     borderRadius: 10,
     marginBottom: 16,
-    shadowColor: '#000',
+    backgroundColor: "white",
+    overflow: "hidden",
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
-  productHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+  accordionButton: {
+    padding: 12,
+    backgroundColor: "white",
   },
-  productInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  accordionButtonExpanded: {
+    backgroundColor: appColorTheme.brown_0,
+  },
+  accordionHeaderContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  accordionTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
     flex: 1,
   },
-  productDetails: {
+  titleContainer: {
     flex: 1,
   },
-  productTitle: {
+  accordionTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: appColorTheme.brown_2,
   },
-  categoryBadge: {
-    backgroundColor: '#f0e6ff',
+  productImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    marginRight: 12,
+  },
+  badge: {
+    backgroundColor: "#805AD5",
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 2,
     borderRadius: 4,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     marginTop: 4,
   },
-  categoryText: {
-    color: '#6b46c1',
+  badgeText: {
+    color: "white",
     fontSize: 12,
   },
-  productContent: {
+  accordionPanel: {
     padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#E2E8F0",
+  },
+  productContent: {
+    gap: 16,
   },
   section: {
     marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: appColorTheme.brown_2,
     marginBottom: 8,
   },
   centerContainer: {
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   tableContainer: {
     marginBottom: 16,
+    backgroundColor: "#F7FAFC",
+    borderRadius: 8,
+    padding: 10,
+    overflow: "hidden",
   },
   tableHeader: {
-    flexDirection: 'row',
+    flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: "#ddd",
     paddingBottom: 8,
     marginBottom: 8,
   },
   headerCell: {
     flex: 1,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
   },
   tableRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: "#eee",
   },
   cell: {
     flex: 1,
-    textAlign: 'center',
+    textAlign: "center",
   },
   boldText: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   rightAlign: {
-    textAlign: 'right',
+    textAlign: "right",
   },
   totalPrice: {
     fontSize: 18,
     color: appColorTheme.brown_2,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   emptyText: {
-    color: '#666',
+    color: "#666",
     fontSize: 16,
+    textAlign: "center",
+    padding: 10,
   },
   techSpecList: {
     gap: 8,
+    backgroundColor: "#F7FAFC",
+    borderRadius: 8,
+    padding: 10,
   },
   techSpecItem: {
     marginBottom: 8,
   },
   techSpecLabel: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 4,
   },
   techSpecValue: {
     flex: 1,
   },
-  repairInfo: {
-    backgroundColor: '#f5f5f5',
+  repairInfoCard: {
+    backgroundColor: "white",
     borderRadius: 10,
     padding: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   repairTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: appColorTheme.brown_2,
     marginBottom: 12,
   },
   repairContent: {
-    gap: 8,
+    gap: 12,
   },
   repairItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+    paddingVertical: 8,
   },
   repairLabel: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   repairValue: {
     flex: 1,
-    textAlign: 'right',
+    textAlign: "right",
   },
   errorLabel: {
-    fontWeight: 'bold',
-    color: 'red',
+    fontWeight: "bold",
+    color: "red",
   },
   errorValue: {
-    color: 'red',
+    color: "red",
     flex: 1,
-    textAlign: 'right',
+    textAlign: "right",
   },
 });

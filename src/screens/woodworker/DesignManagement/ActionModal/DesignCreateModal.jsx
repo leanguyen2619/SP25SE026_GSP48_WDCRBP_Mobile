@@ -1,33 +1,18 @@
+import React, { useState } from "react";
 import {
-  Box,
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  Select,
-  Stack,
+  View,
   Text,
-  VStack,
-  HStack,
-  IconButton,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
-  NumberIncrementStepper,
-  NumberDecrementStepper,
-  useDisclosure,
-  Flex,
-  Textarea,
-  Checkbox,
-} from "@chakra-ui/react";
-import { useRef, useState } from "react";
-import { FiPlus, FiTrash, FiX, FiXCircle } from "react-icons/fi";
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  ScrollView,
+  TextInput,
+  ActivityIndicator,
+  Switch,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { appColorTheme } from "../../../../config/appconfig";
 import ImageUpload from "../../../../components/Utility/ImageUpload";
 import { formatPrice } from "../../../../utils/utils";
@@ -39,8 +24,7 @@ import CategorySelector from "../../../../components/Utility/CategorySelector";
 import { validateDesignData } from "../../../../validations";
 
 export default function DesignCreateModal({ refetch }) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const initialRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
   const [configurations, setConfigurations] = useState([
     {
       id: 1,
@@ -53,6 +37,10 @@ export default function DesignCreateModal({ refetch }) {
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const [categoryId, setCategoryId] = useState(null);
   const [isInstall, setIsInstall] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+  });
   const notify = useNotify();
   const { auth } = useAuth();
 
@@ -185,15 +173,13 @@ export default function DesignCreateModal({ refetch }) {
     setPrices(newPrices);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
+  const handleSubmit = async () => {
     const data = {
       woodworkerId: auth?.wwId,
-      name: formData.get("name"),
+      name: formData.name,
       img: imgUrls,
       categoryId: +categoryId,
-      description: formData.get("description"),
+      description: formData.description,
       configurations,
       prices,
       isInstall: isInstall,
@@ -202,7 +188,7 @@ export default function DesignCreateModal({ refetch }) {
     // Validate data before submission
     const validationErrors = validateDesignData(data);
     if (validationErrors.length > 0) {
-      notify("Vui lòng kiểm tra", validationErrors[0], "error");
+      notify("Vui lòng kiểm tra", validationErrors.join("\n"), "error");
       return;
     }
 
@@ -216,7 +202,7 @@ export default function DesignCreateModal({ refetch }) {
       setImgUrls([]);
 
       refetch?.();
-      onClose();
+      setIsOpen(false);
     } catch (error) {
       notify(
         "Thêm thiết kế thất bại",
@@ -226,287 +212,504 @@ export default function DesignCreateModal({ refetch }) {
     }
   };
 
+  const openModal = () => setIsOpen(true);
+  const closeModal = () => {
+    if (!isLoading) {
+      setIsOpen(false);
+    }
+  };
+
   return (
     <>
-      <Button
-        px={2}
-        color={appColorTheme.green_0}
-        bg="none"
-        border={`1px solid ${appColorTheme.green_0}`}
-        _hover={{ bg: appColorTheme.green_0, color: "white" }}
-        leftIcon={<FiPlus />}
-        onClick={onOpen}
-      >
-        Thêm thiết kế mới
-      </Button>
+      <TouchableOpacity style={styles.addButton} onPress={openModal}>
+        <Ionicons name="add" size={16} color={appColorTheme.green_0} />
+        <Text style={styles.addButtonText}>Thêm thiết kế mới</Text>
+      </TouchableOpacity>
 
-      <Modal
-        size="6xl"
-        initialFocusRef={initialRef}
-        isOpen={isOpen}
-        closeOnOverlayClick={false}
-        closeOnEsc={false}
-        onClose={isLoading ? null : onClose}
-      >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Thêm thiết kế mới</ModalHeader>
-          {!isLoading && <ModalCloseButton />}
-          <ModalBody bgColor="app_grey.1" pb={6}>
-            <form onSubmit={handleSubmit}>
-              <Stack spacing={4}>
-                <FormControl isRequired>
-                  <FormLabel>Tên thiết kế</FormLabel>
-                  <Input
-                    name="name"
-                    placeholder="Nhập tên thiết kế"
-                    bg="white"
-                  />
-                </FormControl>
+      <Modal visible={isOpen} animationType="slide" onRequestClose={closeModal}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.container}
+        >
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>Thêm thiết kế mới</Text>
+            {!isLoading && (
+              <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
+                <Ionicons name="close" size={24} color="#000" />
+              </TouchableOpacity>
+            )}
+          </View>
 
-                <FormControl isRequired>
-                  <FormLabel>Hình ảnh</FormLabel>
-                  <ImageUpload
-                    maxFiles={4}
-                    onUploadComplete={(result) => {
-                      setImgUrls(result);
-                    }}
-                  />
-                </FormControl>
+          <ScrollView style={styles.scrollView}>
+            <View style={styles.form}>
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Tên thiết kế *</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nhập tên thiết kế"
+                  value={formData.name}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, name: text })
+                  }
+                />
+              </View>
 
-                <FormControl isRequired>
-                  <FormLabel>Danh mục</FormLabel>
-                  <CategorySelector
-                    initialCategoryId={1}
-                    setCategoryId={setCategoryId}
-                  />
-                </FormControl>
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Hình ảnh *</Text>
+                <ImageUpload
+                  maxFiles={4}
+                  onUploadComplete={(result) => {
+                    setImgUrls(result);
+                  }}
+                />
+              </View>
 
-                <Box py={2}>
-                  <Checkbox
-                    isChecked={isInstall}
-                    onChange={(e) => setIsInstall(e.target.checked)}
-                    size="md"
-                    colorScheme="green"
-                  >
-                    <Text fontWeight="medium">
-                      Cần giao hàng + lắp đặt bởi xưởng
-                    </Text>
-                  </Checkbox>
-                </Box>
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Danh mục *</Text>
+                <CategorySelector setCategoryId={setCategoryId} />
+              </View>
 
-                <FormControl isRequired>
-                  <FormLabel>Mô tả</FormLabel>
-                  <Textarea
-                    name="description"
-                    placeholder="Nhập mô tả"
-                    bg="white"
-                    rows={5}
-                  />
-                </FormControl>
-
-                <Box>
-                  <HStack justify="space-between" mb={4}>
-                    <Text fontWeight="bold">Cấu hình sản phẩm</Text>
-                    <Button
-                      leftIcon={<FiPlus />}
-                      onClick={handleAddConfig}
-                      size="sm"
-                    >
-                      Thêm cấu hình
-                    </Button>
-                  </HStack>
-
-                  <VStack spacing={4} align="stretch">
-                    {configurations.map((config) => (
-                      <Box
-                        key={config.id}
-                        p={5}
-                        borderWidth="1px"
-                        borderRadius="lg"
-                        bg="white"
-                        position="relative"
-                      >
-                        <HStack mb={2}>
-                          <FormControl isRequired>
-                            <FormLabel>Tên cấu hình</FormLabel>
-
-                            <Input
-                              value={config.name}
-                              onChange={(e) =>
-                                handleConfigChange(
-                                  config.id,
-                                  "name",
-                                  e.target.value
-                                )
-                              }
-                              placeholder="Nhập tên cấu hình"
-                            />
-                          </FormControl>
-                          {config.name !=
-                            "Kích thước (dài x rộng x cao cm)" && (
-                            <IconButton
-                              position="absolute"
-                              right={1}
-                              top={1}
-                              icon={<FiXCircle />}
-                              colorScheme="red"
-                              variant="ghost"
-                              onClick={() => handleRemoveConfig(config.id)}
-                            />
-                          )}
-                        </HStack>
-
-                        <VStack spacing={2} align="stretch">
-                          <FormLabel m={0}>
-                            Giá trị <span style={{ color: "red" }}>*</span>
-                          </FormLabel>
-                          {config.values.map((value) => (
-                            <HStack key={value.id}>
-                              <FormControl isRequired>
-                                <Input
-                                  value={value.name}
-                                  onChange={(e) =>
-                                    handleValueChange(
-                                      config.id,
-                                      value.id,
-                                      e.target.value
-                                    )
-                                  }
-                                  placeholder="Nhập giá trị"
-                                />
-                              </FormControl>
-                              <IconButton
-                                icon={<FiTrash />}
-                                colorScheme="red"
-                                variant="ghost"
-                                onClick={() =>
-                                  handleRemoveValue(config.id, value.id)
-                                }
-                              />
-                            </HStack>
-                          ))}
-                          <Button
-                            leftIcon={<FiPlus />}
-                            onClick={() => handleAddValue(config.id)}
-                            size="sm"
-                          >
-                            Thêm giá trị
-                          </Button>
-                        </VStack>
-                      </Box>
-                    ))}
-                  </VStack>
-                </Box>
-
-                <Text mb={4}>
-                  * Lưu ý: Hãy tính phần tiền giao hàng + lắp đặt vào trong giá
-                  của sản phẩm
+              <View style={styles.switchContainer}>
+                <Switch
+                  value={isInstall}
+                  onValueChange={setIsInstall}
+                  trackColor={{ false: "#767577", true: appColorTheme.green_0 }}
+                  thumbColor={isInstall ? "#ffffff" : "#f4f3f4"}
+                />
+                <Text style={styles.switchLabel}>
+                  Cần giao hàng + lắp đặt bởi xưởng
                 </Text>
+              </View>
 
-                {prices.length > 0 && (
-                  <Box>
-                    <Text fontWeight="bold" mb={4}>
-                      Bảng giá theo cấu hình
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Mô tả *</Text>
+                <TextInput
+                  style={[styles.input, styles.textarea]}
+                  placeholder="Nhập mô tả"
+                  multiline
+                  numberOfLines={5}
+                  value={formData.description}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, description: text })
+                  }
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <View style={styles.configHeaderRow}>
+                  <Text style={styles.sectionTitle}>Cấu hình sản phẩm</Text>
+                  <TouchableOpacity
+                    style={styles.addConfigButton}
+                    onPress={handleAddConfig}
+                  >
+                    <Ionicons name="add" size={16} color="white" />
+                    <Text style={styles.addConfigButtonText}>
+                      Thêm cấu hình
                     </Text>
-                    <VStack spacing={4} align="stretch">
-                      {prices.map((price, index) => (
-                        <Box
-                          key={index}
-                          p={5}
-                          borderWidth="1px"
-                          borderRadius="lg"
-                          bg="white"
+                  </TouchableOpacity>
+                </View>
+
+                {configurations.map((config) => (
+                  <View key={config.id} style={styles.configCard}>
+                    <View style={styles.configHeader}>
+                      <View style={styles.configNameContainer}>
+                        <Text style={styles.label}>Tên cấu hình *</Text>
+                        <TextInput
+                          style={styles.input}
+                          value={config.name}
+                          onChangeText={(text) =>
+                            handleConfigChange(config.id, "name", text)
+                          }
+                          placeholder="Nhập tên cấu hình"
+                        />
+                      </View>
+                      {config.name !== "Kích thước (dài x rộng x cao cm)" && (
+                        <TouchableOpacity
+                          style={styles.removeConfigButton}
+                          onPress={() => handleRemoveConfig(config.id)}
                         >
-                          <HStack justify="space-between">
-                            <Box pr={4} borderRight="1px solid #CCC" flex="1">
-                              {price.configValue.map((valueId) => {
-                                const configId = Math.floor(valueId / 100);
-                                const config = configurations.find(
-                                  (c) => c.id == configId
-                                );
-                                const value = config?.values.find(
-                                  (v) => v.id == valueId
-                                );
-                                return (
-                                  <Flex justify="space-between" key={valueId}>
-                                    <Text>{config?.name}:</Text>
-                                    <Text as="b">{value?.name}</Text>
-                                  </Flex>
-                                );
-                              })}
-                            </Box>
+                          <Ionicons
+                            name="close-circle"
+                            size={24}
+                            color={appColorTheme.red_0}
+                          />
+                        </TouchableOpacity>
+                      )}
+                    </View>
 
-                            <HStack justifyContent="flex-end" flex="1">
-                              <Text as="b" color={appColorTheme.brown_2}>
-                                {formatPrice(price.price)}
-                              </Text>
-
-                              <FormControl isRequired maxW="200px">
-                                <NumberInput
-                                  value={price.price}
-                                  onChange={(value) =>
-                                    handlePriceChange(
-                                      price.config,
-                                      price.configValue,
-                                      parseInt(value)
-                                    )
-                                  }
-                                  min={0}
-                                  max={50000000}
-                                  step={1000}
-                                >
-                                  <NumberInputField />
-                                  <NumberInputStepper>
-                                    <NumberIncrementStepper />
-                                    <NumberDecrementStepper />
-                                  </NumberInputStepper>
-                                </NumberInput>
-                              </FormControl>
-                            </HStack>
-                          </HStack>
-                        </Box>
+                    <View style={styles.valuesContainer}>
+                      <Text style={styles.label}>Giá trị *</Text>
+                      {config.values.map((value) => (
+                        <View key={value.id} style={styles.valueRow}>
+                          <TextInput
+                            style={[styles.input, styles.valueInput]}
+                            value={value.name}
+                            onChangeText={(text) =>
+                              handleValueChange(config.id, value.id, text)
+                            }
+                            placeholder="Nhập giá trị"
+                          />
+                          <TouchableOpacity
+                            style={styles.removeValueButton}
+                            onPress={() =>
+                              handleRemoveValue(config.id, value.id)
+                            }
+                          >
+                            <Ionicons
+                              name="trash"
+                              size={20}
+                              color={appColorTheme.red_0}
+                            />
+                          </TouchableOpacity>
+                        </View>
                       ))}
-                    </VStack>
-                  </Box>
-                )}
+                      <TouchableOpacity
+                        style={styles.addValueButton}
+                        onPress={() => handleAddValue(config.id)}
+                      >
+                        <Ionicons
+                          name="add"
+                          size={16}
+                          color={appColorTheme.brown_2}
+                        />
+                        <Text style={styles.addValueButtonText}>
+                          Thêm giá trị
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ))}
+              </View>
 
-                <HStack mt={6}>
-                  <CheckboxList
-                    items={[
-                      {
-                        isOptional: false,
-                        description:
-                          "Tôi đã kiểm tra thông tin và xác nhận thao tác",
-                      },
-                    ]}
-                    setButtonDisabled={setButtonDisabled}
-                  />
-                </HStack>
+              <Text style={styles.noteText}>
+                * Lưu ý: Hãy tính phần tiền giao hàng + lắp đặt vào trong giá
+                của sản phẩm
+              </Text>
 
-                <HStack justify="flex-end" mt={4}>
-                  <Button
-                    leftIcon={<FiX />}
-                    isLoading={isLoading}
-                    onClick={onClose}
-                  >
-                    Đóng
-                  </Button>
-                  <Button
-                    colorScheme="blue"
-                    type="submit"
-                    isLoading={isLoading}
-                    isDisabled={buttonDisabled}
-                    leftIcon={<FiPlus />}
-                  >
-                    Lưu
-                  </Button>
-                </HStack>
-              </Stack>
-            </form>
-          </ModalBody>
-        </ModalContent>
+              {prices.length > 0 && (
+                <View style={styles.formGroup}>
+                  <Text style={styles.sectionTitle}>
+                    Bảng giá theo cấu hình
+                  </Text>
+                  {prices.map((price, index) => (
+                    <View key={index} style={styles.priceCard}>
+                      <View style={styles.priceConfigSection}>
+                        {price.configValue.map((valueId) => {
+                          const configId = Math.floor(valueId / 100);
+                          const config = configurations.find(
+                            (c) => c.id == configId
+                          );
+                          const value = config?.values.find(
+                            (v) => v.id == valueId
+                          );
+                          return (
+                            <View style={styles.priceConfigRow} key={valueId}>
+                              <Text style={styles.priceConfigName}>
+                                {config?.name}:
+                              </Text>
+                              <Text style={styles.priceConfigValue}>
+                                {value?.name}
+                              </Text>
+                            </View>
+                          );
+                        })}
+                      </View>
+
+                      <View style={styles.priceInputSection}>
+                        <Text style={styles.currentPrice}>
+                          {formatPrice(price.price)}
+                        </Text>
+                        <TextInput
+                          style={styles.priceInput}
+                          keyboardType="numeric"
+                          value={String(price.price)}
+                          onChangeText={(value) =>
+                            handlePriceChange(
+                              price.config,
+                              price.configValue,
+                              parseInt(value) || 0
+                            )
+                          }
+                          placeholder="Nhập giá"
+                        />
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              <View style={styles.checkboxSection}>
+                <CheckboxList
+                  items={[
+                    {
+                      isOptional: false,
+                      description:
+                        "Tôi đã kiểm tra thông tin và xác nhận thao tác",
+                    },
+                  ]}
+                  setButtonDisabled={setButtonDisabled}
+                />
+              </View>
+
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={[styles.button, styles.cancelButton]}
+                  onPress={closeModal}
+                  disabled={isLoading}
+                >
+                  <Ionicons name="close" size={18} color="#000" />
+                  <Text style={styles.cancelButtonText}>Đóng</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.button,
+                    styles.saveButton,
+                    (buttonDisabled || isLoading) && styles.disabledButton,
+                  ]}
+                  onPress={handleSubmit}
+                  disabled={buttonDisabled || isLoading}
+                >
+                  {isLoading ? (
+                    <ActivityIndicator size="small" color="white" />
+                  ) : (
+                    <>
+                      <Ionicons name="save" size={18} color="white" />
+                      <Text style={styles.saveButtonText}>Lưu</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </Modal>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  addButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: appColorTheme.green_0,
+    borderRadius: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  addButtonText: {
+    color: appColorTheme.green_0,
+    marginLeft: 5,
+    fontWeight: "500",
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 15,
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  closeButton: {
+    padding: 5,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  form: {
+    padding: 15,
+  },
+  formGroup: {
+    marginBottom: 20,
+  },
+  label: {
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 4,
+    padding: 10,
+  },
+  textarea: {
+    minHeight: 100,
+    textAlignVertical: "top",
+  },
+  switchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  switchLabel: {
+    marginLeft: 10,
+    fontWeight: "500",
+  },
+  configHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  addConfigButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: appColorTheme.brown_2,
+    borderRadius: 4,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+  },
+  addConfigButtonText: {
+    color: "white",
+    marginLeft: 5,
+    fontSize: 14,
+  },
+  configCard: {
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 15,
+  },
+  configHeader: {
+    flexDirection: "row",
+    marginBottom: 15,
+  },
+  configNameContainer: {
+    flex: 1,
+  },
+  removeConfigButton: {
+    padding: 5,
+  },
+  valuesContainer: {
+    marginTop: 10,
+  },
+  valueRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  valueInput: {
+    flex: 1,
+    marginRight: 10,
+  },
+  removeValueButton: {
+    padding: 5,
+  },
+  addValueButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    borderWidth: 1,
+    borderColor: appColorTheme.brown_2,
+    borderRadius: 4,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    marginTop: 5,
+  },
+  addValueButtonText: {
+    color: appColorTheme.brown_2,
+    marginLeft: 5,
+    fontSize: 14,
+  },
+  noteText: {
+    fontStyle: "italic",
+    marginBottom: 20,
+  },
+  priceCard: {
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 10,
+  },
+  priceConfigSection: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+    paddingBottom: 10,
+    marginBottom: 10,
+  },
+  priceConfigRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 5,
+  },
+  priceConfigName: {
+    flex: 1,
+  },
+  priceConfigValue: {
+    fontWeight: "bold",
+    flex: 1,
+    textAlign: "right",
+  },
+  priceInputSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  currentPrice: {
+    fontWeight: "bold",
+    color: appColorTheme.brown_2,
+    fontSize: 16,
+  },
+  priceInput: {
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 4,
+    padding: 10,
+    width: 120,
+  },
+  checkboxSection: {
+    marginVertical: 20,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 20,
+    marginBottom: 40,
+  },
+  button: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 4,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    marginLeft: 10,
+    minWidth: 100,
+    justifyContent: "center",
+  },
+  cancelButton: {
+    backgroundColor: "#e0e0e0",
+  },
+  cancelButtonText: {
+    marginLeft: 5,
+  },
+  saveButton: {
+    backgroundColor: "#2196F3",
+  },
+  saveButtonText: {
+    color: "white",
+    marginLeft: 5,
+  },
+  disabledButton: {
+    opacity: 0.6,
+  },
+});

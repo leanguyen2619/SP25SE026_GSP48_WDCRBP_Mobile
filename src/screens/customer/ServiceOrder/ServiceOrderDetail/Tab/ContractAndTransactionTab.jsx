@@ -391,6 +391,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 16,
+    color: appColorTheme.brown_2,
   },
   contractContent: {
     marginBottom: 16,

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,78 @@ import {
   formatPrice,
   formatDateTimeString,
 } from "../../../../../utils/utils.js";
+
+// Information Row Component
+const InfoRow = ({ label, value, valueColor, bold = false }) => (
+  <View style={styles.infoRow}>
+    <Text style={styles.infoLabel}>{label}</Text>
+    <Text
+      style={[
+        styles.infoValue,
+        valueColor && { color: valueColor },
+        bold && { fontWeight: "bold" },
+      ]}
+    >
+      {value || "Chưa cập nhật"}
+    </Text>
+  </View>
+);
+
+// Transaction Item Component
+const TransactionItem = ({ deposit }) => (
+  <View
+    style={[
+      styles.transactionItem,
+      { backgroundColor: deposit.status ? "#F0FFF4" : "#F7FAFC" },
+    ]}
+  >
+    <View style={styles.transactionHeader}>
+      <Text style={styles.transactionTitle}>
+        Đặt cọc lần {deposit.depositNumber}
+      </Text>
+      <View
+        style={[
+          styles.badge,
+          { backgroundColor: deposit.status ? "#48BB78" : "#CBD5E0" },
+        ]}
+      >
+        <Text style={styles.badgeText}>
+          {deposit.status ? "Đã thanh toán" : "Chưa thanh toán"}
+        </Text>
+      </View>
+    </View>
+
+    <InfoRow
+      label="Ngày tạo:"
+      value={
+        deposit.createdAt
+          ? formatDateTimeString(new Date(deposit.createdAt))
+          : "Chưa cập nhật"
+      }
+    />
+
+    <InfoRow
+      label="Ngày thanh toán:"
+      value={
+        deposit.updatedAt
+          ? formatDateTimeString(new Date(deposit.updatedAt))
+          : "Chưa cập nhật"
+      }
+    />
+
+    <InfoRow
+      label="Số tiền thanh toán:"
+      value={deposit.amount ? formatPrice(deposit.amount) : "Chưa cập nhật"}
+      valueColor={appColorTheme.brown_2}
+      bold
+    />
+
+    <InfoRow
+      label="Phần trăm cọc:"
+      value={deposit.percent ? `${deposit.percent}%` : "Chưa cập nhật"}
+    />
+  </View>
+);
 
 export default function QuotationAndTransactionTab({
   activeTabIndex,
@@ -82,23 +154,23 @@ export default function QuotationAndTransactionTab({
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.gridContainer}>
+      <View style={styles.contentContainer}>
         {/* Quotation Information */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Báo giá chi tiết</Text>
 
           {isQuotationLoading ? (
-            <View style={styles.centerContainer}>
-              <ActivityIndicator size="large" color={appColorTheme.brown_2} />
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color={appColorTheme.brown_2} />
             </View>
           ) : quotationError ? (
-            <View style={styles.centerContainer}>
+            <View style={styles.errorContainer}>
               <Text style={styles.errorText}>
                 Đã có lỗi xảy ra khi tải thông tin báo giá
               </Text>
             </View>
           ) : quotationDetails.length === 0 ? (
-            <View style={styles.centerContainer}>
+            <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>Chưa có thông tin báo giá</Text>
             </View>
           ) : (
@@ -115,11 +187,15 @@ export default function QuotationAndTransactionTab({
                   <Text style={styles.cell}>{index + 1}</Text>
                   <Text style={styles.cell}>{detail.costType}</Text>
                   <Text style={styles.cell}>{detail.quantityRequired}</Text>
-                  <Text style={styles.cell}>{formatPrice(detail.costAmount)}</Text>
+                  <Text style={styles.cell}>
+                    {formatPrice(detail.costAmount)}
+                  </Text>
                 </View>
               ))}
 
               <View style={styles.tableRow}>
+                <Text style={styles.emptyCell}></Text>
+                <Text style={styles.emptyCell}></Text>
                 <Text style={[styles.cell, styles.boldText, styles.rightAlign]}>
                   Phí vận chuyển:
                 </Text>
@@ -127,6 +203,8 @@ export default function QuotationAndTransactionTab({
               </View>
 
               <View style={styles.tableRow}>
+                <Text style={styles.emptyCell}></Text>
+                <Text style={styles.emptyCell}></Text>
                 <Text style={[styles.cell, styles.boldText, styles.rightAlign]}>
                   Tổng chi phí:
                 </Text>
@@ -143,92 +221,52 @@ export default function QuotationAndTransactionTab({
           <Text style={styles.cardTitle}>Thông tin giao dịch</Text>
 
           {isDepositsLoading ? (
-            <View style={styles.centerContainer}>
-              <ActivityIndicator size="large" color={appColorTheme.brown_2} />
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color={appColorTheme.brown_2} />
             </View>
           ) : depositsError ? (
-            <View style={styles.centerContainer}>
+            <View style={styles.errorContainer}>
               <Text style={styles.errorText}>
                 Đã có lỗi xảy ra khi tải thông tin thanh toán
               </Text>
             </View>
           ) : deposits.length === 0 ? (
-            <View style={styles.centerContainer}>
+            <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>Chưa có thông tin thanh toán</Text>
             </View>
           ) : (
-            <View style={styles.transactionContainer}>
-              <View style={styles.amountInfo}>
-                <View style={styles.amountRow}>
-                  <Text style={styles.amountLabel}>Thành tiền:</Text>
-                  <Text style={styles.amountValue}>
-                    {formatPrice(order?.totalAmount)}
-                  </Text>
-                </View>
+            <View style={styles.transactionsContent}>
+              <View style={styles.orderAmountSummary}>
+                <InfoRow
+                  label="Thành tiền:"
+                  value={
+                    order?.totalAmount ? formatPrice(order?.totalAmount) : null
+                  }
+                  valueColor={appColorTheme.brown_2}
+                  bold
+                />
 
-                <View style={styles.amountRow}>
-                  <Text style={styles.amountLabel}>Số tiền đã thanh toán:</Text>
-                  <Text style={styles.amountValue}>
-                    {formatPrice(order?.amountPaid || 0)}
-                  </Text>
-                </View>
+                <InfoRow
+                  label="Số tiền đã thanh toán:"
+                  value={formatPrice(order?.amountPaid || 0)}
+                  valueColor={appColorTheme.brown_2}
+                  bold
+                />
 
-                <View style={styles.amountRow}>
-                  <Text style={styles.amountLabel}>Số tiền còn lại:</Text>
-                  <Text style={styles.amountValue}>
-                    {formatPrice(order?.amountRemaining || 0)}
-                  </Text>
-                </View>
+                <InfoRow
+                  label="Số tiền còn lại:"
+                  value={formatPrice(order?.amountRemaining || 0)}
+                  valueColor={appColorTheme.brown_2}
+                  bold
+                />
               </View>
 
-              <View style={styles.depositsContainer}>
+              <View style={styles.depositsList}>
                 {deposits.map((deposit) => (
-                  <View
-                    key={deposit.serviceDepositId}
-                    style={[
-                      styles.depositCard,
-                      deposit.status && styles.paidDeposit,
-                    ]}
-                  >
-                    <View style={styles.depositHeader}>
-                      <Text style={styles.depositTitle}>
-                        Đặt cọc lần {deposit.depositNumber}:
-                      </Text>
-                      <View
-                        style={[
-                          styles.statusBadge,
-                          deposit.status && styles.paidBadge,
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.statusText,
-                            deposit.status && styles.paidStatusText,
-                          ]}
-                        >
-                          {deposit.status ? "Đã thanh toán" : "Chưa thanh toán"}
-                        </Text>
-                      </View>
-                    </View>
-
-                    <View style={styles.depositInfo}>
-                      <Text style={styles.depositLabel}>Ngày tạo:</Text>
-                      <Text>
-                        {deposit.createdAt
-                          ? formatDateTimeString(new Date(deposit.createdAt))
-                          : "Chưa cập nhật"}
-                      </Text>
-                    </View>
-
-                    <View style={styles.depositInfo}>
-                      <Text style={styles.depositLabel}>Ngày thanh toán:</Text>
-                      <Text>
-                        {deposit.updatedAt
-                          ? formatDateTimeString(new Date(deposit.updatedAt))
-                          : "Chưa cập nhật"}
-                      </Text>
-                    </View>
-                  </View>
+                  <TransactionItem
+                    key={deposit.orderDepositId || deposit.serviceDepositId}
+                    deposit={deposit}
+                  />
                 ))}
               </View>
             </View>
@@ -242,45 +280,38 @@ export default function QuotationAndTransactionTab({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#F5F5F5",
+  },
+  contentContainer: {
+    padding: 10,
   },
   loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 40,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  centerContainer: {
-    padding: 20,
-    alignItems: 'center',
+  errorContainer: {
+    padding: 40,
+    alignItems: "center",
+    justifyContent: "center",
   },
   errorText: {
-    color: 'red',
-    fontSize: 16,
-  },
-  emptyText: {
-    color: '#666',
-    fontSize: 16,
-  },
-  gridContainer: {
-    padding: 16,
-    gap: 16,
+    color: "red",
   },
   card: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 10,
     padding: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
   },
   cardTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 16,
     color: appColorTheme.brown_2,
   },
@@ -288,97 +319,95 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   tableHeader: {
-    flexDirection: 'row',
+    flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: "#ddd",
     paddingBottom: 8,
     marginBottom: 8,
   },
   headerCell: {
     flex: 1,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
   },
   tableRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: "#eee",
   },
   cell: {
     flex: 1,
-    textAlign: 'center',
+    textAlign: "center",
+  },
+  emptyCell: {
+    flex: 1,
   },
   boldText: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   rightAlign: {
-    textAlign: 'right',
+    textAlign: "right",
   },
   totalPrice: {
     fontSize: 18,
     color: appColorTheme.brown_2,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
-  transactionContainer: {
-    gap: 16,
+  emptyContainer: {
+    padding: 32,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  amountInfo: {
-    gap: 8,
+  emptyText: {
+    color: "#718096",
+    fontSize: 16,
   },
-  amountRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  // Transaction styles
+  infoRow: {
+    flexDirection: "row",
+    marginBottom: 10,
+    alignItems: "center",
+    flexWrap: "wrap",
   },
-  amountLabel: {
-    fontWeight: 'bold',
+  infoLabel: {
+    fontWeight: "bold",
+    minWidth: 150,
+    marginRight: 8,
   },
-  amountValue: {
-    color: appColorTheme.brown_2,
-    fontWeight: 'bold',
+  infoValue: {
+    flex: 1,
   },
-  depositsContainer: {
-    gap: 12,
+  transactionsContent: {
+    marginBottom: 16,
   },
-  depositCard: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
+  orderAmountSummary: {
+    marginBottom: 20,
+  },
+  depositsList: {
+    marginTop: 16,
+  },
+  transactionItem: {
     padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
   },
-  paidDeposit: {
-    backgroundColor: '#e6ffe6',
+  transactionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
   },
-  depositHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
+  transactionTitle: {
+    fontWeight: "bold",
   },
-  depositTitle: {
-    fontWeight: 'bold',
-  },
-  statusBadge: {
-    backgroundColor: '#ddd',
+  badge: {
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 2,
     borderRadius: 4,
   },
-  paidBadge: {
-    backgroundColor: '#4CAF50',
-  },
-  statusText: {
-    color: '#666',
+  badgeText: {
     fontSize: 12,
-  },
-  paidStatusText: {
-    color: 'white',
-  },
-  depositInfo: {
-    flexDirection: 'row',
-    marginBottom: 4,
-  },
-  depositLabel: {
-    fontWeight: 'bold',
-    marginRight: 8,
+    color: "white",
   },
 });

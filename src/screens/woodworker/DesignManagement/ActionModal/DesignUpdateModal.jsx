@@ -1,470 +1,461 @@
+import React, { useRef, useState, useEffect } from "react";
 import {
-  Box,
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  Select,
-  Stack,
+  View,
   Text,
-  VStack,
-  HStack,
-  IconButton,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
-  NumberIncrementStepper,
-  NumberDecrementStepper,
-  useDisclosure,
-  Flex,
-  Textarea,
-  Tooltip,
-  Checkbox,
-} from "@chakra-ui/react";
-import { useRef, useState } from "react";
-import { FiEdit2, FiPlus, FiTrash, FiXCircle } from "react-icons/fi";
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  ScrollView,
+  TextInput,
+  ActivityIndicator,
+  Switch,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { appColorTheme } from "../../../../config/appconfig";
 import { formatPrice } from "../../../../utils/utils";
 import ImageUpdateUploader from "../../../../components/Utility/ImageUpdateUploader";
+import {
+  useUpdateDesignIdeaMutation,
+  useGetDesignIdeaVariantQuery,
+} from "../../../../services/designIdeaApi";
+import { useNotify } from "../../../../components/Utility/Notify";
+import CheckboxList from "../../../../components/Utility/CheckboxList";
 
 export default function DesignUpdateModal({ design, refetch }) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const initialRef = useRef(null);
-  const [imgUrls, setImgUrls] = useState(design?.imgUrls || "");
+  const [isOpen, setIsOpen] = useState(false);
+  const [imgUrls, setImgUrls] = useState(design?.img_urls || "");
   const [isInstall, setIsInstall] = useState(design?.isInstall || false);
+  const [buttonDisabled, setButtonDisabled] = useState(true);
+  const [formData, setFormData] = useState({
+    name: design?.name || "",
+    description: design?.description || "",
+  });
+  const notify = useNotify();
 
-  const [configurations, setConfigurations] = useState([
-    {
-      id: 1,
-      name: "Loại gỗ",
-      values: [
-        { id: 101, name: "Gỗ Sồi" },
-        { id: 102, name: "Gỗ Óc Chó" },
-      ],
-    },
-    {
-      id: 2,
-      name: "Bề mặt hoàn thiện",
-      values: [
-        { id: 201, name: "Tự nhiên" },
-        { id: 202, name: "Sơn bóng" },
-      ],
-    },
-  ]);
-  const [prices, setPrices] = useState([
-    { config: [1, 2], configValue: [101, 201], price: 12000000 },
-    { config: [1, 2], configValue: [101, 202], price: 14000000 },
-    { config: [1, 2], configValue: [102, 201], price: 15000000 },
-    { config: [1, 2], configValue: [102, 202], price: 17000000 },
-  ]);
+  const [updateDesignIdea, { isLoading }] = useUpdateDesignIdeaMutation();
 
-  const handleAddConfig = () => {
-    const newConfigId = configurations.length + 1;
-    setConfigurations([
-      ...configurations,
-      {
-        id: newConfigId,
-        name: "",
-        values: [],
-      },
-    ]);
-  };
-
-  const handleAddValue = (configId) => {
-    const configIndex = configurations.findIndex((c) => c.id == configId);
-    if (configIndex === -1) return;
-
-    const newValueId =
-      configId * 100 + (configurations[configIndex].values.length + 1);
-    const newConfigurations = [...configurations];
-    newConfigurations[configIndex].values.push({
-      id: newValueId,
-      name: "",
+  // Fetch variant data when modal opens
+  const { data: variantData, isLoading: isVariantLoading } =
+    useGetDesignIdeaVariantQuery(design?.designIdeaId, {
+      skip: !isOpen || !design?.designIdeaId,
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
     });
-    setConfigurations(newConfigurations);
-    updatePrices(newConfigurations);
-  };
 
-  const handleConfigChange = (configId, field, value) => {
-    const configIndex = configurations.findIndex((c) => c.id == configId);
-    if (configIndex === -1) return;
+  const variants = variantData?.data || [];
 
-    const newConfigurations = [...configurations];
-    newConfigurations[configIndex][field] = value;
-    setConfigurations(newConfigurations);
-  };
+  // Track variant prices to update
+  const [variantPrices, setVariantPrices] = useState([]);
 
-  const handleValueChange = (configId, valueId, value) => {
-    const configIndex = configurations.findIndex((c) => c.id == configId);
-    if (configIndex === -1) return;
+  useEffect(() => {
+    if (isOpen && design) {
+      // Initialize with actual data once the modal is opened and variants loaded
+      setIsInstall(design?.isInstall || false);
+      setImgUrls(design?.img_urls || "");
+      setFormData({
+        name: design?.name || "",
+        description: design?.description || "",
+      });
 
-    const valueIndex = configurations[configIndex].values.findIndex(
-      (v) => v.id == valueId
-    );
-    if (valueIndex === -1) return;
-
-    const newConfigurations = [...configurations];
-    newConfigurations[configIndex].values[valueIndex].name = value;
-    setConfigurations(newConfigurations);
-  };
-
-  const handleRemoveConfig = (configId) => {
-    setConfigurations(configurations.filter((c) => c.id != configId));
-    updatePrices(configurations.filter((c) => c.id != configId));
-  };
-
-  const handleRemoveValue = (configId, valueId) => {
-    const configIndex = configurations.findIndex((c) => c.id == configId);
-    if (configIndex === -1) return;
-
-    const newConfigurations = [...configurations];
-    newConfigurations[configIndex].values = newConfigurations[
-      configIndex
-    ].values.filter((v) => v.id != valueId);
-    setConfigurations(newConfigurations);
-    updatePrices(newConfigurations);
-  };
-
-  const updatePrices = (configs) => {
-    const combinations = generateCombinations(configs);
-    const newPrices = combinations.map((combo) => {
-      const existingPrice = prices.find(
-        (p) =>
-          JSON.stringify(p.config) == JSON.stringify(combo.config) &&
-          JSON.stringify(p.configValue) == JSON.stringify(combo.configValue)
-      );
-      return (
-        existingPrice || {
-          config: combo.config,
-          configValue: combo.configValue,
-          price: 0,
-        }
-      );
-    });
-    setPrices(newPrices);
-  };
-
-  const generateCombinations = (configs) => {
-    if (configs.length === 0) return [];
-
-    const result = [];
-    const configIds = configs.map((c) => c.id);
-    const valueIds = configs.map((c) => c.values.map((v) => v.id));
-
-    function generate(current, index) {
-      if (index === configs.length) {
-        result.push({
-          config: [...configIds],
-          configValue: [...current],
-        });
-        return;
-      }
-
-      for (const valueId of valueIds[index]) {
-        current.push(valueId);
-        generate(current, index + 1);
-        current.pop();
+      // Initialize variant prices from fetched data
+      if (variants.length > 0) {
+        const initialPrices = variants.map((variant) => ({
+          designIdeaVariantId: variant.designIdeaVariantId,
+          price: variant.price,
+        }));
+        setVariantPrices(initialPrices);
       }
     }
+  }, [isOpen, design, variants]);
 
-    generate([], 0);
-    return result;
-  };
-
-  const handlePriceChange = (config, configValue, price) => {
-    const priceIndex = prices.findIndex(
-      (p) =>
-        JSON.stringify(p.config) == JSON.stringify(config) &&
-        JSON.stringify(p.configValue) == JSON.stringify(configValue)
+  const handlePriceChange = (variantId, newPrice) => {
+    setVariantPrices((prev) =>
+      prev.map((item) =>
+        item.designIdeaVariantId === variantId
+          ? { ...item, price: newPrice }
+          : item
+      )
     );
-    if (priceIndex === -1) return;
-
-    const newPrices = [...prices];
-    newPrices[priceIndex].price = price;
-    setPrices(newPrices);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
+  const handleSubmit = async () => {
+    // Format data according to the API's expected structure
     const data = {
-      name: formData.get("name"),
-      imgUrls: formData.get("imgUrls"),
-      category: formData.get("category"),
-      description: formData.get("description"),
-      configurations,
-      prices,
+      designIdeaId: design.designIdeaId,
+      name: formData.name,
+      img: imgUrls,
+      description: formData.description,
       isInstall: isInstall,
+      prices: variantPrices,
     };
-    onClose();
+
+    try {
+      await updateDesignIdea(data).unwrap();
+      notify("Cập nhật thiết kế thành công");
+      refetch?.();
+      closeModal();
+    } catch (error) {
+      notify(
+        "Cập nhật thiết kế thất bại",
+        error.data?.message || "Vui lòng thử lại sau",
+        "error"
+      );
+    }
+  };
+
+  const openModal = () => setIsOpen(true);
+  const closeModal = () => {
+    if (!isLoading) {
+      setIsOpen(false);
+    }
   };
 
   return (
     <>
-      <Tooltip label="Chỉnh sửa" hasArrow>
-        <Button
-          p="1px"
+      <TouchableOpacity style={styles.iconButton} onPress={openModal}>
+        <Ionicons
+          name="create-outline"
+          size={18}
           color={appColorTheme.blue_0}
-          bg="none"
-          border={`1px solid ${appColorTheme.blue_0}`}
-          _hover={{ bg: appColorTheme.blue_0, color: "white" }}
-          onClick={onOpen}
+        />
+      </TouchableOpacity>
+
+      <Modal visible={isOpen} animationType="slide" onRequestClose={closeModal}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.container}
         >
-          <FiEdit2 />
-        </Button>
-      </Tooltip>
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>Chỉnh sửa thiết kế</Text>
+            {!isLoading && (
+              <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
+                <Ionicons name="close" size={24} color="#000" />
+              </TouchableOpacity>
+            )}
+          </View>
 
-      <Modal
-        size="6xl"
-        initialFocusRef={initialRef}
-        isOpen={isOpen}
-        closeOnOverlayClick={false}
-        closeOnEsc={false}
-        onClose={onClose}
-      >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Chỉnh sửa thiết kế</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody bgColor="app_grey.1" pb={6}>
-            <form onSubmit={handleSubmit}>
-              <Stack spacing={4}>
-                <FormControl isRequired>
-                  <FormLabel>Tên thiết kế</FormLabel>
-                  <Input
-                    name="name"
+          <ScrollView style={styles.scrollView}>
+            {isVariantLoading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={appColorTheme.brown_2} />
+                <Text style={styles.loadingText}>
+                  Đang tải dữ liệu thiết kế...
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.form}>
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>Tên thiết kế *</Text>
+                  <TextInput
+                    style={styles.input}
                     placeholder="Nhập tên thiết kế"
-                    bg="white"
-                    defaultValue="Bàn gỗ thủ công"
+                    value={formData.name}
+                    onChangeText={(text) =>
+                      setFormData({ ...formData, name: text })
+                    }
                   />
-                </FormControl>
+                </View>
 
-                <FormControl isRequired>
-                  <FormLabel>Danh mục</FormLabel>
-                  <Select
-                    name="category"
-                    placeholder="Chọn danh mục"
-                    bg="white"
-                    defaultValue="Bàn"
-                  >
-                    <option value="Bàn ăn">Bàn ăn</option>
-                    <option value="Tủ quần áo">Tủ quần áo</option>
-                    <option value="Giường ngủ">Giường ngủ</option>
-                  </Select>
-                </FormControl>
+                <View style={styles.switchContainer}>
+                  <Switch
+                    value={isInstall}
+                    onValueChange={setIsInstall}
+                    trackColor={{
+                      false: "#767577",
+                      true: appColorTheme.green_0,
+                    }}
+                    thumbColor={isInstall ? "#ffffff" : "#f4f3f4"}
+                  />
+                  <Text style={styles.switchLabel}>
+                    Cần giao hàng + lắp đặt bởi xưởng
+                  </Text>
+                </View>
 
-                <Box py={2}>
-                  <Checkbox
-                    isChecked={isInstall}
-                    onChange={(e) => setIsInstall(e.target.checked)}
-                    size="md"
-                    colorScheme="green"
-                    bg="white"
-                    p={2}
-                    borderRadius="md"
-                  >
-                    <Text fontWeight="medium">
-                      Cần giao hàng + lắp đặt bởi xưởng
-                    </Text>
-                  </Checkbox>
-                </Box>
-
-                <FormControl isRequired>
-                  <FormLabel>Mô tả</FormLabel>
-                  <Textarea
-                    name="description"
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>Mô tả *</Text>
+                  <TextInput
+                    style={[styles.input, styles.textarea]}
                     placeholder="Nhập mô tả"
-                    bg="white"
-                    rows={5}
-                    defaultValue="Không có gì"
+                    multiline
+                    numberOfLines={5}
+                    value={formData.description}
+                    onChangeText={(text) =>
+                      setFormData({ ...formData, description: text })
+                    }
                   />
-                </FormControl>
+                </View>
 
-                <Box>
-                  <HStack justify="space-between" mb={4}>
-                    <Text fontWeight="bold">Cấu hình sản phẩm</Text>
-                    <Button
-                      leftIcon={<FiPlus />}
-                      onClick={handleAddConfig}
-                      size="sm"
-                    >
-                      Thêm cấu hình
-                    </Button>
-                  </HStack>
-
-                  <VStack spacing={4} align="stretch">
-                    {configurations.map((config) => (
-                      <Box
-                        key={config.id}
-                        p={5}
-                        borderWidth="1px"
-                        borderRadius="lg"
-                        bg="white"
-                        position="relative"
-                      >
-                        <HStack mb={2}>
-                          <FormControl isRequired>
-                            <FormLabel>Tên cấu hình</FormLabel>
-                            <Input
-                              value={config.name}
-                              onChange={(e) =>
-                                handleConfigChange(
-                                  config.id,
-                                  "name",
-                                  e.target.value
-                                )
-                              }
-                              placeholder="Nhập tên cấu hình"
-                            />
-                          </FormControl>
-                          <IconButton
-                            position="absolute"
-                            right={1}
-                            top={1}
-                            icon={<FiXCircle />}
-                            colorScheme="red"
-                            variant="ghost"
-                            onClick={() => handleRemoveConfig(config.id)}
-                          />
-                        </HStack>
-
-                        <VStack spacing={2} align="stretch">
-                          <FormLabel m={0} isRequired>
-                            Giá trị <span style={{ color: "red" }}>*</span>
-                          </FormLabel>
-                          {config.values.map((value) => (
-                            <HStack key={value.id}>
-                              <FormControl isRequired>
-                                <Input
-                                  value={value.name}
-                                  onChange={(e) =>
-                                    handleValueChange(
-                                      config.id,
-                                      value.id,
-                                      e.target.value
-                                    )
-                                  }
-                                  placeholder="Nhập giá trị"
-                                />
-                              </FormControl>
-                              <IconButton
-                                icon={<FiTrash />}
-                                colorScheme="red"
-                                variant="ghost"
-                                onClick={() =>
-                                  handleRemoveValue(config.id, value.id)
-                                }
-                              />
-                            </HStack>
-                          ))}
-                          <Button
-                            leftIcon={<FiPlus />}
-                            onClick={() => handleAddValue(config.id)}
-                            size="sm"
-                          >
-                            Thêm giá trị
-                          </Button>
-                        </VStack>
-                      </Box>
-                    ))}
-                  </VStack>
-                </Box>
-
-                {prices.length > 0 && (
-                  <Box>
-                    <Text fontWeight="bold" mb={4}>
+                {variants.length > 0 && (
+                  <View style={styles.formGroup}>
+                    <Text style={styles.sectionTitle}>
                       Bảng giá theo cấu hình
                     </Text>
-                    <VStack spacing={4} align="stretch">
-                      {prices.map((price, index) => (
-                        <Box
-                          key={index}
-                          p={5}
-                          borderWidth="1px"
-                          borderRadius="lg"
-                          bg="white"
-                        >
-                          <HStack justify="space-between">
-                            <Box pr={4} borderRight="1px solid #CCC" flex="1">
-                              {price.configValue.map((valueId) => {
-                                const configId = Math.floor(valueId / 100);
-                                const config = configurations.find(
-                                  (c) => c.id == configId
-                                );
-                                const value = config?.values.find(
-                                  (v) => v.id == valueId
-                                );
-                                return (
-                                  <Flex justify="space-between" key={valueId}>
-                                    <Text>{config?.name}:</Text>
-                                    <Text as="b">{value?.name}</Text>
-                                  </Flex>
-                                );
-                              })}
-                            </Box>
+                    {variants.map((variant) => (
+                      <View
+                        key={variant.designIdeaVariantId}
+                        style={styles.priceCard}
+                      >
+                        <View style={styles.priceConfigSection}>
+                          <Text style={styles.variantIdText}>
+                            Mã biến thể: {variant.designIdeaVariantId}
+                          </Text>
 
-                            <HStack justifyContent="flex-end" flex="1">
-                              <Text as="b" color={appColorTheme.brown_2}>
-                                {formatPrice(price.price)}
-                              </Text>
+                          {variant.designIdeaVariantConfig.map((config) =>
+                            config.designVariantValues.map((value) => (
+                              <View
+                                style={styles.configRow}
+                                key={value.designIdeaConfigValueId}
+                              >
+                                <Text style={styles.configName}>
+                                  {value.designIdeaConfig.specifications}:
+                                </Text>
+                                <Text style={styles.configValue}>
+                                  {value.value}
+                                </Text>
+                              </View>
+                            ))
+                          )}
+                        </View>
 
-                              <FormControl isRequired maxW="200px">
-                                <NumberInput
-                                  value={price.price}
-                                  onChange={(value) =>
-                                    handlePriceChange(
-                                      price.config,
-                                      price.configValue,
-                                      parseInt(value)
-                                    )
-                                  }
-                                  min={0}
-                                  max={50000000}
-                                  step={1000}
-                                >
-                                  <NumberInputField />
-                                  <NumberInputStepper>
-                                    <NumberIncrementStepper />
-                                    <NumberDecrementStepper />
-                                  </NumberInputStepper>
-                                </NumberInput>
-                              </FormControl>
-                            </HStack>
-                          </HStack>
-                        </Box>
-                      ))}
-                    </VStack>
-                  </Box>
+                        <View style={styles.priceInputSection}>
+                          <Text style={styles.currentPrice}>
+                            {formatPrice(
+                              variantPrices.find(
+                                (p) =>
+                                  p.designIdeaVariantId ===
+                                  variant.designIdeaVariantId
+                              )?.price || variant.price
+                            )}
+                          </Text>
+
+                          <TextInput
+                            style={styles.priceInput}
+                            keyboardType="numeric"
+                            value={String(
+                              variantPrices.find(
+                                (p) =>
+                                  p.designIdeaVariantId ===
+                                  variant.designIdeaVariantId
+                              )?.price || variant.price
+                            )}
+                            onChangeText={(value) =>
+                              handlePriceChange(
+                                variant.designIdeaVariantId,
+                                parseInt(value) || 0
+                              )
+                            }
+                          />
+                        </View>
+                      </View>
+                    ))}
+                  </View>
                 )}
 
-                <FormControl isRequired>
-                  <FormLabel>Hình ảnh</FormLabel>
-                  <ImageUpdateUploader
-                    maxFiles={4}
-                    onUploadComplete={(result) => {
-                      setImgUrls(result);
-                    }}
-                    imgUrls={imgUrls}
+                <View style={styles.checkboxSection}>
+                  <CheckboxList
+                    items={[
+                      {
+                        isOptional: false,
+                        description:
+                          "Tôi đã kiểm tra thông tin và xác nhận thao tác",
+                      },
+                    ]}
+                    setButtonDisabled={setButtonDisabled}
                   />
-                </FormControl>
+                </View>
 
-                <HStack justify="flex-end" mt={4}>
-                  <Button onClick={onClose}>Hủy</Button>
-                  <Button colorScheme="blue" type="submit">
-                    Cập nhật
-                  </Button>
-                </HStack>
-              </Stack>
-            </form>
-          </ModalBody>
-        </ModalContent>
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity
+                    style={[styles.button, styles.cancelButton]}
+                    onPress={closeModal}
+                    disabled={isLoading}
+                  >
+                    <Text style={styles.cancelButtonText}>Đóng</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.button,
+                      styles.saveButton,
+                      (buttonDisabled || isLoading) && styles.disabledButton,
+                    ]}
+                    onPress={handleSubmit}
+                    disabled={buttonDisabled || isLoading}
+                  >
+                    {isLoading ? (
+                      <ActivityIndicator size="small" color="white" />
+                    ) : (
+                      <Text style={styles.saveButtonText}>Lưu</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+          </ScrollView>
+        </KeyboardAvoidingView>
       </Modal>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  iconButton: {
+    padding: 8,
+    borderWidth: 1,
+    borderColor: appColorTheme.blue_0,
+    borderRadius: 4,
+    marginHorizontal: 4,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 15,
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  closeButton: {
+    padding: 5,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  loadingContainer: {
+    padding: 50,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 15,
+    fontSize: 16,
+  },
+  form: {
+    padding: 15,
+  },
+  formGroup: {
+    marginBottom: 20,
+  },
+  label: {
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 4,
+    padding: 10,
+  },
+  textarea: {
+    minHeight: 100,
+    textAlignVertical: "top",
+  },
+  switchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  switchLabel: {
+    marginLeft: 10,
+    fontWeight: "500",
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  priceCard: {
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 10,
+  },
+  priceConfigSection: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+    paddingBottom: 10,
+    marginBottom: 10,
+  },
+  variantIdText: {
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  configRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 5,
+  },
+  configName: {
+    flex: 1,
+  },
+  configValue: {
+    fontWeight: "bold",
+    flex: 1,
+    textAlign: "right",
+  },
+  priceInputSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  currentPrice: {
+    fontWeight: "bold",
+    color: appColorTheme.brown_2,
+    fontSize: 16,
+  },
+  priceInput: {
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 4,
+    padding: 10,
+    width: 120,
+  },
+  checkboxSection: {
+    marginVertical: 20,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 20,
+    marginBottom: 40,
+  },
+  button: {
+    alignItems: "center",
+    borderRadius: 4,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    marginLeft: 10,
+    minWidth: 100,
+  },
+  cancelButton: {
+    backgroundColor: "#e0e0e0",
+  },
+  cancelButtonText: {
+    fontWeight: "500",
+  },
+  saveButton: {
+    backgroundColor: appColorTheme.blue_0,
+  },
+  saveButtonText: {
+    color: "white",
+    fontWeight: "500",
+  },
+  disabledButton: {
+    opacity: 0.6,
+  },
+});

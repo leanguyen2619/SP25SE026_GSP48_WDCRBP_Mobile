@@ -1,16 +1,18 @@
-import Toast from "react-native-toast-message";
-import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity, Alert } from "react-native";
 import Icon from "react-native-vector-icons/Feather";
 
-// Custom toast config
-const toastConfig = {
+// Custom alert config
+const alertConfig = {
   success: ({ text1, text2, props, ...rest }) => (
     <View style={[styles.toastContainer, styles.successToast]}>
       <View style={styles.toastContent}>
         <Text style={styles.toastTitle}>{text1}</Text>
         <Text style={styles.toastMessage}>{text2}</Text>
       </View>
-      <TouchableOpacity style={styles.closeButton} onPress={() => Toast.hide()}>
+      <TouchableOpacity
+        style={styles.closeButton}
+        onPress={() => Alert.alert("Thông báo", "Đóng thông báo")}
+      >
         <Icon name="x" size={20} color="#333" />
       </TouchableOpacity>
     </View>
@@ -21,7 +23,10 @@ const toastConfig = {
         <Text style={styles.toastTitle}>{text1}</Text>
         <Text style={styles.toastMessage}>{text2}</Text>
       </View>
-      <TouchableOpacity style={styles.closeButton} onPress={() => Toast.hide()}>
+      <TouchableOpacity
+        style={styles.closeButton}
+        onPress={() => Alert.alert("Thông báo", "Đóng thông báo")}
+      >
         <Icon name="x" size={20} color="#333" />
       </TouchableOpacity>
     </View>
@@ -32,7 +37,10 @@ const toastConfig = {
         <Text style={styles.toastTitle}>{text1}</Text>
         <Text style={styles.toastMessage}>{text2}</Text>
       </View>
-      <TouchableOpacity style={styles.closeButton} onPress={() => Toast.hide()}>
+      <TouchableOpacity
+        style={styles.closeButton}
+        onPress={() => Alert.alert("Thông báo", "Đóng thông báo")}
+      >
         <Icon name="x" size={20} color="#333" />
       </TouchableOpacity>
     </View>
@@ -43,7 +51,10 @@ const toastConfig = {
         <Text style={styles.toastTitle}>{text1}</Text>
         <Text style={styles.toastMessage}>{text2}</Text>
       </View>
-      <TouchableOpacity style={styles.closeButton} onPress={() => Toast.hide()}>
+      <TouchableOpacity
+        style={styles.closeButton}
+        onPress={() => Alert.alert("Thông báo", "Đóng thông báo")}
+      >
         <Icon name="x" size={20} color="#333" />
       </TouchableOpacity>
     </View>
@@ -52,40 +63,29 @@ const toastConfig = {
 
 export const useNotify = () => {
   const notify = (title, description, status = "info", duration = 2222) => {
-    // Map status to react-native-toast-message type
-    let type = "info";
+    // Map status to alert type
+    let message = `${description}`;
     switch (status) {
       case "success":
-        type = "success";
+        message = `Thành công: ${description}`;
         break;
       case "error":
-        type = "error";
+        message = `Lỗi: ${description}`;
         break;
       case "warning":
-        type = "warning";
+        message = `Cảnh báo: ${description}`;
         break;
       case "info":
       default:
-        type = "info";
+        message = `Thông tin: ${description}`;
         break;
     }
 
-    Toast.show({
-      type,
-      text1: title,
-      text2: description,
-      visibilityTime: duration,
-      autoHide: true,
-      position: "top",
-    });
+    // Show alert using the Alert API
+    Alert.alert(title, message);
   };
 
   return notify;
-};
-
-// Cung cấp component Toast global để đặt ở dưới cùng của ứng dụng
-export const ToastProvider = () => {
-  return <Toast config={toastConfig} />;
 };
 
 const styles = StyleSheet.create({

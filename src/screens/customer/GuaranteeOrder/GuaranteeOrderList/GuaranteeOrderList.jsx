@@ -1,27 +1,33 @@
+import React, { useMemo, useState, useEffect } from "react";
 import {
-  Box,
-  Spinner,
+  View,
   Text,
-  Select,
-  Flex,
-  HStack,
-  Stack,
-} from "@chakra-ui/react";
-import { useMemo, useState, useEffect } from "react";
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  Modal,
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import { Ionicons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import {
   appColorTheme,
   guaranteeOrderStatusConstants,
 } from "../../../../config/appconfig";
-import { useNavigate } from "react-router-dom";
 import { useGetGuaranteeOrdersQuery } from "../../../../services/guaranteeOrderApi";
 import useAuth from "../../../../hooks/useAuth";
 import GuaranteeOrderCard from "./GuaranteeOrderCard";
 import Pagination from "../../../../components/Utility/Pagination";
+import { useNavigation } from "@react-navigation/native";
 
 // Component to render guarantee order items (will be passed to Pagination)
 const GuaranteeOrderListItems = ({ data, onViewDetails }) => {
   return (
-    <Stack spacing={4}>
+    <View style={styles.listContainer}>
       {data.length > 0 ? (
         data.map((order) => (
           <GuaranteeOrderCard
@@ -31,20 +37,25 @@ const GuaranteeOrderListItems = ({ data, onViewDetails }) => {
           />
         ))
       ) : (
-        <Box textAlign="center" py={4}>
-          <Text fontSize="lg">Không có đơn hàng nào phù hợp với bộ lọc.</Text>
-        </Box>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>
+            Không có đơn hàng nào phù hợp với bộ lọc.
+          </Text>
+        </View>
       )}
-    </Stack>
+    </View>
   );
 };
 
+const { width, height } = Dimensions.get("window");
+
 export default function GuaranteeOrderList() {
   const { auth } = useAuth();
-  const navigate = useNavigate();
+  const navigation = useNavigation();
   const [statusFilter, setStatusFilter] = useState("");
-  const [sortOption, setSortOption] = useState("orderIdDesc");
+  const [sortOption, setSortOption] = useState("orderIdDesc"); // Mặc định sắp xếp theo ID giảm dần
   const [filteredData, setFilteredData] = useState([]);
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
 
   // Get unique status values from the constants for the dropdown
   const statusValues = useMemo(() => {
@@ -55,15 +66,26 @@ export default function GuaranteeOrderList() {
     data: apiResponse,
     error,
     isLoading,
-  } = useGetGuaranteeOrdersQuery({
-    id: auth?.userId,
-    role: "Customer",
-  });
+  } = useGetGuaranteeOrdersQuery(
+    {
+      id: auth?.userId,
+      role: "Customer",
+    },
+    {
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
+    }
+  );
 
   // Set initial filtered data when API data is loaded
   useEffect(() => {
     if (apiResponse?.data) {
-      setFilteredData(apiResponse.data);
+      // Mặc định sắp xếp theo ID giảm dần
+      const sortedData = [...apiResponse.data].sort(
+        (a, b) => b.guaranteeOrderId - a.guaranteeOrderId
+      );
+      setFilteredData(sortedData);
     }
   }, [apiResponse]);
 
@@ -74,7 +96,7 @@ export default function GuaranteeOrderList() {
     let filtered = apiResponse.data;
 
     // Apply status filter if selected
-    if (statusFilter !== "") {
+    if (statusFilter !== "" && statusFilter !== "All") {
       filtered = filtered.filter((item) => item.status === statusFilter);
     }
 
@@ -84,7 +106,6 @@ export default function GuaranteeOrderList() {
         case "orderIdAsc":
           return a.guaranteeOrderId - b.guaranteeOrderId;
         case "orderIdDesc":
-          return b.guaranteeOrderId - a.guaranteeOrderId;
         default:
           return b.guaranteeOrderId - a.guaranteeOrderId;
       }
@@ -93,97 +114,310 @@ export default function GuaranteeOrderList() {
     setFilteredData(sorted);
   }, [statusFilter, sortOption, apiResponse]);
 
-  // Handle filter changes
-  const handleStatusFilterChange = (e) => {
-    setStatusFilter(e.target.value);
-  };
-
-  const handleSortChange = (e) => {
-    setSortOption(e.target.value);
-  };
-
   const handleViewDetails = (orderId) => {
-    navigate(`${orderId}`);
+    navigation.navigate("CustomerGuaranteeOrderDetail", { id: orderId });
+  };
+
+  const handleApplyFilters = () => {
+    setFilterModalVisible(false);
+  };
+
+  const resetFilters = () => {
+    setStatusFilter("");
+    setSortOption("orderIdDesc");
   };
 
   if (isLoading) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="500px"
-      >
-        <Spinner size="xl" color={appColorTheme.brown_2} />
-      </Box>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={appColorTheme.brown_2} />
+      </View>
     );
   }
 
   if (error) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="500px"
-      >
-        <Text color="red.500">
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>
           Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại.
         </Text>
-      </Box>
+      </View>
     );
   }
 
   return (
-    <Box>
-      <Flex mb={4} gap={4} flexWrap="wrap">
-        <HStack>
-          <Text fontWeight="medium">Lọc theo trạng thái:</Text>
-          <Select
-            width="300px"
-            bgColor="white"
-            value={statusFilter}
-            onChange={handleStatusFilterChange}
-          >
-            <option value="">Tất cả trạng thái</option>
-            {statusValues.map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
-          </Select>
-        </HStack>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Đơn bảo hành, sửa chữa</Text>
+        <TouchableOpacity
+          style={styles.filterButton}
+          onPress={() => setFilterModalVisible(true)}
+        >
+          <Ionicons name="filter" size={20} color="white" />
+          <Text style={styles.filterButtonText}>Lọc</Text>
+        </TouchableOpacity>
+      </View>
 
-        <HStack>
-          <Text fontWeight="medium">Sắp xếp theo:</Text>
-          <Select
-            width="250px"
-            bgColor="white"
-            value={sortOption}
-            onChange={handleSortChange}
-          >
-            <option value="orderIdDesc">Mã giảm dần</option>
-            <option value="orderIdAsc">Mã tăng dần</option>
-          </Select>
-        </HStack>
-      </Flex>
+      <ScrollView style={styles.contentContainer}>
+        {filteredData.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>
+              Không có đơn hàng nào phù hợp với bộ lọc.
+            </Text>
+          </View>
+        ) : (
+          <Pagination
+            dataList={filteredData}
+            DisplayComponent={(props) => (
+              <GuaranteeOrderListItems
+                {...props}
+                onViewDetails={handleViewDetails}
+              />
+            )}
+            itemsPerPage={5}
+          />
+        )}
+      </ScrollView>
 
-      {filteredData.length === 0 ? (
-        <Box textAlign="center" py={10}>
-          <Text fontSize="lg">Không có đơn hàng nào phù hợp với bộ lọc.</Text>
-        </Box>
-      ) : (
-        <Pagination
-          dataList={filteredData}
-          DisplayComponent={(props) => (
-            <GuaranteeOrderListItems
-              {...props}
-              onViewDetails={handleViewDetails}
-            />
-          )}
-          itemsPerPage={10}
-        />
-      )}
-    </Box>
+      {/* Filter Modal */}
+      <Modal
+        visible={filterModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setFilterModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.modalContainer}
+        >
+          <View style={styles.modalContent}>
+            {/* Header */}
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Bộ lọc đơn hàng</Text>
+              <TouchableOpacity
+                onPress={() => setFilterModalVisible(false)}
+                style={styles.closeButton}
+              >
+                <Ionicons name="close" size={24} color="#4A5568" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.scrollView}>
+              {/* Trạng thái */}
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Trạng thái:</Text>
+                <View style={styles.pickerContainer}>
+                  <Picker
+                    selectedValue={statusFilter}
+                    onValueChange={(value) => setStatusFilter(value)}
+                    style={styles.picker}
+                    dropdownIconColor={appColorTheme.brown_2}
+                    mode="dropdown"
+                  >
+                    <Picker.Item label="Tất cả trạng thái" value="All" />
+                    {statusValues.map((status) => (
+                      <Picker.Item key={status} label={status} value={status} />
+                    ))}
+                  </Picker>
+                </View>
+              </View>
+
+              {/* Sắp xếp */}
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Sắp xếp theo:</Text>
+                <View style={styles.pickerContainer}>
+                  <Picker
+                    selectedValue={sortOption}
+                    onValueChange={(value) => setSortOption(value)}
+                    style={styles.picker}
+                    dropdownIconColor={appColorTheme.brown_2}
+                    mode="dropdown"
+                  >
+                    <Picker.Item label="Mã giảm dần" value="orderIdDesc" />
+                    <Picker.Item label="Mã tăng dần" value="orderIdAsc" />
+                  </Picker>
+                </View>
+              </View>
+            </ScrollView>
+
+            {/* Button footer */}
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={styles.resetButton}
+                onPress={resetFilters}
+              >
+                <Text style={styles.resetButtonText}>Đặt lại</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.applyButton}
+                onPress={handleApplyFilters}
+              >
+                <Ionicons
+                  name="filter"
+                  size={20}
+                  color="white"
+                  style={styles.buttonIcon}
+                />
+                <Text style={styles.applyButtonText}>Áp dụng</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 15,
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  contentContainer: {
+    flex: 1,
+    padding: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 400,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 400,
+  },
+  errorText: {
+    color: "red",
+    fontSize: 16,
+    textAlign: "center",
+  },
+  filterButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: appColorTheme.brown_2,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 5,
+  },
+  filterButtonText: {
+    color: "white",
+    marginLeft: 5,
+    fontWeight: "bold",
+  },
+  listContainer: {
+    marginTop: 8,
+  },
+  emptyContainer: {
+    padding: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#718096",
+    textAlign: "center",
+  },
+  // Modal styles
+  modalContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    maxHeight: height * 0.7,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingBottom: Platform.OS === "ios" ? 30 : 16,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  closeButton: {
+    padding: 4,
+  },
+  scrollView: {
+    maxHeight: height * 0.5,
+  },
+  section: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 10,
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    backgroundColor: "white",
+    marginBottom: 5,
+    overflow: "hidden",
+  },
+  picker: {
+    height: 50,
+    width: "100%",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#E2E8F0",
+  },
+  resetButton: {
+    flex: 1,
+    backgroundColor: "#EDF2F7",
+    padding: 14,
+    borderRadius: 8,
+    marginRight: 8,
+    alignItems: "center",
+  },
+  resetButtonText: {
+    color: "#4A5568",
+    fontWeight: "600",
+  },
+  applyButton: {
+    flex: 2,
+    backgroundColor: appColorTheme.brown_2,
+    padding: 14,
+    borderRadius: 8,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  applyButtonText: {
+    color: "white",
+    fontWeight: "600",
+  },
+  buttonIcon: {
+    marginRight: 8,
+  },
+});

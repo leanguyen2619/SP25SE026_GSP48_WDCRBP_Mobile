@@ -1,174 +1,237 @@
+import React, { useState } from "react";
 import {
-  Box,
-  Button,
-  Grid,
-  Heading,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  SimpleGrid,
-  Stack,
+  View,
   Text,
-  Tooltip,
-  useDisclosure,
-  VStack,
-} from "@chakra-ui/react";
-import { useRef } from "react";
-import { FiEye } from "react-icons/fi";
+  TouchableOpacity,
+  Modal,
+  StyleSheet,
+  ScrollView,
+  Dimensions,
+} from "react-native";
+import { Feather } from "@expo/vector-icons";
 import { appColorTheme } from "../../../../config/appconfig";
 import ImageListSelector from "../../../../components/Utility/ImageListSelector";
 import { formatPrice } from "../../../../utils/utils";
 import StarReview from "../../../../components/Utility/StarReview";
 
 export default function ProductDetailModal({ product }) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const initialRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const renderDetailItem = (label, value) => (
+    <View style={styles.detailItem}>
+      <Text style={styles.detailLabel}>{label}:</Text>
+      <Text style={styles.detailValue}>{value || "-"}</Text>
+    </View>
+  );
 
   return (
     <>
-      <Tooltip label="Chi tiết" hasArrow>
-        <Button
-          p="1px"
-          color={appColorTheme.brown_2}
-          bg="none"
-          border={`1px solid ${appColorTheme.brown_2}`}
-          _hover={{ bg: appColorTheme.brown_2, color: "white" }}
-          onClick={onOpen}
-        >
-          <FiEye />
-        </Button>
-      </Tooltip>
+      <TouchableOpacity
+        style={styles.detailButton}
+        onPress={() => setIsOpen(true)}
+      >
+        <Feather name="eye" size={16} color={appColorTheme.brown_2} />
+      </TouchableOpacity>
 
       <Modal
-        size="6xl"
-        initialFocusRef={initialRef}
-        isOpen={isOpen}
-        closeOnOverlayClick={false}
-        closeOnEsc={false}
-        onClose={onClose}
+        visible={isOpen}
+        animationType="slide"
+        onRequestClose={() => setIsOpen(false)}
       >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Chi tiết sản phẩm</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody bgColor="app_grey.1" pb={6}>
-            <Stack gap={5}>
-              <SimpleGrid columns={{ base: 1, xl: 2 }} gap={5}>
-                {/* Product images */}
-                <Box>
-                  <Heading size="md" mb={4}>
-                    Hình ảnh sản phẩm
-                  </Heading>
-                  <ImageListSelector imgH={300} imgUrls={product?.mediaUrls} />
-                </Box>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalHeaderText}>Chi tiết sản phẩm</Text>
+            <TouchableOpacity onPress={() => setIsOpen(false)}>
+              <Text style={styles.closeButton}>X</Text>
+            </TouchableOpacity>
+          </View>
 
-                {/* Basic information */}
-                <Box>
-                  <Heading size="md" mb={4}>
-                    Thông tin cơ bản
-                  </Heading>
-                  <Box bg="white" p={5} borderRadius="lg" boxShadow="md">
-                    <VStack align="stretch" spacing={4}>
-                      <Box>
-                        <Text fontWeight="bold">Mã sản phẩm:</Text>
-                        <Text>{product?.productId}</Text>
-                      </Box>
-                      <Box>
-                        <Text fontWeight="bold">Tên sản phẩm:</Text>
-                        <Text>{product?.productName}</Text>
-                      </Box>
-                      <Box>
-                        <Text fontWeight="bold">Danh mục:</Text>
-                        <Text>{product?.categoryName}</Text>
-                      </Box>
-                      <Box>
-                        <Text fontWeight="bold">Mô tả:</Text>
-                        <Text whiteSpace="pre-wrap">
-                          {product?.description}
-                        </Text>
-                      </Box>
-                    </VStack>
-                  </Box>
-                </Box>
-              </SimpleGrid>
+          <ScrollView style={styles.modalBody}>
+            <View style={styles.sectionContainer}>
+              <Text style={styles.sectionTitle}>Hình ảnh sản phẩm</Text>
+              <View style={styles.imageContainer}>
+                <ImageListSelector imgH={200} imgUrls={product?.mediaUrls} />
+              </View>
+            </View>
 
-              {/* Technical details */}
-              <Box>
-                <Heading size="md" mb={4}>
-                  Thông tin kỹ thuật
-                </Heading>
-                <Box bg="white" p={5} borderRadius="lg" boxShadow="md">
-                  <Grid templateColumns="repeat(2, 1fr)" gap={5}>
-                    <Box>
-                      <Text fontWeight="bold">Giá:</Text>
-                      <Text fontSize="xl" as="b" color={appColorTheme.brown_2}>
+            <View style={styles.sectionContainer}>
+              <Text style={styles.sectionTitle}>Thông tin cơ bản</Text>
+              <View style={styles.detailsContainer}>
+                {renderDetailItem("Mã sản phẩm", product?.productId)}
+                {renderDetailItem("Tên sản phẩm", product?.productName)}
+                {renderDetailItem("Danh mục", product?.categoryName)}
+                <View style={styles.detailItem}>
+                  <Text style={styles.detailLabel}>Mô tả:</Text>
+                  <Text style={styles.detailValueMultiline}>
+                    {product?.description}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.sectionContainer}>
+              <Text style={styles.sectionTitle}>Thông tin kỹ thuật</Text>
+              <View style={styles.detailsContainer}>
+                <View style={styles.detailsRow}>
+                  <View style={styles.detailsColumn}>
+                    <View style={styles.detailItem}>
+                      <Text style={styles.detailLabel}>Giá:</Text>
+                      <Text style={styles.priceText}>
                         {formatPrice(product?.price)}
                       </Text>
-                    </Box>
-                    <Box>
-                      <Text fontWeight="bold">Tồn kho:</Text>
-                      <Text>{product?.stock} sản phẩm</Text>
-                    </Box>
-                    <Box>
-                      <Text fontWeight="bold">Bảo hành:</Text>
-                      <Text>{product?.warrantyDuration} tháng</Text>
-                    </Box>
-                    <Box>
-                      <Text fontWeight="bold">Kích thước:</Text>
-                      <Text>
-                        {product?.length} x {product?.width} x {product?.height}{" "}
-                        cm
-                      </Text>
-                    </Box>
-                    <Box>
-                      <Text fontWeight="bold">Loại gỗ:</Text>
-                      <Text>{product?.woodType}</Text>
-                    </Box>
-                    <Box>
-                      <Text fontWeight="bold">Màu sắc:</Text>
-                      <Text>{product?.color}</Text>
-                    </Box>
-                    <Box>
-                      <Text fontWeight="bold">Tính năng đặc biệt:</Text>
-                      <Text>{product?.specialFeature}</Text>
-                    </Box>
-                    <Box>
-                      <Text fontWeight="bold">Phong cách:</Text>
-                      <Text>{product?.style}</Text>
-                    </Box>
-                    <Box>
-                      <Text fontWeight="bold">Điêu khắc:</Text>
-                      <Text>{product?.sculpture}</Text>
-                    </Box>
-                    <Box>
-                      <Text fontWeight="bold">Mùi hương:</Text>
-                      <Text>{product?.scent}</Text>
-                    </Box>
-                    <Box>
-                      <Text fontWeight="bold">Đánh giá:</Text>
-                      <StarReview
-                        totalReviews={product?.totalReviews || 0}
-                        totalStar={product?.totalStar || 0}
-                      />
-                    </Box>
-                    <Box>
-                      <Text fontWeight="bold">Cần giao hàng + lắp đặt:</Text>
-                      <Text>{product?.isInstall ? "Có" : "Không"}</Text>
-                    </Box>
-                  </Grid>
-                </Box>
-              </Box>
-            </Stack>
+                    </View>
+                    {renderDetailItem("Tồn kho", `${product?.stock} sản phẩm`)}
+                    {renderDetailItem(
+                      "Bảo hành",
+                      `${product?.warrantyDuration} tháng`
+                    )}
+                    {renderDetailItem(
+                      "Kích thước",
+                      `${product?.length} x ${product?.width} x ${product?.height} cm`
+                    )}
+                    {renderDetailItem("Loại gỗ", product?.woodType)}
+                  </View>
 
-            <Button onClick={onClose} mt={6} float="right">
-              Đóng
-            </Button>
-          </ModalBody>
-        </ModalContent>
+                  <View style={styles.detailsColumn}>
+                    {renderDetailItem("Màu sắc", product?.color)}
+                    {renderDetailItem(
+                      "Tính năng đặc biệt",
+                      product?.specialFeature
+                    )}
+                    {renderDetailItem("Phong cách", product?.style)}
+                    {renderDetailItem("Điêu khắc", product?.sculpture)}
+                    {renderDetailItem("Mùi hương", product?.scent)}
+                  </View>
+                </View>
+
+                <View style={styles.detailItem}>
+                  <Text style={styles.detailLabel}>Đánh giá:</Text>
+                  <StarReview
+                    totalReviews={product?.totalReviews || 0}
+                    totalStar={product?.totalStar || 0}
+                  />
+                </View>
+
+                {renderDetailItem(
+                  "Cần giao hàng + lắp đặt",
+                  product?.isInstall ? "Có" : "Không"
+                )}
+              </View>
+            </View>
+
+            <TouchableOpacity
+              style={styles.closeModalButton}
+              onPress={() => setIsOpen(false)}
+            >
+              <Text style={styles.closeModalButtonText}>Đóng</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
       </Modal>
     </>
   );
 }
+
+const { width } = Dimensions.get("window");
+
+const styles = StyleSheet.create({
+  detailButton: {
+    padding: 8,
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: appColorTheme.brown_2,
+    borderRadius: 4,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+    backgroundColor: "white",
+  },
+  modalHeaderText: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  closeButton: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  modalBody: {
+    flex: 1,
+    padding: 16,
+  },
+  sectionContainer: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  imageContainer: {
+    width: "100%",
+    backgroundColor: "white",
+    borderRadius: 8,
+    padding: 10,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+  },
+  detailsContainer: {
+    backgroundColor: "white",
+    borderRadius: 8,
+    padding: 16,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+  },
+  detailsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  detailsColumn: {
+    width: "48%",
+  },
+  detailItem: {
+    marginBottom: 12,
+  },
+  detailLabel: {
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  detailValue: {
+    fontSize: 14,
+  },
+  detailValueMultiline: {
+    fontSize: 14,
+  },
+  priceText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: appColorTheme.brown_2,
+  },
+  closeModalButton: {
+    alignSelf: "flex-end",
+    backgroundColor: appColorTheme.brown_2,
+    padding: 12,
+    borderRadius: 4,
+    marginTop: 20,
+    marginBottom: 40,
+  },
+  closeModalButtonText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+});

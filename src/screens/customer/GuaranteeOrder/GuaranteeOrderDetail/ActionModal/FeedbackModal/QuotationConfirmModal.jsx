@@ -4,7 +4,7 @@ import {
   useGetByGuaranteeOrderMutation,
 } from "../../../../../../services/quotationApi";
 import { useNotify } from "../../../../../../components/Utility/Notify";
-import { FiCheck, FiCheckCircle, FiXCircle } from "react-icons/fi";
+import { Feather } from "@expo/vector-icons";
 import CheckboxList from "../../../../../../components/Utility/CheckboxList";
 import { formatPrice } from "../../../../../../utils/utils";
 import { appColorTheme } from "../../../../../../config/appconfig";
@@ -26,10 +26,12 @@ export default function QuotationConfirmModal({
 }) {
   const [isModalVisible, setModalVisible] = useState(false);
   const notify = useNotify();
-  const [acceptQuotation, { isLoading: isAccepting }] = useAcceptGuaranteeQuotationsMutation();
+  const [acceptQuotation, { isLoading: isAccepting }] =
+    useAcceptGuaranteeQuotationsMutation();
   const [isCheckboxDisabled, setIsCheckboxDisabled] = useState(true);
 
-  const [getByGuaranteeOrder, { isLoading: isLoadingQuotation }] = useGetByGuaranteeOrderMutation();
+  const [getByGuaranteeOrder, { isLoading: isLoadingQuotation }] =
+    useGetByGuaranteeOrderMutation();
   const [quotationData, setQuotationData] = useState(null);
   const [quotationError, setQuotationError] = useState(null);
 
@@ -105,7 +107,7 @@ export default function QuotationConfirmModal({
         style={styles.button}
         onPress={() => setModalVisible(true)}
       >
-        <FiCheckCircle style={styles.buttonIcon} />
+        <Feather name="check-circle" size={18} style={styles.buttonIcon} />
         <Text style={styles.buttonText}>{buttonText}</Text>
       </TouchableOpacity>
 
@@ -123,7 +125,7 @@ export default function QuotationConfirmModal({
                 style={styles.closeButton}
                 onPress={handleClose}
               >
-                <FiXCircle style={styles.closeIcon} />
+                <Feather name="x-circle" size={20} style={styles.closeIcon} />
               </TouchableOpacity>
             )}
 
@@ -133,7 +135,10 @@ export default function QuotationConfirmModal({
               <View style={styles.detailsCard}>
                 {isLoadingQuotation ? (
                   <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color={appColorTheme.brown_2} />
+                    <ActivityIndicator
+                      size="large"
+                      color={appColorTheme.brown_2}
+                    />
                   </View>
                 ) : quotationError ? (
                   <View style={styles.errorContainer}>
@@ -143,23 +148,41 @@ export default function QuotationConfirmModal({
                   </View>
                 ) : quotationDetails.length === 0 ? (
                   <View style={styles.emptyContainer}>
-                    <Text style={styles.emptyText}>Chưa có thông tin báo giá</Text>
+                    <Text style={styles.emptyText}>
+                      Chưa có thông tin báo giá
+                    </Text>
                   </View>
                 ) : (
                   <View style={styles.tableContainer}>
                     <View style={styles.tableHeader}>
-                      <Text style={[styles.headerCell, styles.sttCell]}>STT</Text>
-                      <Text style={[styles.headerCell, styles.typeCell]}>Loại chi phí</Text>
-                      <Text style={[styles.headerCell, styles.quantityCell]}>Số lượng</Text>
-                      <Text style={[styles.headerCell, styles.costCell]}>Chi phí</Text>
+                      <Text style={[styles.headerCell, styles.sttCell]}>
+                        STT
+                      </Text>
+                      <Text style={[styles.headerCell, styles.typeCell]}>
+                        Loại chi phí
+                      </Text>
+                      <Text style={[styles.headerCell, styles.quantityCell]}>
+                        Số lượng
+                      </Text>
+                      <Text style={[styles.headerCell, styles.costCell]}>
+                        Chi phí
+                      </Text>
                     </View>
 
                     {quotationDetails.map((detail, index) => (
                       <View key={index} style={styles.tableRow}>
-                        <Text style={[styles.cell, styles.sttCell]}>{index + 1}</Text>
-                        <Text style={[styles.cell, styles.typeCell]}>{detail.costType}</Text>
-                        <Text style={[styles.cell, styles.quantityCell]}>{detail.quantityRequired}</Text>
-                        <Text style={[styles.cell, styles.costCell]}>{formatPrice(detail.costAmount)}</Text>
+                        <Text style={[styles.cell, styles.sttCell]}>
+                          {index + 1}
+                        </Text>
+                        <Text style={[styles.cell, styles.typeCell]}>
+                          {detail.costType}
+                        </Text>
+                        <Text style={[styles.cell, styles.quantityCell]}>
+                          {detail.quantityRequired}
+                        </Text>
+                        <Text style={[styles.cell, styles.costCell]}>
+                          {formatPrice(detail.costAmount)}
+                        </Text>
                       </View>
                     ))}
 
@@ -167,17 +190,39 @@ export default function QuotationConfirmModal({
                       <View style={styles.tableRow}>
                         <Text style={[styles.cell, styles.sttCell]}></Text>
                         <Text style={[styles.cell, styles.typeCell]}></Text>
-                        <Text style={[styles.cell, styles.quantityCell, styles.boldText]}>Phí vận chuyển:</Text>
-                        <Text style={[styles.cell, styles.costCell]}>{formatPrice(order?.shipFee)}</Text>
+                        <Text
+                          style={[
+                            styles.cell,
+                            styles.quantityCell,
+                            styles.boldText,
+                          ]}
+                        >
+                          Phí vận chuyển:
+                        </Text>
+                        <Text style={[styles.cell, styles.costCell]}>
+                          {formatPrice(order?.shipFee)}
+                        </Text>
                       </View>
                     )}
 
                     <View style={styles.tableRow}>
                       <Text style={[styles.cell, styles.sttCell]}></Text>
                       <Text style={[styles.cell, styles.typeCell]}></Text>
-                      <Text style={[styles.cell, styles.quantityCell, styles.boldText]}>Tổng chi phí:</Text>
-                      <Text style={[styles.cell, styles.costCell, styles.boldText]}>
-                        {formatPrice(totalQuotationAmount + (order?.shipFee || 0))}
+                      <Text
+                        style={[
+                          styles.cell,
+                          styles.quantityCell,
+                          styles.boldText,
+                        ]}
+                      >
+                        Tổng chi phí:
+                      </Text>
+                      <Text
+                        style={[styles.cell, styles.costCell, styles.boldText]}
+                      >
+                        {formatPrice(
+                          totalQuotationAmount + (order?.shipFee || 0)
+                        )}
                       </Text>
                     </View>
                   </View>
@@ -197,19 +242,19 @@ export default function QuotationConfirmModal({
                 onPress={handleClose}
                 disabled={isAccepting}
               >
-                <FiXCircle style={styles.buttonIcon} />
+                <Feather name="x-circle" size={18} style={styles.buttonIcon} />
                 <Text style={styles.buttonText}>Đóng</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.footerButton, styles.submitButton]}
+                style={[styles.footerButton, styles.confirmButton]}
                 onPress={handleSubmit}
-                disabled={isCheckboxDisabled || quotationDetails.length === 0}
+                disabled={isAccepting || isCheckboxDisabled}
               >
                 {isAccepting ? (
                   <ActivityIndicator size="small" color="white" />
                 ) : (
-                  <FiCheck style={styles.buttonIcon} />
+                  <Feather name="check" size={18} style={styles.buttonIcon} />
                 )}
                 <Text style={[styles.buttonText, styles.submitButtonText]}>
                   Xác nhận
@@ -225,107 +270,107 @@ export default function QuotationConfirmModal({
 
 const styles = StyleSheet.create({
   button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#38A169',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#38A169",
     padding: 8,
     borderRadius: 4,
   },
   buttonIcon: {
-    color: 'white',
+    color: "white",
     marginRight: 8,
   },
   buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 10,
-    width: '90%',
+    width: "90%",
     maxWidth: 500,
-    maxHeight: '80%',
+    maxHeight: "80%",
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     padding: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   closeButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 16,
     right: 16,
   },
   closeIcon: {
     fontSize: 20,
-    color: '#666',
+    color: "#666",
   },
   modalBody: {
     flex: 1,
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 16,
     paddingHorizontal: 16,
   },
   detailsCard: {
-    backgroundColor: '#F7FAFC',
+    backgroundColor: "#F7FAFC",
     padding: 16,
     borderRadius: 8,
     marginBottom: 16,
   },
   loadingContainer: {
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   errorContainer: {
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   errorText: {
-    color: '#E53E3E',
+    color: "#E53E3E",
   },
   emptyContainer: {
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   emptyText: {
-    color: '#718096',
+    color: "#718096",
   },
   tableContainer: {
-    width: '100%',
+    width: "100%",
   },
   tableHeader: {
-    flexDirection: 'row',
+    flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
+    borderBottomColor: "#E2E8F0",
     paddingBottom: 8,
     marginBottom: 8,
   },
   headerCell: {
-    fontWeight: 'bold',
-    color: '#4A5568',
+    fontWeight: "bold",
+    color: "#4A5568",
   },
   tableRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#EDF2F7',
+    borderBottomColor: "#EDF2F7",
   },
   cell: {
     fontSize: 14,
   },
   sttCell: {
     width: 40,
-    textAlign: 'center',
+    textAlign: "center",
   },
   typeCell: {
     flex: 2,
@@ -333,41 +378,41 @@ const styles = StyleSheet.create({
   },
   quantityCell: {
     width: 80,
-    textAlign: 'center',
+    textAlign: "center",
   },
   costCell: {
     width: 100,
-    textAlign: 'right',
+    textAlign: "right",
   },
   boldText: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   divider: {
     height: 1,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: "#E2E8F0",
     marginVertical: 16,
   },
   modalFooter: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "flex-end",
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
+    borderTopColor: "#E2E8F0",
   },
   footerButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 8,
     borderRadius: 4,
     marginLeft: 8,
   },
   cancelButton: {
-    backgroundColor: '#EDF2F7',
+    backgroundColor: "#EDF2F7",
   },
-  submitButton: {
-    backgroundColor: '#38A169',
+  confirmButton: {
+    backgroundColor: "#38A169",
   },
   submitButtonText: {
-    color: 'white',
+    color: "white",
   },
 });

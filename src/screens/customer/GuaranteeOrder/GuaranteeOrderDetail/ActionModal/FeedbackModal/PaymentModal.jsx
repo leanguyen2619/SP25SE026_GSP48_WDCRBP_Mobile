@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNotify } from "../../../../../../components/Utility/Notify";
-import { FiCheck, FiCreditCard, FiXCircle } from "react-icons/fi";
+import { Feather } from "@expo/vector-icons";
 import CheckboxList from "../../../../../../components/Utility/CheckboxList";
 import {
   appColorTheme,
@@ -11,7 +11,7 @@ import { formatPrice } from "../../../../../../utils/utils";
 import useAuth from "../../../../../../hooks/useAuth";
 import { useOrderPaymentMutation } from "../../../../../../services/walletApi";
 import { useCreatePaymentMutation } from "../../../../../../services/paymentApi";
-import { useNavigate } from "react-router-dom";
+import { useNavigation } from "@react-navigation/native";
 import {
   useGetShipmentsByGuaranteeOrderIdQuery,
   useUpdateGuaranteeOrderShipmentOrderCodeMutation,
@@ -26,27 +26,30 @@ import {
   Modal,
   ActivityIndicator,
   ScrollView,
+  Linking,
 } from "react-native";
 
 export default function PaymentModal({ deposit, order, refetch, buttonText }) {
   const [isModalVisible, setModalVisible] = useState(false);
   const notify = useNotify();
   const { auth } = useAuth();
-  const navigate = useNavigate();
-  const [orderPayment, { isLoading: isWalletLoading }] = useOrderPaymentMutation();
-  const [createPayment, { isLoading: isGatewayLoading }] = useCreatePaymentMutation();
+  const navigation = useNavigation();
+  const [orderPayment, { isLoading: isWalletLoading }] =
+    useOrderPaymentMutation();
+  const [createPayment, { isLoading: isGatewayLoading }] =
+    useCreatePaymentMutation();
   const [isCheckboxDisabled, setIsCheckboxDisabled] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState("wallet");
   const [processingShipment, setProcessingShipment] = useState(false);
 
-  const { data: shipmentData, isLoading: loadingShipment } = useGetShipmentsByGuaranteeOrderIdQuery(
-    order?.guaranteeOrderId,
-    {
+  const { data: shipmentData, isLoading: loadingShipment } =
+    useGetShipmentsByGuaranteeOrderIdQuery(order?.guaranteeOrderId, {
       skip: !isModalVisible,
-    }
-  );
-  const [createShipment, { isLoading: creatingShipment }] = useCreateShipmentForServiceOrderMutation();
-  const [updateShipmentOrderCode, { isLoading: updatingShipment }] = useUpdateGuaranteeOrderShipmentOrderCodeMutation();
+    });
+  const [createShipment, { isLoading: creatingShipment }] =
+    useCreateShipmentForServiceOrderMutation();
+  const [updateShipmentOrderCode, { isLoading: updatingShipment }] =
+    useUpdateGuaranteeOrderShipmentOrderCodeMutation();
 
   const isLoading =
     isWalletLoading ||
@@ -79,15 +82,16 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
           item.requestedProductId == order?.requestedProduct?.requestedProductId
       );
 
-      const result = await createAndUpdateShipmentForGuaranteeGetProductFromCustomer({
-        order,
-        product,
-        shipmentData,
-        guaranteeOrderId: order.guaranteeOrderId,
-        createShipment,
-        updateShipmentOrderCode,
-        notify,
-      });
+      const result =
+        await createAndUpdateShipmentForGuaranteeGetProductFromCustomer({
+          order,
+          product,
+          shipmentData,
+          guaranteeOrderId: order.guaranteeOrderId,
+          createShipment,
+          updateShipmentOrderCode,
+          notify,
+        });
 
       return result.success;
     } catch (error) {
@@ -114,17 +118,19 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
         orderDepositId: deposit?.orderDepositId,
         transactionType: "",
         email: auth.sub,
-        returnUrl: `${window.location.origin}/payment-success`,
+        returnUrl: `payment-success`,
       };
 
       if (paymentMethod === "wallet") {
         postData.transactionType = transactionTypeConstants.THANH_TOAN_BANG_VI;
         await orderPayment(postData).unwrap();
 
-        navigate(
-          `/success?title=Thanh toán thành công&desc=Bạn đã thanh toán cho đơn hàng thành công&path=/cus/guarantee-order/${order.guaranteeOrderId}&buttonText=Xem đơn hàng`,
-          { replace: true }
-        );
+        navigation.navigate("Success", {
+          title: "Thanh toán thành công",
+          desc: "Bạn đã thanh toán cho đơn hàng thành công",
+          path: `/cus/guarantee-order/${order.guaranteeOrderId}`,
+          buttonText: "Xem đơn hàng",
+        });
 
         setModalVisible(false);
         refetch();
@@ -133,7 +139,9 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
         const response = await createPayment(postData).unwrap();
 
         setModalVisible(false);
-        window.location.href = response.url || response.data.url;
+        if (response.url || response.data?.url) {
+          Linking.openURL(response.url || response.data.url);
+        }
       }
     } catch (err) {
       notify(
@@ -150,7 +158,7 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
         style={styles.button}
         onPress={() => setModalVisible(true)}
       >
-        <FiCreditCard style={styles.buttonIcon} />
+        <Feather name="credit-card" size={18} style={styles.buttonIcon} />
         <Text style={styles.buttonText}>
           {buttonText ? buttonText : `Thanh toán lần #${deposit.depositNumber}`}
         </Text>
@@ -170,14 +178,17 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
                 style={styles.closeButton}
                 onPress={() => setModalVisible(false)}
               >
-                <FiXCircle style={styles.closeIcon} />
+                <Feather name="x-circle" size={20} style={styles.closeIcon} />
               </TouchableOpacity>
             )}
 
             <ScrollView style={styles.modalBody}>
               {processingShipment ? (
                 <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="large" color={appColorTheme.brown_2} />
+                  <ActivityIndicator
+                    size="large"
+                    color={appColorTheme.brown_2}
+                  />
                   <Text style={styles.loadingText}>Đang xử lý vận đơn...</Text>
                 </View>
               ) : (
@@ -187,12 +198,16 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
                   <View style={styles.detailsCard}>
                     <View style={styles.detailRow}>
                       <Text style={styles.detailLabel}>Mã đơn dịch vụ:</Text>
-                      <Text style={styles.detailValue}>#{order.guaranteeOrderId}</Text>
+                      <Text style={styles.detailValue}>
+                        #{order.guaranteeOrderId}
+                      </Text>
                     </View>
 
                     <View style={styles.detailRow}>
                       <Text style={styles.detailLabel}>Đặt cọc lần:</Text>
-                      <Text style={styles.detailValue}>{deposit.depositNumber}</Text>
+                      <Text style={styles.detailValue}>
+                        {deposit.depositNumber}
+                      </Text>
                     </View>
 
                     <View style={styles.detailRow}>
@@ -207,7 +222,8 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
                       </Text>
                     </View>
 
-                    {order?.status == guaranteeOrderStatusConstants.DA_DUYET_BAO_GIA && (
+                    {order?.status ==
+                      guaranteeOrderStatusConstants.DA_DUYET_BAO_GIA && (
                       <View style={styles.detailRow}>
                         <Text style={styles.detailLabel}>Lưu ý:</Text>
                         <Text style={[styles.detailValue, styles.noteText]}>
@@ -218,32 +234,44 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
                   </View>
 
                   <View style={styles.paymentMethodContainer}>
-                    <Text style={styles.sectionTitle}>Chọn phương thức thanh toán:</Text>
+                    <Text style={styles.sectionTitle}>
+                      Chọn phương thức thanh toán:
+                    </Text>
                     <View style={styles.radioGroup}>
                       <TouchableOpacity
                         style={[
                           styles.radioButton,
-                          paymentMethod === "wallet" && styles.radioButtonSelected,
+                          paymentMethod === "wallet" &&
+                            styles.radioButtonSelected,
                         ]}
                         onPress={() => setPaymentMethod("wallet")}
                       >
                         <View style={styles.radioCircle}>
-                          {paymentMethod === "wallet" && <View style={styles.radioInner} />}
+                          {paymentMethod === "wallet" && (
+                            <View style={styles.radioInner} />
+                          )}
                         </View>
-                        <Text style={styles.radioLabel}>Thanh toán bằng ví</Text>
+                        <Text style={styles.radioLabel}>
+                          Thanh toán bằng ví
+                        </Text>
                       </TouchableOpacity>
 
                       <TouchableOpacity
                         style={[
                           styles.radioButton,
-                          paymentMethod === "gateway" && styles.radioButtonSelected,
+                          paymentMethod === "gateway" &&
+                            styles.radioButtonSelected,
                         ]}
                         onPress={() => setPaymentMethod("gateway")}
                       >
                         <View style={styles.radioCircle}>
-                          {paymentMethod === "gateway" && <View style={styles.radioInner} />}
+                          {paymentMethod === "gateway" && (
+                            <View style={styles.radioInner} />
+                          )}
                         </View>
-                        <Text style={styles.radioLabel}>Thanh toán qua cổng thanh toán</Text>
+                        <Text style={styles.radioLabel}>
+                          Thanh toán qua cổng thanh toán
+                        </Text>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -263,21 +291,21 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
                 onPress={() => setModalVisible(false)}
                 disabled={isLoading}
               >
-                <FiXCircle style={styles.buttonIcon} />
+                <Feather name="x-circle" size={18} style={styles.buttonIcon} />
                 <Text style={styles.buttonText}>Đóng</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.footerButton, styles.submitButton]}
+                style={[styles.footerButton, styles.confirmButton]}
                 onPress={handleSubmit}
                 disabled={isLoading || isCheckboxDisabled}
               >
                 {isLoading ? (
                   <ActivityIndicator size="small" color="white" />
                 ) : (
-                  <FiCheck style={styles.buttonIcon} />
+                  <Feather name="check" size={18} style={styles.buttonIcon} />
                 )}
-                <Text style={[styles.buttonText, styles.submitButtonText]}>
+                <Text style={[styles.buttonText, styles.confirmButtonText]}>
                   Thanh toán
                 </Text>
               </TouchableOpacity>
@@ -291,54 +319,54 @@ export default function PaymentModal({ deposit, order, refetch, buttonText }) {
 
 const styles = StyleSheet.create({
   button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#3182CE',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#3182CE",
     padding: 8,
     borderRadius: 4,
   },
   buttonIcon: {
-    color: 'white',
+    color: "white",
     marginRight: 8,
   },
   buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 10,
-    width: '90%',
+    width: "90%",
     maxWidth: 500,
-    maxHeight: '80%',
+    maxHeight: "80%",
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     padding: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   closeButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 16,
     right: 16,
   },
   closeIcon: {
     fontSize: 20,
-    color: '#666',
+    color: "#666",
   },
   modalBody: {
     flex: 1,
   },
   loadingContainer: {
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   loadingText: {
     marginTop: 10,
@@ -349,32 +377,32 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 16,
   },
   detailsCard: {
-    backgroundColor: '#F7FAFC',
+    backgroundColor: "#F7FAFC",
     padding: 16,
     borderRadius: 8,
     marginBottom: 16,
   },
   detailRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginBottom: 8,
   },
   detailLabel: {
-    fontWeight: '600',
+    fontWeight: "600",
     width: 120,
   },
   detailValue: {
     flex: 1,
   },
   amountText: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: appColorTheme.brown_2,
   },
   noteText: {
-    color: '#3182CE',
+    color: "#3182CE",
   },
   paymentMethodContainer: {
     padding: 16,
@@ -383,58 +411,58 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   radioButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 8,
   },
   radioButtonSelected: {
-    backgroundColor: '#EBF8FF',
+    backgroundColor: "#EBF8FF",
   },
   radioCircle: {
     width: 20,
     height: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: '#3182CE',
+    borderColor: "#3182CE",
     marginRight: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   radioInner: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#3182CE',
+    backgroundColor: "#3182CE",
   },
   radioLabel: {
     fontSize: 16,
   },
   divider: {
     height: 1,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: "#E2E8F0",
     marginVertical: 16,
   },
   modalFooter: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "flex-end",
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
+    borderTopColor: "#E2E8F0",
   },
   footerButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 8,
     borderRadius: 4,
     marginLeft: 8,
   },
   cancelButton: {
-    backgroundColor: '#EDF2F7',
+    backgroundColor: "#EDF2F7",
   },
-  submitButton: {
-    backgroundColor: '#3182CE',
+  confirmButton: {
+    backgroundColor: "#3182CE",
   },
-  submitButtonText: {
-    color: 'white',
+  confirmButtonText: {
+    color: "white",
   },
 });

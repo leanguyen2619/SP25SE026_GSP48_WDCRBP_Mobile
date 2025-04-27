@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Linking,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import {
@@ -260,6 +259,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 16,
+    color: appColorTheme.brown_2,
   },
   infoContainer: {
     marginBottom: 8,

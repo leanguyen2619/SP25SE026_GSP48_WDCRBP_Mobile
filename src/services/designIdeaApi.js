@@ -35,6 +35,21 @@ export const designIdeaApi = createApi({
       }),
     }),
 
+    updateDesignIdea: builder.mutation({
+      query: (data) => ({
+        url: `/api/v1/designIdea/updateDesignIdea`,
+        method: "PUT",
+        body: data,
+      }),
+    }),
+
+    deleteDesignIdea: builder.mutation({
+      query: (designIdeaId) => ({
+        url: `/api/v1/designIdea/${designIdeaId}`,
+        method: "DELETE",
+      }),
+    }),
+
     getDesignIdeaVariant: builder.query({
       query: (designId) =>
         `/api/v1/designIdea/getDesignIdeaVariantByDesignId/${designId}`,
@@ -56,6 +71,8 @@ export const designIdeaApi = createApi({
 
 export const {
   useAddDesignIdeaMutation,
+  useUpdateDesignIdeaMutation,
+  useDeleteDesignIdeaMutation,
   useGetDesignIdeaVariantQuery,
   useGetDesignByIdQuery,
   useGetAllDesignIdeasByWoodworkerQuery,
