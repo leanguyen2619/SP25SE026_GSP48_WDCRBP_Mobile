@@ -12,7 +12,7 @@ import {
   complaintStatusConstants,
 } from "../../../../config/appconfig";
 import ImageListSelector from "../../../../components/Utility/ImageListSelector";
-import RefundTransactionCard from "../../../staff/ComplaintManagement/ActionModal/RefundTransactionCard";
+import RefundTransactionCard from "../../../customer/ComplaintManagement/ActionModal/RefundTransactionCard";
 import { AntDesign } from "@expo/vector-icons";
 
 // Custom Accordion Item component
@@ -54,9 +54,7 @@ const AccordionItem = ({
                 },
               ]}
             >
-              <Text style={styles.badgeText}>
-                {getComplaintStatusText(item.status)}
-              </Text>
+              <Text style={styles.badgeText}>{item.status}</Text>
             </View>
             <Text style={styles.titleText}>Khiếu nại #{item.complaintId}</Text>
             <Text style={styles.dateText}>
@@ -106,14 +104,6 @@ export default function ComplaintAccordion({
   // Check if an item is expanded
   const isItemExpanded = (complaintId) => {
     return !!expandedItems[complaintId];
-  };
-
-  // Helper function to get complaint status display text
-  const getComplaintStatusText = (status) => {
-    return (
-      Object.values(complaintStatusConstants).find((s) => s === status) ||
-      status
-    );
   };
 
   return (

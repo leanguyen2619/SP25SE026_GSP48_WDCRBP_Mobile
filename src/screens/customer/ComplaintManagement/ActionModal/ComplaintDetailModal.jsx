@@ -15,7 +15,6 @@ import { AntDesign } from "@expo/vector-icons";
 import ServiceInfoSection from "./ServiceInfoSection";
 import ProductInfoSection from "./ProductInfoSection";
 import Transaction from "./Transaction";
-import RefundTransactionCard from "./RefundTransactionCard";
 import ComplaintAccordion from "./ComplaintAccordion";
 
 export default function ComplaintDetailModal({ complaint }) {
@@ -29,17 +28,12 @@ export default function ComplaintDetailModal({ complaint }) {
 
   // Fetch all complaints for this service order
   const { data: serviceOrderComplaints, isLoading: isLoadingComplaints } =
-    useGetServiceOrderComplaintsQuery(
-      orderId,
-      {
-        skip: !isOpen || !orderId,
-      },
-      {
-        refetchOnMountOrArgChange: true,
-        refetchOnFocus: true,
-        refetchOnReconnect: true,
-      }
-    );
+    useGetServiceOrderComplaintsQuery(orderId, {
+      skip: !isOpen || !orderId,
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
+    });
 
   // State to store all complaints for this order
   const [allOrderComplaints, setAllOrderComplaints] = useState([]);

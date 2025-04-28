@@ -72,8 +72,6 @@ export default function OrderPaymentSuccessPage() {
       navigation.replace("Success", {
         title: "Thanh toán thành công",
         desc: "Thanh toán đặt cọc đã được xử lý thành công",
-        path: "CustomerServiceOrders",
-        buttonText: "Xem danh sách đơn hàng",
       });
     } catch (error) {
       setStatus("Có lỗi xảy ra, vui lòng thử lại sau");

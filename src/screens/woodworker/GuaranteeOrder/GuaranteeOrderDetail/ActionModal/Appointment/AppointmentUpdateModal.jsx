@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Icon from "react-native-vector-icons/Feather";
 import { appColorTheme } from "../../../../../../config/appconfig.js";
 import { useAcceptGuaranteeOrderMutation } from "../../../../../../services/guaranteeOrderApi.js";
@@ -37,7 +37,7 @@ export default function AppointmentUpdateModal({ order, refetch }) {
   const [description, setDescription] = useState(
     order?.consultantAppointment?.content || ""
   );
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
   // API mutation
   const [acceptServiceOrder, { isLoading }] = useAcceptGuaranteeOrderMutation();
@@ -51,7 +51,9 @@ export default function AppointmentUpdateModal({ order, refetch }) {
       const formDataObj = {
         form,
         meetAddress,
-        timeMeeting: dateTime.toISOString(),
+        timeMeeting: new Date(
+          dateTime.getTime() - dateTime.getTimezoneOffset() * 60000
+        ).toISOString(),
         desc: description,
       };
 
@@ -94,17 +96,26 @@ export default function AppointmentUpdateModal({ order, refetch }) {
   ];
 
   const formatDate = (date) => {
-    return (
-      date.toLocaleDateString() +
-      " " +
-      date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    );
+    if (!date) return "";
+    return `${date.getDate()}/${
+      date.getMonth() + 1
+    }/${date.getFullYear()} ${date.getHours()}:${date
+      .getMinutes()
+      .toString()
+      .padStart(2, "0")}`;
   };
 
-  const onDateChange = (event, selectedDate) => {
-    const currentDate = selectedDate || dateTime;
-    setShowDatePicker(false);
-    setDateTime(currentDate);
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirm = (selectedDate) => {
+    setDateTime(selectedDate);
+    hideDatePicker();
   };
 
   return (
@@ -180,7 +191,7 @@ export default function AppointmentUpdateModal({ order, refetch }) {
                     <View style={styles.formInput}>
                       <TouchableOpacity
                         style={styles.dateButton}
-                        onPress={() => setShowDatePicker(true)}
+                        onPress={showDatePicker}
                       >
                         <Text>{formatDate(dateTime)}</Text>
                         <Icon
@@ -189,14 +200,6 @@ export default function AppointmentUpdateModal({ order, refetch }) {
                           color={appColorTheme.blue_0}
                         />
                       </TouchableOpacity>
-                      {showDatePicker && (
-                        <DateTimePicker
-                          value={dateTime}
-                          mode="datetime"
-                          display="default"
-                          onChange={onDateChange}
-                        />
-                      )}
                     </View>
                   </View>
 
@@ -265,6 +268,17 @@ export default function AppointmentUpdateModal({ order, refetch }) {
             </View>
           </View>
         </View>
+
+        <DateTimePickerModal
+          isVisible={isDatePickerVisible}
+          mode="datetime"
+          onConfirm={handleConfirm}
+          onCancel={hideDatePicker}
+          date={dateTime}
+          locale="vi"
+          confirmTextIOS="Xác nhận"
+          cancelTextIOS="Hủy"
+        />
       </Modal>
     </>
   );

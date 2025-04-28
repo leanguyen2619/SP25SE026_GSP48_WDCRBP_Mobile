@@ -316,7 +316,7 @@ export default function GuaranteeRequestPage() {
         title: "Gửi yêu cầu sửa chữa / bảo hành thành công",
         desc: "Yêu cầu của bạn đã được gửi đi, vui lòng đợi xưởng mộc phản hồi.",
         buttonText: "Xem danh sách yêu cầu",
-        path: "/cus/guarantee-order",
+        path: "CustomerGuaranteeOrders",
       });
     } catch (error) {
       notify(

@@ -90,7 +90,7 @@ export default function Transaction({ order }) {
 
               {deposits.map((deposit) => (
                 <View
-                  key={deposit.serviceDepositId}
+                  key={deposit.orderDepositId}
                   style={[
                     styles.depositCard,
                     {
