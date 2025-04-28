@@ -15,7 +15,6 @@ import {
   TouchableOpacity,
   Modal,
   ActivityIndicator,
-  ScrollView,
 } from "react-native";
 
 export default function QuotationConfirmModal({
@@ -129,7 +128,7 @@ export default function QuotationConfirmModal({
               </TouchableOpacity>
             )}
 
-            <ScrollView style={styles.modalBody}>
+            <View style={styles.modalBody}>
               <Text style={styles.sectionTitle}>Chi tiết báo giá sửa chữa</Text>
 
               <View style={styles.detailsCard}>
@@ -155,32 +154,20 @@ export default function QuotationConfirmModal({
                 ) : (
                   <View style={styles.tableContainer}>
                     <View style={styles.tableHeader}>
-                      <Text style={[styles.headerCell, styles.sttCell]}>
-                        STT
-                      </Text>
-                      <Text style={[styles.headerCell, styles.typeCell]}>
-                        Loại chi phí
-                      </Text>
-                      <Text style={[styles.headerCell, styles.quantityCell]}>
-                        Số lượng
-                      </Text>
-                      <Text style={[styles.headerCell, styles.costCell]}>
-                        Chi phí
-                      </Text>
+                      <Text style={styles.headerCell}>STT</Text>
+                      <Text style={styles.headerCell}>Loại chi phí</Text>
+                      <Text style={styles.headerCell}>Số lượng</Text>
+                      <Text style={styles.headerCell}>Chi phí</Text>
                     </View>
 
                     {quotationDetails.map((detail, index) => (
                       <View key={index} style={styles.tableRow}>
-                        <Text style={[styles.cell, styles.sttCell]}>
-                          {index + 1}
-                        </Text>
-                        <Text style={[styles.cell, styles.typeCell]}>
-                          {detail.costType}
-                        </Text>
-                        <Text style={[styles.cell, styles.quantityCell]}>
+                        <Text style={styles.cell}>{index + 1}</Text>
+                        <Text style={styles.cell}>{detail.costType}</Text>
+                        <Text style={styles.cell}>
                           {detail.quantityRequired}
                         </Text>
-                        <Text style={[styles.cell, styles.costCell]}>
+                        <Text style={styles.cell}>
                           {formatPrice(detail.costAmount)}
                         </Text>
                       </View>
@@ -188,38 +175,36 @@ export default function QuotationConfirmModal({
 
                     {order?.shipFee > 0 && (
                       <View style={styles.tableRow}>
-                        <Text style={[styles.cell, styles.sttCell]}></Text>
-                        <Text style={[styles.cell, styles.typeCell]}></Text>
+                        <Text style={styles.emptyCell}></Text>
+                        <Text style={styles.emptyCell}></Text>
                         <Text
                           style={[
                             styles.cell,
-                            styles.quantityCell,
                             styles.boldText,
+                            styles.rightAlign,
                           ]}
                         >
                           Phí vận chuyển:
                         </Text>
-                        <Text style={[styles.cell, styles.costCell]}>
+                        <Text style={styles.cell}>
                           {formatPrice(order?.shipFee)}
                         </Text>
                       </View>
                     )}
 
                     <View style={styles.tableRow}>
-                      <Text style={[styles.cell, styles.sttCell]}></Text>
-                      <Text style={[styles.cell, styles.typeCell]}></Text>
+                      <Text style={styles.emptyCell}></Text>
+                      <Text style={styles.emptyCell}></Text>
                       <Text
                         style={[
                           styles.cell,
-                          styles.quantityCell,
                           styles.boldText,
+                          styles.rightAlign,
                         ]}
                       >
                         Tổng chi phí:
                       </Text>
-                      <Text
-                        style={[styles.cell, styles.costCell, styles.boldText]}
-                      >
+                      <Text style={[styles.cell, styles.totalPrice]}>
                         {formatPrice(
                           totalQuotationAmount + (order?.shipFee || 0)
                         )}
@@ -234,7 +219,7 @@ export default function QuotationConfirmModal({
                 items={checkboxItems}
                 setButtonDisabled={setIsCheckboxDisabled}
               />
-            </ScrollView>
+            </View>
 
             <View style={styles.modalFooter}>
               <TouchableOpacity
@@ -256,7 +241,7 @@ export default function QuotationConfirmModal({
                 ) : (
                   <Feather name="check" size={18} style={styles.buttonIcon} />
                 )}
-                <Text style={[styles.buttonText, styles.submitButtonText]}>
+                <Text style={[styles.buttonText, styles.confirmButtonText]}>
                   Xác nhận
                 </Text>
               </TouchableOpacity>
@@ -295,7 +280,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     width: "90%",
     maxWidth: 500,
-    maxHeight: "80%",
   },
   modalTitle: {
     fontSize: 18,
@@ -313,13 +297,12 @@ const styles = StyleSheet.create({
     color: "#666",
   },
   modalBody: {
-    flex: 1,
+    padding: 16,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 16,
-    paddingHorizontal: 16,
   },
   detailsCard: {
     backgroundColor: "#F7FAFC",
@@ -356,7 +339,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   headerCell: {
+    flex: 1,
     fontWeight: "bold",
+    textAlign: "center",
     color: "#4A5568",
   },
   tableRow: {
@@ -366,25 +351,22 @@ const styles = StyleSheet.create({
     borderBottomColor: "#EDF2F7",
   },
   cell: {
+    flex: 1,
+    textAlign: "center",
     fontSize: 14,
   },
-  sttCell: {
-    width: 40,
-    textAlign: "center",
-  },
-  typeCell: {
-    flex: 2,
-    paddingRight: 8,
-  },
-  quantityCell: {
-    width: 80,
-    textAlign: "center",
-  },
-  costCell: {
-    width: 100,
-    textAlign: "right",
+  emptyCell: {
+    flex: 1,
   },
   boldText: {
+    fontWeight: "bold",
+  },
+  rightAlign: {
+    textAlign: "right",
+  },
+  totalPrice: {
+    fontSize: 16,
+    color: appColorTheme.brown_2,
     fontWeight: "bold",
   },
   divider: {
@@ -412,7 +394,7 @@ const styles = StyleSheet.create({
   confirmButton: {
     backgroundColor: "#38A169",
   },
-  submitButtonText: {
+  confirmButtonText: {
     color: "white",
   },
 });

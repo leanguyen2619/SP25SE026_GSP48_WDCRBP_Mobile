@@ -142,21 +142,19 @@ export const transactionTypeColorMap = {
 export const complaintStatusConstants = {
   PENDING: "Đang chờ tường trình từ xưởng mộc",
   IN_PROGRESS: "Đang chờ xử lý",
-  COMPLETED: "Đã hoàn thành",
+  CANCELED: "Đã từ chối xử lý",
+  COMPLETED: "Đã xử lý",
 };
 
-// Add function to get color for complaint status
 export const getComplaintStatusColor = (status) => {
-  switch (status) {
-    case complaintStatusConstants.PENDING:
-      return "red.500";
-    case complaintStatusConstants.COMPLETED:
-      return "green.500";
-    case complaintStatusConstants.IN_PROGRESS:
-      return "orange.500";
-    default:
-      return "gray.500";
-  }
+  const statusColorMap = {
+    [complaintStatusConstants.PENDING]: "#9f7aea", // Red 500
+    [complaintStatusConstants.IN_PROGRESS]: "#ED8936", // Orange 500
+    [complaintStatusConstants.CANCELED]: "#F56565", // Gray 400-500-ish
+    [complaintStatusConstants.COMPLETED]: "#48BB78", // Green 500
+  };
+
+  return statusColorMap[status] || "#A0AEC0"; // default gray
 };
 
 export const service = {

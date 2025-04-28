@@ -1,46 +1,36 @@
 import {
-  Box,
-  Button,
-  Grid,
-  GridItem,
-  Heading,
-  HStack,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  SimpleGrid,
+  View,
   Text,
-  Textarea,
-  Tooltip,
-  useDisclosure,
-  VStack,
-} from "@chakra-ui/react";
-import { useRef, useState } from "react";
-import { FiEye, FiSend } from "react-icons/fi";
+  StyleSheet,
+  Modal,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+  ActivityIndicator,
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { useRef, useState, useEffect } from "react";
+import { Ionicons } from "@expo/vector-icons";
 import {
   appColorTheme,
   complaintStatusConstants,
-  getComplaintStatusColor,
-  getServiceTypeLabel,
 } from "../../../../config/appconfig";
-import {
-  formatDateString,
-  formatDateTimeString,
-  formatPrice,
-} from "../../../../utils/utils";
 import { useNotify } from "../../../../components/Utility/Notify";
-import { useUpdateComplaintWoodworkerMutation } from "../../../../services/complaintApi";
-import ImageListSelector from "../../../../components/Utility/ImageListSelector";
-import PersonalizationProductList from "../../../customer/ServiceOrder/ServiceOrderDetail/Tab/PersonalizationProductList";
-import CustomizationProductList from "../../../customer/ServiceOrder/ServiceOrderDetail/Tab/CustomizationProductList";
-import SaleProductList from "../../../customer/ServiceOrder/ServiceOrderDetail/Tab/SaleProductList";
+import {
+  useUpdateComplaintWoodworkerMutation,
+  useGetServiceOrderComplaintsQuery,
+} from "../../../../services/complaintApi";
+import ServiceInfoSection from "../../../customer/ComplaintManagement/ActionModal/ServiceInfoSection";
+import ProductInfoSection from "../../../customer/ComplaintManagement/ActionModal/ProductInfoSection";
+import Transaction from "../../../customer/ComplaintManagement/ActionModal/Transaction";
+import ComplaintAccordion from "../../../customer/ComplaintManagement/ActionModal/ComplaintAccordion";
+
+const { width, height } = Dimensions.get("window");
 
 export default function ComplaintDetailModal({ complaint, refetch }) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const initialRef = useRef(null);
+  const [modalVisible, setModalVisible] = useState(false);
   const notify = useNotify();
   const [response, setResponse] = useState(complaint?.woodworkerResponse || "");
   const [updateComplaintWoodworker, { isLoading }] =
@@ -50,6 +40,25 @@ export default function ComplaintDetailModal({ complaint, refetch }) {
   const serviceName =
     complaint?.serviceOrderDetail?.service?.service?.serviceName;
   const orderDetail = complaint?.serviceOrderDetail;
+  const orderId = orderDetail?.orderId;
+
+  // Fetch all complaints for this service order
+  const { data: serviceOrderComplaints, isLoading: isLoadingComplaints } =
+    useGetServiceOrderComplaintsQuery(orderId, {
+      skip: !modalVisible || !orderId,
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
+    });
+
+  // State to store all complaints for this order
+  const [allOrderComplaints, setAllOrderComplaints] = useState([]);
+
+  useEffect(() => {
+    if (serviceOrderComplaints?.data) {
+      setAllOrderComplaints(serviceOrderComplaints.data);
+    }
+  }, [serviceOrderComplaints?.data]);
 
   const handleSubmit = async () => {
     if (!response.trim()) {
@@ -67,7 +76,7 @@ export default function ComplaintDetailModal({ complaint, refetch }) {
 
       notify("Thành công", "Đã gửi phản hồi khiếu nại thành công", "success");
 
-      onClose();
+      setModalVisible(false);
       refetch && refetch();
     } catch (error) {
       notify(
@@ -80,273 +89,240 @@ export default function ComplaintDetailModal({ complaint, refetch }) {
 
   return (
     <>
-      <Tooltip label="Chi tiết" hasArrow>
-        <Button
-          p="1px"
-          color={appColorTheme.brown_2}
-          bg="none"
-          border={`1px solid ${appColorTheme.brown_2}`}
-          _hover={{ bg: appColorTheme.brown_2, color: "white" }}
-          onClick={onOpen}
-        >
-          <FiEye />
-        </Button>
-      </Tooltip>
+      <TouchableOpacity
+        style={styles.viewButton}
+        onPress={() => setModalVisible(true)}
+      >
+        <Ionicons name="eye" size={20} color={appColorTheme.brown_2} />
+      </TouchableOpacity>
 
       <Modal
-        size="6xl"
-        initialFocusRef={initialRef}
-        isOpen={isOpen}
-        closeOnOverlayClick={false}
-        closeOnEsc={false}
-        onClose={onClose}
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
       >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>
-            Chi tiết khiếu nại #{complaint?.complaintId}
-          </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody bgColor="app_grey.1" pb={6}>
-            {/* Complaint Information */}
-            <Box bg="white" p={5} borderRadius="lg" boxShadow="md" mb={4}>
-              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-                {/* Left side: Complaint details */}
-                <Box>
-                  <Heading size="md" mb={4}>
-                    Thông tin khiếu nại
-                  </Heading>
-                  <Grid templateColumns="150px 1fr" gap={3}>
-                    <GridItem>
-                      <Text fontWeight="bold">Mã khiếu nại:</Text>
-                    </GridItem>
-                    <GridItem>
-                      <Text>#{complaint?.complaintId}</Text>
-                    </GridItem>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.modalContainer}
+        >
+          <View style={styles.modalContent}>
+            {/* Header */}
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                Chi tiết khiếu nại #{complaint?.complaintId}
+              </Text>
+              <TouchableOpacity
+                onPress={() => setModalVisible(false)}
+                style={styles.closeButton}
+              >
+                <Ionicons name="close" size={24} color="#4A5568" />
+              </TouchableOpacity>
+            </View>
 
-                    <GridItem>
-                      <Text fontWeight="bold">Loại khiếu nại:</Text>
-                    </GridItem>
-                    <GridItem>
-                      <Text>{complaint?.complaintType}</Text>
-                    </GridItem>
-
-                    <GridItem>
-                      <Text fontWeight="bold">Khách hàng:</Text>
-                    </GridItem>
-                    <GridItem>
-                      <Text>{orderDetail?.user?.username || "N/A"}</Text>
-                    </GridItem>
-
-                    <GridItem>
-                      <Text fontWeight="bold">Ngày tạo:</Text>
-                    </GridItem>
-                    <GridItem>
-                      <Text>
-                        {formatDateTimeString(new Date(complaint?.createdAt))}
-                      </Text>
-                    </GridItem>
-
-                    <GridItem>
-                      <Text fontWeight="bold">Trạng thái:</Text>
-                    </GridItem>
-                    <GridItem>
-                      <Text
-                        fontWeight="semibold"
-                        color={getComplaintStatusColor(complaint?.status)}
-                      >
-                        {complaint?.status}
-                      </Text>
-                    </GridItem>
-
-                    {complaint?.staffUser && (
-                      <>
-                        <GridItem>
-                          <Text fontWeight="bold">Nhân viên xử lý:</Text>
-                        </GridItem>
-                        <GridItem>
-                          <Text>{complaint?.staffUser?.username}</Text>
-                        </GridItem>
-                      </>
-                    )}
-                  </Grid>
-                </Box>
-
-                {/* Right side: Service Information */}
-                <Box>
-                  <Heading size="md" mb={4}>
-                    Thông tin dịch vụ
-                  </Heading>
-                  <Grid templateColumns="150px 1fr" gap={3}>
-                    <GridItem>
-                      <Text fontWeight="bold">Mã đơn hàng:</Text>
-                    </GridItem>
-                    <GridItem>
-                      <Text>#{orderDetail?.orderId}</Text>
-                    </GridItem>
-
-                    <GridItem>
-                      <Text fontWeight="bold">Loại dịch vụ:</Text>
-                    </GridItem>
-                    <GridItem>
-                      <Text>{getServiceTypeLabel(serviceName)}</Text>
-                    </GridItem>
-
-                    <GridItem>
-                      <Text fontWeight="bold">Ngày cam kết hoàn thành:</Text>
-                    </GridItem>
-                    <GridItem>
-                      <Text>
-                        {orderDetail?.completeDate
-                          ? formatDateString(orderDetail?.completeDate)
-                          : "Chưa cập nhật"}
-                      </Text>
-                    </GridItem>
-
-                    <GridItem>
-                      <Text fontWeight="bold">Tổng tiền đã thanh toán:</Text>
-                    </GridItem>
-                    <GridItem>
-                      <Text color={appColorTheme.brown_2}>
-                        {formatPrice(orderDetail?.amountPaid)}
-                      </Text>
-                    </GridItem>
-                  </Grid>
-                </Box>
-              </SimpleGrid>
-            </Box>
-
-            {/* Product Information - Using the components from GeneralInformationTab */}
-            {serviceName && (
-              <Box mb={4}>
-                {serviceName === "Personalization" && (
-                  <PersonalizationProductList
-                    orderId={orderDetail?.orderId}
-                    products={orderDetail?.requestedProduct}
-                    totalAmount={orderDetail?.totalAmount}
-                  />
-                )}
-
-                {serviceName === "Customization" && (
-                  <CustomizationProductList
-                    shipFee={orderDetail?.shipFee}
-                    products={orderDetail?.requestedProduct}
-                    totalAmount={orderDetail?.totalAmount}
-                  />
-                )}
-
-                {serviceName === "Sale" && (
-                  <SaleProductList
-                    shipFee={orderDetail?.shipFee}
-                    products={orderDetail?.requestedProduct}
-                    totalAmount={orderDetail?.totalAmount}
-                  />
-                )}
-              </Box>
-            )}
-
-            {/* Complaint Description and Images */}
-            <Box bg="white" p={5} borderRadius="lg" boxShadow="md" mb={4}>
-              <Heading size="md" mb={4}>
-                Nội dung khiếu nại
-              </Heading>
-              <Text whiteSpace="pre-wrap">{complaint?.description}</Text>
-
-              {complaint?.proofImgUrls && (
-                <Box mt={4}>
-                  <Text fontWeight="bold" mb={2}>
-                    Hình ảnh minh chứng:
-                  </Text>
-                  <ImageListSelector
-                    imgH={150}
-                    imgUrls={complaint.proofImgUrls}
-                  />
-                </Box>
-              )}
-            </Box>
-
-            {/* Response Section */}
-            <Box bg="white" p={5} borderRadius="lg" boxShadow="md" mb={4}>
-              <Heading size="md" mb={4}>
-                Phản hồi của bạn
-              </Heading>
-              <VStack spacing={4} align="stretch">
-                <Textarea
-                  value={response}
-                  onChange={(e) => setResponse(e.target.value)}
-                  placeholder="Nhập nội dung phản hồi của bạn đối với khiếu nại này..."
-                  rows={6}
-                  isDisabled={
-                    complaint?.status != complaintStatusConstants.PENDING ||
-                    isLoading
-                  }
+            <ScrollView style={styles.scrollView}>
+              {/* Service and Product Information */}
+              <View style={styles.infoContainer}>
+                <ServiceInfoSection
+                  orderDetail={orderDetail}
+                  serviceName={serviceName}
                 />
-                <HStack justify="space-between">
+              </View>
+
+              <View style={styles.infoContainer}>
+                <ProductInfoSection
+                  orderDetail={orderDetail}
+                  serviceName={serviceName}
+                />
+              </View>
+
+              {/* Transaction Information */}
+              <View style={styles.transactionContainer}>
+                <Transaction order={complaint?.serviceOrderDetail} />
+              </View>
+
+              {/* All Complaints for this Order */}
+              <View style={styles.complaintsContainer}>
+                <ComplaintAccordion
+                  orderDetail={orderDetail}
+                  allOrderComplaints={allOrderComplaints}
+                  currentComplaint={complaint}
+                  isLoadingComplaints={isLoadingComplaints}
+                />
+              </View>
+
+              {/* Response Section */}
+              {complaint?.status == complaintStatusConstants.PENDING && (
+                <View style={styles.responseContainer}>
+                  <Text style={styles.responseTitle}>Phản hồi của bạn</Text>
+                  <TextInput
+                    style={styles.responseInput}
+                    value={response}
+                    onChangeText={setResponse}
+                    placeholder="Nhập nội dung phản hồi của bạn đối với khiếu nại này..."
+                    multiline
+                    numberOfLines={6}
+                    editable={
+                      complaint?.status == complaintStatusConstants.PENDING &&
+                      !isLoading
+                    }
+                  />
                   {complaint?.status == complaintStatusConstants.PENDING && (
-                    <Button
-                      leftIcon={<FiSend />}
-                      colorScheme="blue"
-                      onClick={handleSubmit}
-                      isLoading={isLoading}
-                      isDisabled={!response.trim() || response.length > 1000}
+                    <TouchableOpacity
+                      style={[
+                        styles.submitButton,
+                        (!response.trim() || response.length > 1000) &&
+                          styles.submitButtonDisabled,
+                      ]}
+                      onPress={handleSubmit}
+                      disabled={!response.trim() || response.length > 1000}
                     >
-                      Gửi phản hồi
-                    </Button>
+                      {isLoading ? (
+                        <ActivityIndicator color="white" />
+                      ) : (
+                        <>
+                          <Ionicons
+                            name="send"
+                            size={20}
+                            color="white"
+                            style={styles.buttonIcon}
+                          />
+                          <Text style={styles.submitButtonText}>
+                            Gửi phản hồi
+                          </Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
                   )}
-                </HStack>
-              </VStack>
-            </Box>
+                </View>
+              )}
+            </ScrollView>
 
-            {/* Staff Response (if exists) */}
-            {complaint?.staffResponse && (
-              <Box bg="white" p={5} borderRadius="lg" boxShadow="md" mb={4}>
-                <Heading size="md" mb={4}>
-                  Phản hồi từ nhân viên nền tảng
-                </Heading>
-                <Text whiteSpace="pre-wrap">{complaint?.staffResponse}</Text>
-              </Box>
-            )}
-
-            {/* Refund Information (if exists) */}
-            {complaint?.refundAmount > 0 && (
-              <Box bg="white" p={5} borderRadius="lg" boxShadow="md" mb={4}>
-                <Heading size="md" mb={4}>
-                  Thông tin hoàn tiền
-                </Heading>
-                <Grid templateColumns="150px 1fr" gap={3}>
-                  <GridItem>
-                    <Text fontWeight="bold">Số tiền hoàn:</Text>
-                  </GridItem>
-                  <GridItem>
-                    <Text fontWeight="semibold" color="green.500">
-                      {formatPrice(complaint?.refundAmount)}
-                    </Text>
-                  </GridItem>
-
-                  <GridItem>
-                    <Text fontWeight="bold">Ngày hoàn tiền:</Text>
-                  </GridItem>
-                  <GridItem>
-                    <Text>
-                      {complaint?.refundCreditTransaction?.createdAt
-                        ? formatDateTimeString(
-                            new Date(
-                              complaint?.refundCreditTransaction?.createdAt
-                            )
-                          )
-                        : "Chưa cập nhật"}
-                    </Text>
-                  </GridItem>
-                </Grid>
-              </Box>
-            )}
-
-            <HStack justify="flex-end" mt={6}>
-              <Button onClick={onClose}>Đóng</Button>
-            </HStack>
-          </ModalBody>
-        </ModalContent>
+            {/* Footer */}
+            <View style={styles.footer}>
+              <TouchableOpacity
+                style={styles.closeFooterButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.closeFooterButtonText}>Đóng</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
       </Modal>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  viewButton: {
+    padding: 10,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: appColorTheme.brown_2,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "transparent",
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    width: "95%",
+    maxHeight: "95%",
+    backgroundColor: "white",
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  closeButton: {
+    padding: 5,
+  },
+  scrollView: {
+    backgroundColor: "#F7FAFC",
+    paddingBottom: 15,
+  },
+  infoContainer: {
+    flexDirection: "column",
+    marginBottom: 15,
+    paddingHorizontal: 10,
+    paddingTop: 10,
+  },
+  transactionContainer: {
+    marginBottom: 15,
+    paddingHorizontal: 10,
+  },
+  complaintsContainer: {
+    marginBottom: 15,
+    paddingHorizontal: 10,
+  },
+  responseContainer: {
+    marginBottom: 15,
+    paddingHorizontal: 10,
+  },
+  responseTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 12,
+  },
+  responseInput: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    minHeight: 120,
+    textAlignVertical: "top",
+    backgroundColor: "white",
+  },
+  submitButton: {
+    flexDirection: "row",
+    backgroundColor: appColorTheme.brown_2,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  submitButtonDisabled: {
+    backgroundColor: "#ccc",
+  },
+  submitButtonText: {
+    color: "white",
+    fontWeight: "600",
+  },
+  buttonIcon: {
+    marginRight: 8,
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 15,
+    borderTopWidth: 1,
+    borderTopColor: "#E2E8F0",
+  },
+  closeFooterButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 4,
+    backgroundColor: "#E2E8F0",
+  },
+  closeFooterButtonText: {
+    fontWeight: "bold",
+  },
+});

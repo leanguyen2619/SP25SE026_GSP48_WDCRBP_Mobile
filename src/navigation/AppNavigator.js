@@ -44,6 +44,7 @@ import ReviewManagementListPage from "../screens/woodworker/ReviewManagement/Rev
 import ServiceConfiguration from "../screens/woodworker/ServiceConfiguration/ServiceConfiguration";
 import GuaranteeRequestPage from "../screens/customer/GuaranteeRequest/GuaranteeRequestPage";
 import CustomerComplaintPage from "../screens/customer/ComplaintManagement/ComplaintList/CustomerComplaintPage";
+import WWComplaintManagementPage from "../screens/woodworker/ComplaintManagement/ComplaintList/WWComplaintManagementPage";
 
 const Stack = createNativeStackNavigator();
 
@@ -155,10 +156,10 @@ const AppNavigator = () => {
       />
       <Stack.Screen name="PostManagement" component={PostManagementListPage} />
       <Stack.Screen name="ServiceConfig" component={ServiceConfiguration} />
-      {/* <Stack.Screen
+      <Stack.Screen
         name="WWComplaintManagement"
         component={WWComplaintManagementPage}
-      /> */}
+      />
       <Stack.Screen
         name="ReviewManagement"
         component={ReviewManagementListPage}
