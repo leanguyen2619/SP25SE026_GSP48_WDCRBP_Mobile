@@ -1,14 +1,12 @@
 import {
-  Box,
-  Center,
-  Flex,
-  Heading,
-  Spinner,
-  Stack,
+  View,
   Text,
-  Select,
-  HStack,
-} from "@chakra-ui/react";
+  StyleSheet,
+  ActivityIndicator,
+  TouchableOpacity,
+  SafeAreaView,
+  ScrollView,
+} from "react-native";
 import { useState, useMemo, useEffect } from "react";
 import {
   appColorTheme,
@@ -20,11 +18,12 @@ import useAuth from "../../../../hooks/useAuth";
 import { useGetServiceOrdersQuery } from "../../../../services/serviceOrderApi";
 import Pagination from "../../../../components/Utility/Pagination";
 import ComplaintCard from "./ComplaintCard";
+import { Picker } from "@react-native-picker/picker";
 
 // Component to render complaint items (will be passed to Pagination)
 const ComplaintListItems = ({ data, refetch }) => {
   return (
-    <Stack spacing={4}>
+    <View style={styles.listContainer}>
       {data.length > 0 ? (
         data.map((complaint) => (
           <ComplaintCard
@@ -34,11 +33,13 @@ const ComplaintListItems = ({ data, refetch }) => {
           />
         ))
       ) : (
-        <Box textAlign="center" py={10}>
-          <Text fontSize="lg">Không có khiếu nại nào phù hợp với bộ lọc.</Text>
-        </Box>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>
+            Không có khiếu nại nào phù hợp với bộ lọc.
+          </Text>
+        </View>
       )}
-    </Stack>
+    </View>
   );
 };
 
@@ -96,89 +97,153 @@ export default function CustomerComplaintPage() {
     setFilteredComplaints(sorted);
   }, [complaints, statusFilter, sortOption]);
 
-  // Handle filter changes
-  const handleStatusFilterChange = (e) => {
-    setStatusFilter(e.target.value);
-  };
-
-  const handleSortChange = (e) => {
-    setSortOption(e.target.value);
-  };
-
+  // Show loading state
   if (isLoading || isLoadingOrders) {
     return (
-      <Center h="500px">
-        <Spinner size="xl" />
-      </Center>
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color={appColorTheme.brown_2} />
+      </View>
     );
   }
 
+  // Show error state
   if (isError) {
     return (
-      <Center h="500px">
-        <Text>Đã xảy ra lỗi khi tải dữ liệu.</Text>
-      </Center>
+      <View style={styles.centerContainer}>
+        <Text style={styles.errorText}>Đã xảy ra lỗi khi tải dữ liệu.</Text>
+      </View>
     );
   }
 
   return (
-    <Stack spacing={6}>
-      <Flex justify="space-between" align="center">
-        <Heading
-          color={appColorTheme.brown_2}
-          fontSize="2xl"
-          fontFamily="Montserrat"
-        >
-          Quản lý Khiếu nại
-        </Heading>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.heading}>Quản lý Khiếu nại</Text>
         <ComplaintCreateModal refetch={refetch} serviceOrders={serviceOrders} />
-      </Flex>
+      </View>
 
-      <Flex mb={4} gap={4} flexWrap="wrap">
-        <HStack>
-          <Text fontWeight="medium">Lọc theo trạng thái:</Text>
-          <Select
-            width="200px"
-            bgColor="white"
-            value={statusFilter}
-            onChange={handleStatusFilterChange}
-          >
-            <option value="">Tất cả trạng thái</option>
-            {statusValues.map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
-          </Select>
-        </HStack>
+      <ScrollView style={styles.contentContainer}>
+        <View style={styles.filtersContainer}>
+          <View style={styles.filterGroup}>
+            <Text style={styles.filterLabel}>Lọc theo trạng thái:</Text>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={statusFilter}
+                onValueChange={(itemValue) => setStatusFilter(itemValue)}
+                style={styles.picker}
+              >
+                <Picker.Item label="Tất cả trạng thái" value="" />
+                {statusValues.map((status) => (
+                  <Picker.Item key={status} label={status} value={status} />
+                ))}
+              </Picker>
+            </View>
+          </View>
 
-        <HStack>
-          <Text fontWeight="medium">Sắp xếp theo:</Text>
-          <Select
-            width="250px"
-            bgColor="white"
-            value={sortOption}
-            onChange={handleSortChange}
-          >
-            <option value="complaintIdDesc">Mã khiếu nại giảm dần</option>
-            <option value="complaintIdAsc">Mã khiếu nại tăng dần</option>
-          </Select>
-        </HStack>
-      </Flex>
+          <View style={styles.filterGroup}>
+            <Text style={styles.filterLabel}>Sắp xếp theo:</Text>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={sortOption}
+                onValueChange={(itemValue) => setSortOption(itemValue)}
+                style={styles.picker}
+              >
+                <Picker.Item
+                  label="Mã khiếu nại giảm dần"
+                  value="complaintIdDesc"
+                />
+                <Picker.Item
+                  label="Mã khiếu nại tăng dần"
+                  value="complaintIdAsc"
+                />
+              </Picker>
+            </View>
+          </View>
+        </View>
 
-      {filteredComplaints.length === 0 ? (
-        <Box textAlign="center" py={10}>
-          <Text fontSize="lg">Không có khiếu nại nào phù hợp với bộ lọc.</Text>
-        </Box>
-      ) : (
-        <Pagination
-          dataList={filteredComplaints}
-          DisplayComponent={(props) => (
-            <ComplaintListItems {...props} refetch={refetch} />
-          )}
-          itemsPerPage={5}
-        />
-      )}
-    </Stack>
+        {filteredComplaints.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>
+              Không có khiếu nại nào phù hợp với bộ lọc.
+            </Text>
+          </View>
+        ) : (
+          <Pagination
+            dataList={filteredComplaints}
+            DisplayComponent={(props) => (
+              <ComplaintListItems {...props} refetch={refetch} />
+            )}
+            itemsPerPage={5}
+          />
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+    padding: 10,
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 500,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  heading: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: appColorTheme.brown_2,
+    fontFamily: "Montserrat",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 16,
+  },
+  contentContainer: {
+    flex: 1,
+  },
+  filtersContainer: {
+    marginBottom: 15,
+  },
+  filterGroup: {
+    marginBottom: 10,
+  },
+  filterLabel: {
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  pickerContainer: {
+    backgroundColor: "white",
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    marginBottom: 10,
+  },
+  picker: {
+    height: 40,
+  },
+  listContainer: {
+    marginTop: 8,
+  },
+  emptyContainer: {
+    padding: 20,
+    alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 8,
+    marginVertical: 10,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#666",
+  },
+});

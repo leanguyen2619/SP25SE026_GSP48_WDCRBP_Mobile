@@ -62,11 +62,9 @@ const GuaranteeOrderCard = ({ order, onViewDetails }) => {
       <View style={styles.cardBody}>
         <View style={styles.column}>
           <View style={styles.row}>
-            <Text style={styles.label}>Xưởng mộc:</Text>
+            <Text style={styles.label}>Khách hàng:</Text>
             <Pressable>
-              <Text style={styles.link}>
-                {order.woodworker?.brandName || "N/A"}
-              </Text>
+              <Text style={styles.link}>{order.user?.username || "N/A"}</Text>
             </Pressable>
           </View>
 

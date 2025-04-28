@@ -1,18 +1,15 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import {
-  Box,
-  Heading,
-  Flex,
-  Button,
-  SimpleGrid,
-  VStack,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
   Alert,
-  AlertIcon,
-  Spinner,
-  Center,
-} from "@chakra-ui/react";
-import { FiSend } from "react-icons/fi";
+} from "react-native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 import { addMonths, format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { appColorTheme } from "../../../config/appconfig.js";
@@ -42,12 +39,13 @@ import ProductCard from "./components/ProductCard.jsx";
 import ProductStatusForm from "./components/ProductStatusForm.jsx";
 import ShippingAndPriceSection from "./components/ShippingAndPriceSection.jsx";
 import ProductSelectionModal from "./components/ProductSelectionModal.jsx";
-import { useDisclosure } from "@chakra-ui/react";
+import RootLayout from "../../../layouts/RootLayout";
 
 export default function GuaranteeRequestPage() {
-  const { id: woodworkerId } = useParams();
+  const route = useRoute();
+  const woodworkerId = route.params?.id;
   const { auth } = useAuth();
-  const navigate = useNavigate();
+  const navigation = useNavigation();
   const notify = useNotify();
 
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -62,14 +60,12 @@ export default function GuaranteeRequestPage() {
   const [selectedService, setSelectedService] = useState(null);
   const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
   const [currentWoodworkerId, setCurrentWoodworkerId] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   // New states for warranty/repair handling
   const [isGuarantee, setIsGuarantee] = useState(true);
   const [guaranteeError, setGuaranteeError] = useState("");
   const [isWarrantyValid, setIsWarrantyValid] = useState(false);
-
-  // Modal for product selection
-  const { isOpen, onOpen, onClose } = useDisclosure();
 
   // API calls
   const { data: addressesResponse, isLoading: isLoadingAddresses } =
@@ -217,8 +213,7 @@ export default function GuaranteeRequestPage() {
   }, [selectedProduct]);
 
   // Handle order selection
-  const handleOrderSelect = (e) => {
-    const orderId = e.target.value;
+  const handleOrderSelect = (orderId) => {
     setSelectedOrderId(orderId);
 
     if (orderId) {
@@ -236,7 +231,7 @@ export default function GuaranteeRequestPage() {
   // Handle product selection
   const handleSelectProduct = (product) => {
     setSelectedProduct(product);
-    onClose();
+    setModalVisible(false);
   };
 
   // Handle image upload completion
@@ -317,9 +312,12 @@ export default function GuaranteeRequestPage() {
         "success"
       );
 
-      navigate(
-        "/success?title=Gửi yêu cầu sửa chữa / bảo hành thành công&desc=Yêu cầu của bạn đã được gửi đi, vui lòng đợi xưởng mộc phản hồi.&buttonText=Xem danh sách yêu cầu&path=/cus/guarantee-order"
-      );
+      navigation.navigate("Success", {
+        title: "Gửi yêu cầu sửa chữa / bảo hành thành công",
+        desc: "Yêu cầu của bạn đã được gửi đi, vui lòng đợi xưởng mộc phản hồi.",
+        buttonText: "Xem danh sách yêu cầu",
+        path: "/cus/guarantee-order",
+      });
     } catch (error) {
       notify(
         "Lỗi",
@@ -336,38 +334,36 @@ export default function GuaranteeRequestPage() {
     isLoadingWoodworkerDetail
   ) {
     return (
-      <Center h="400px">
-        <Spinner size="xl" color={appColorTheme.brown_2} />
-      </Center>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={appColorTheme.brown_2} />
+      </View>
     );
   }
 
   // Error state
   if (ordersError) {
     return (
-      <Box textAlign="center" p={10}>
-        <Alert status="error">
-          <AlertIcon />
-          Có lỗi xảy ra khi tải thông tin đơn hàng. Vui lòng thử lại sau.
-        </Alert>
-      </Box>
+      <View style={styles.errorContainer}>
+        <View style={styles.alert}>
+          <Ionicons name="alert-circle" size={24} color="red" />
+          <Text style={styles.alertText}>
+            Có lỗi xảy ra khi tải thông tin đơn hàng. Vui lòng thử lại sau.
+          </Text>
+        </View>
+      </View>
     );
   }
 
   return (
-    <>
-      <Box mb={6}>
-        <Heading
-          color={appColorTheme.brown_2}
-          fontSize="2xl"
-          fontFamily="Montserrat"
-        >
-          Yêu cầu sửa chữa / bảo hành sản phẩm
-        </Heading>
-      </Box>
+    <RootLayout>
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.heading}>
+            Yêu cầu sửa chữa / bảo hành sản phẩm
+          </Text>
+        </View>
 
-      <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={5}>
-        <VStack spacing={5} align="stretch">
+        <View style={styles.content}>
           {/* Order Selection Component */}
           <OrderSelection
             completedOrders={completedOrders}
@@ -382,17 +378,15 @@ export default function GuaranteeRequestPage() {
               orderDetail={orderDetail}
               getWarrantyEndDate={getWarrantyEndDate}
               formatDate={formatDate}
-              onOpen={onOpen}
+              onOpen={() => setModalVisible(true)}
             />
           )}
 
           {/* Woodworker Box Component */}
           {woodworkerInfo && (
-            <WoodworkerBox mt={0} woodworkerProfile={woodworkerInfo} />
+            <WoodworkerBox woodworkerProfile={woodworkerInfo} />
           )}
-        </VStack>
 
-        <VStack spacing={5} align="stretch">
           {/* Product Status Component - updated with new props */}
           {selectedProduct && (
             <ProductStatusForm
@@ -410,14 +404,14 @@ export default function GuaranteeRequestPage() {
           )}
 
           {/* Address Selection Component */}
-          <Box bg="white" p={5} borderRadius="10px" boxShadow="sm">
+          <View style={styles.card}>
             <AddressSelection
               addresses={addresses}
               isLoading={isLoadingAddresses}
               selectedAddress={selectedAddress}
               setSelectedAddress={setSelectedAddress}
             />
-          </Box>
+          </View>
 
           {/* Shipping Options Component - updated with new props */}
           {selectedProduct && selectedAddress && (
@@ -433,42 +427,139 @@ export default function GuaranteeRequestPage() {
           )}
 
           {/* Submit Button - updated validation */}
-          <Flex justifyContent="center" mt={4}>
-            <Button
-              leftIcon={<FiSend />}
-              _hover={{ backgroundColor: "app_brown.1", color: "white" }}
-              px={8}
-              py={6}
-              bgColor={appColorTheme.brown_2}
-              color="white"
-              borderRadius="40px"
-              onClick={handleSubmit}
-              isLoading={isSubmitting}
-              isDisabled={
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[
+                styles.submitButton,
+                (!selectedProduct ||
+                  !selectedAddress ||
+                  !currentProductImages.length ||
+                  !currentProductStatus ||
+                  (isWarrantyValid && isGuarantee && !guaranteeError) ||
+                  isCalculatingShipping) &&
+                  styles.disabledButton,
+              ]}
+              onPress={handleSubmit}
+              disabled={
                 !selectedProduct ||
                 !selectedAddress ||
                 !currentProductImages.length ||
                 !currentProductStatus ||
                 (isWarrantyValid && isGuarantee && !guaranteeError) ||
-                isCalculatingShipping
+                isCalculatingShipping ||
+                isSubmitting
               }
             >
-              Gửi yêu cầu {isGuarantee ? "bảo hành" : "sửa chữa"}
-            </Button>
-          </Flex>
-        </VStack>
-      </SimpleGrid>
+              {isSubmitting ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <>
+                  <Ionicons
+                    name="send"
+                    size={18}
+                    color="white"
+                    style={styles.buttonIcon}
+                  />
+                  <Text style={styles.buttonText}>
+                    Gửi yêu cầu {isGuarantee ? "bảo hành" : "sửa chữa"}
+                  </Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
 
-      {/* Product Selection Modal */}
-      <ProductSelectionModal
-        isOpen={isOpen}
-        onClose={onClose}
-        orderDetail={orderDetail}
-        isLoadingOrderDetail={isLoadingOrderDetail}
-        getWarrantyEndDate={getWarrantyEndDate}
-        formatDate={formatDate}
-        handleSelectProduct={handleSelectProduct}
-      />
-    </>
+        {/* Product Selection Modal */}
+        <ProductSelectionModal
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          orderDetail={orderDetail}
+          isLoadingOrderDetail={isLoadingOrderDetail}
+          getWarrantyEndDate={getWarrantyEndDate}
+          formatDate={formatDate}
+          handleSelectProduct={handleSelectProduct}
+        />
+      </ScrollView>
+    </RootLayout>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#F5F5F5",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 400,
+  },
+  errorContainer: {
+    padding: 20,
+    alignItems: "center",
+  },
+  alert: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FEE2E2",
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  alertText: {
+    marginLeft: 10,
+    color: "#B91C1C",
+    flex: 1,
+  },
+  header: {
+    marginBottom: 20,
+    paddingHorizontal: 15,
+    paddingTop: 15,
+  },
+  heading: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: appColorTheme.brown_2,
+    fontFamily: "Montserrat",
+  },
+  content: {
+    paddingHorizontal: 15,
+    paddingBottom: 30,
+  },
+  card: {
+    backgroundColor: "white",
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  buttonContainer: {
+    alignItems: "center",
+    marginTop: 20,
+  },
+  submitButton: {
+    backgroundColor: appColorTheme.brown_2,
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 30,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  disabledButton: {
+    backgroundColor: "#CCCCCC",
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  buttonIcon: {
+    marginRight: 8,
+  },
+});

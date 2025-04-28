@@ -5,6 +5,7 @@ import FinishUpdateModal from "../Finish/FinishUpdateModal.jsx";
 import QuotationUpdateModal from "../Quotation/QuotationUpdateModal.jsx";
 import ReceiveConfirmationModal from "./ReceiveConfirmationModal.jsx";
 import GuaranteeAcceptModal from "../Quotation/GuaranteeAcceptModal.jsx";
+import { View } from "react-native";
 
 export default function ActionBar({ status, feedback, order, refetch }) {
   const renderActionButtons = () => {
@@ -66,7 +67,7 @@ export default function ActionBar({ status, feedback, order, refetch }) {
     showCancelModal = false;
 
     return (
-      <>
+      <View style={{ width: "100%" }}>
         {showAcceptFreeGuaranteeModal && (
           <GuaranteeAcceptModal
             refetch={refetch}
@@ -107,7 +108,7 @@ export default function ActionBar({ status, feedback, order, refetch }) {
             refetch={refetch}
           />
         )}
-      </>
+      </View>
     );
   };
 

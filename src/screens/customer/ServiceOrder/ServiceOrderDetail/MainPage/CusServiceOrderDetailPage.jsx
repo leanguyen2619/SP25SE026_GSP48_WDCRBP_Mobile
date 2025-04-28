@@ -99,7 +99,9 @@ export default function CusServiceOrderDetailPage() {
         <View style={styles.header}>
           <View style={styles.titleContainer}>
             <View style={styles.titleRow}>
-              <Text style={styles.title}>Chi tiết đơn #{order.orderId}</Text>
+              <Text style={styles.title}>
+                Chi tiết đơn dịch vụ #{order.orderId}
+              </Text>
             </View>
 
             <View style={styles.statusContainer}>

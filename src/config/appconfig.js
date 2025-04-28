@@ -187,7 +187,7 @@ export const service = {
     serviceAlterName: "Dịch vụ BH / sửa chữa",
     description:
       "Dịch vụ sửa chữa và bảo hành sản phẩm của xưởng, đảm bảo sự hài lòng của khách hàng.",
-    path: "guarantee",
+    path: "GuaranteeRequest",
     buttonText: "Đặt dịch vụ",
     action: "navigate",
   },

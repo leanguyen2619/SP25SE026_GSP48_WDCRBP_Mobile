@@ -1,116 +1,162 @@
-import {
-  Text,
-  Card,
-  CardHeader,
-  CardBody,
-  CardFooter,
-  Badge,
-  Flex,
-  Divider,
-  Grid,
-  GridItem,
-  Heading,
-  Link,
-} from "@chakra-ui/react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import {
   appColorTheme,
-  getComplaintStatusColor,
+  complaintStatusConstants,
 } from "../../../../config/appconfig";
 import { formatDateTimeToVietnamese } from "../../../../utils/utils";
 import ComplaintDetailModal from "../ActionModal/ComplaintDetailModal";
 
 const ComplaintCard = ({ complaint, refetch }) => {
-  // Map status to proper color for badge
-  const getStatusColor = (status) => {
-    const color = getComplaintStatusColor(status);
-    if (color === "red.500") return "red";
-    if (color === "green.500") return "green";
-    if (color === "blue.500") return "blue";
-    if (color === "orange.500") return "orange";
-    return "gray";
+  // Xác định màu nền cho badge dựa trên trạng thái
+  const getBadgeColor = () => {
+    switch (complaint.status) {
+      case complaintStatusConstants.COMPLETED:
+        return "#48BB78"; // green
+      case complaintStatusConstants.IN_PROGRESS:
+        return "#ECC94B"; // yellow
+      case complaintStatusConstants.PENDING:
+        return "#9F7AEA"; // purple
+      default:
+        return "#F56565"; // red
+    }
   };
 
   return (
-    <Card
-      overflow="hidden"
-      variant="outline"
-      boxShadow="sm"
-      borderColor="gray.200"
-      transition="all 0.3s"
-      _hover={{ boxShadow: "md", borderColor: appColorTheme.brown_2 }}
-      width="100%"
-    >
-      <CardHeader bg="gray.50" py={3}>
-        <Flex justifyContent="space-between" alignItems="center">
-          <Heading size="md" fontWeight="bold">
+    <View style={styles.card}>
+      {/* Header */}
+      <View style={styles.cardHeader}>
+        <View style={styles.rowBetween}>
+          <Text style={styles.cardTitle}>
             Mã khiếu nại: #{complaint.complaintId}
-          </Heading>
+          </Text>
 
-          <Badge colorScheme={getStatusColor(complaint.status)} px={2} py={1}>
-            {complaint.status}
-          </Badge>
-        </Flex>
-      </CardHeader>
+          <View style={[styles.badge, { backgroundColor: getBadgeColor() }]}>
+            <Text style={styles.badgeText}>{complaint.status}</Text>
+          </View>
+        </View>
+      </View>
 
-      <CardBody>
-        <Grid templateColumns="repeat(2, 1fr)" gap={4}>
+      {/* Body */}
+      <View style={styles.cardBody}>
+        <View style={styles.grid}>
           {/* Left Column */}
-          <GridItem>
-            <Flex>
-              <Text fontWeight="medium" minWidth="150px">
-                Mã đơn hàng:
+          <View style={styles.gridItem}>
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>Mã đơn hàng:</Text>
+              <Text style={styles.value}>
+                #{complaint.serviceOrderDetail?.orderId || "N/A"}
               </Text>
-              <Text>#{complaint.serviceOrderDetail?.orderId || "N/A"}</Text>
-            </Flex>
+            </View>
 
-            <Flex mt={1}>
-              <Text fontWeight="medium" minWidth="150px">
-                Xưởng mộc:
-              </Text>
-              <Link
-                href={`/woodworker/${complaint.serviceOrderDetail?.service?.wwDto?.woodworkerId}`}
-                target="_blank"
-                color={appColorTheme.brown_2}
-              >
-                <Text>
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>Xưởng mộc:</Text>
+              <TouchableOpacity>
+                <Text style={styles.linkText}>
                   {complaint.serviceOrderDetail?.service?.wwDto?.brandName ||
                     "N/A"}
                 </Text>
-              </Link>
-            </Flex>
-          </GridItem>
+              </TouchableOpacity>
+            </View>
+          </View>
 
           {/* Right Column */}
-          <GridItem>
-            <Flex>
-              <Text fontWeight="medium" minWidth="150px">
-                Loại khiếu nại:
+          <View style={styles.gridItem}>
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>Loại khiếu nại:</Text>
+              <Text style={styles.value}>{complaint.complaintType}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>Ngày tạo:</Text>
+              <Text style={styles.value}>
+                {formatDateTimeToVietnamese(complaint.createdAt)}
               </Text>
-              <Text>{complaint.complaintType}</Text>
-            </Flex>
+            </View>
+          </View>
+        </View>
+      </View>
 
-            <Flex mt={1}>
-              <Text fontWeight="medium" minWidth="150px">
-                Ngày tạo:
-              </Text>
-              <Text>{formatDateTimeToVietnamese(complaint.createdAt)}</Text>
-            </Flex>
-          </GridItem>
-        </Grid>
-      </CardBody>
+      <View style={styles.divider} />
 
-      <Divider />
-
-      <CardFooter
-        pt={2}
-        pb={3}
-        justifyContent={"flex-end"}
-        alignItems={"center"}
-      >
-        <ComplaintDetailModal complaint={complaint} refetch={refetch} />
-      </CardFooter>
-    </Card>
+      {/* Footer */}
+      <View style={styles.cardFooter}>
+        <ComplaintDetailModal complaint={complaint} />
+      </View>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: "white",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    elevation: 2,
+  },
+  cardHeader: {
+    backgroundColor: "#F7FAFC",
+    padding: 12,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+  },
+  rowBetween: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  badge: {
+    borderRadius: 15,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  badgeText: {
+    color: "white",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  cardBody: {
+    padding: 12,
+  },
+  grid: {
+    flexDirection: "row",
+  },
+  gridItem: {
+    flex: 1,
+  },
+  infoRow: {
+    flexDirection: "row",
+    marginBottom: 8,
+    alignItems: "flex-start",
+  },
+  label: {
+    fontWeight: "600",
+    minWidth: 100,
+    marginRight: 8,
+  },
+  value: {
+    flex: 1,
+  },
+  linkText: {
+    color: appColorTheme.brown_2,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#E2E8F0",
+  },
+  cardFooter: {
+    padding: 12,
+    alignItems: "flex-end",
+  },
+});
 
 export default ComplaintCard;
