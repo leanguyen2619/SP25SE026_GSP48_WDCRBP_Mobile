@@ -1,22 +1,13 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  Button,
-  useDisclosure,
-  Box,
+  View,
   Text,
-  Center,
-  Spinner,
-  HStack,
-  Spacer,
-} from "@chakra-ui/react";
-import { FiCheckCircle, FiXCircle } from "react-icons/fi";
+  TouchableOpacity,
+  Modal,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
+import Icon from "react-native-vector-icons/Feather";
 import { appColorTheme } from "../../../../../../config/appconfig.js";
 import CheckboxList from "../../../../../../components/Utility/CheckboxList.jsx";
 import {
@@ -32,7 +23,7 @@ export default function FinishUpdateModal({
   order,
   guaranteeOrderId,
 }) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
   const [finishConfirmation, { isLoading: isFinishing }] =
     useFinishConfirmationMutation();
   const { data: shipmentData, isLoading: loadingShipment } =
@@ -210,7 +201,7 @@ export default function FinishUpdateModal({
         "success"
       );
 
-      onClose();
+      setIsOpen(false);
       refetch && refetch();
     } catch (error) {
       notify(
@@ -223,7 +214,7 @@ export default function FinishUpdateModal({
 
   const handleClose = () => {
     setIsButtonDisabled(true);
-    onClose();
+    setIsOpen(false);
   };
 
   const isProcessing =
@@ -243,90 +234,234 @@ export default function FinishUpdateModal({
 
   return (
     <>
-      <Button
-        py={1}
-        px={2}
-        color={appColorTheme.blue_0}
-        bg="none"
-        border={`1px solid ${appColorTheme.blue_0}`}
-        _hover={{ bg: appColorTheme.blue_0, color: "white" }}
-        leftIcon={<FiCheckCircle />}
-        onClick={onOpen}
-      >
-        Xác nhận hoàn thành và trả hàng
-      </Button>
+      <TouchableOpacity style={styles.button} onPress={() => setIsOpen(true)}>
+        <Icon
+          name="check-circle"
+          size={20}
+          color={appColorTheme.blue_0}
+          style={styles.icon}
+        />
+        <Text style={styles.buttonText}>Hoàn thành sửa chữa</Text>
+      </TouchableOpacity>
 
       <Modal
-        isOpen={isOpen}
-        onClose={isProcessing ? null : handleClose}
-        closeOnOverlayClick={false}
-        closeOnEsc={false}
+        visible={isOpen}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => !isProcessing && handleClose()}
       >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Xác nhận hoàn thành sửa chữa</ModalHeader>
-          {!isProcessing && <ModalCloseButton />}
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                Xác nhận hoàn thành sửa chữa
+              </Text>
+              {!isProcessing && (
+                <TouchableOpacity
+                  onPress={handleClose}
+                  style={styles.closeButton}
+                >
+                  <Icon name="x" size={20} color="#000" />
+                </TouchableOpacity>
+              )}
+            </View>
 
-          <ModalBody pb={6}>
-            {isProcessing ? (
-              <Center py={8} flexDirection="column">
-                <Spinner size="xl" color={appColorTheme.brown_2} mb={4} />
-                <Text>
-                  {processingShipment
-                    ? "Đang tạo vận đơn trả hàng..."
-                    : "Đang xử lý..."}
-                </Text>
-              </Center>
-            ) : (
-              <Box>
-                <Text mb={4}>
-                  Bạn đang xác nhận sản phẩm đã được sửa chữa hoàn thành và sẵn
-                  sàng trả lại cho khách hàng.
-                </Text>
-
-                {!order?.install && (
-                  <Text mb={4}>
-                    Hệ thống sẽ tạo vận đơn GHN để giao sản phẩm về cho khách
-                    hàng.
-                  </Text>
-                )}
-
-                <Box mt={6}>
-                  <CheckboxList
-                    items={confirmationItems}
-                    setButtonDisabled={setIsButtonDisabled}
+            <View style={styles.modalBody}>
+              {isProcessing ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator
+                    size="large"
+                    color={appColorTheme.brown_2}
+                    style={styles.spinner}
                   />
-                </Box>
-              </Box>
-            )}
-          </ModalBody>
+                  <Text style={styles.loadingText}>
+                    {processingShipment
+                      ? "Đang tạo vận đơn trả hàng..."
+                      : "Đang xử lý..."}
+                  </Text>
+                </View>
+              ) : (
+                <View>
+                  <Text style={styles.confirmText}>
+                    Bạn đang xác nhận đã hoàn thành sửa chữa sản phẩm này và sẽ
+                    gửi lại cho khách hàng.
+                  </Text>
+                  {!order?.install && (
+                    <Text style={styles.shipmentNote}>
+                      Hệ thống sẽ tự động tạo vận đơn giao hàng cho khách sau
+                      khi bạn xác nhận.
+                    </Text>
+                  )}
+                  <View style={styles.checkboxContainer}>
+                    <CheckboxList
+                      items={confirmationItems}
+                      setButtonDisabled={setIsButtonDisabled}
+                    />
+                  </View>
+                </View>
+              )}
+            </View>
 
-          <ModalFooter>
-            <HStack width="100%">
-              <Spacer />
-              <Button
-                colorScheme="green"
-                onClick={handleSubmit}
-                isLoading={isProcessing}
-                isDisabled={isButtonDisabled}
-                leftIcon={<FiCheckCircle />}
-                loadingText={
-                  processingShipment ? "Đang tạo vận đơn..." : "Đang xử lý..."
-                }
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={[
+                  styles.footerButton,
+                  styles.confirmBtn,
+                  (isButtonDisabled || isProcessing) && styles.disabledButton,
+                ]}
+                onPress={handleSubmit}
+                disabled={isButtonDisabled || isProcessing}
               >
-                Xác nhận hoàn thành
-              </Button>
-              <Button
-                onClick={handleClose}
-                leftIcon={<FiXCircle />}
-                isDisabled={isProcessing}
+                {isProcessing ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <>
+                    <Icon
+                      name="check-circle"
+                      size={18}
+                      color="white"
+                      style={styles.buttonIcon}
+                    />
+                    <Text style={styles.buttonTextLight}>
+                      Xác nhận hoàn thành
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.footerButton, styles.closeBtn]}
+                onPress={handleClose}
+                disabled={isProcessing}
               >
-                Đóng
-              </Button>
-            </HStack>
-          </ModalFooter>
-        </ModalContent>
+                <Icon
+                  name="x-circle"
+                  size={18}
+                  color="#000"
+                  style={styles.buttonIcon}
+                />
+                <Text style={styles.buttonTextDark}>Đóng</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       </Modal>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  button: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: appColorTheme.blue_0,
+    backgroundColor: "transparent",
+    marginVertical: 8,
+  },
+  buttonText: {
+    color: appColorTheme.blue_0,
+    fontWeight: "600",
+  },
+  icon: {
+    marginRight: 8,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalView: {
+    width: "90%",
+    backgroundColor: "white",
+    borderRadius: 10,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  closeButton: {
+    padding: 4,
+  },
+  modalBody: {
+    padding: 16,
+  },
+  loadingContainer: {
+    alignItems: "center",
+    paddingVertical: 32,
+  },
+  spinner: {
+    marginBottom: 16,
+  },
+  loadingText: {
+    fontSize: 16,
+  },
+  confirmText: {
+    marginBottom: 16,
+  },
+  shipmentNote: {
+    fontStyle: "italic",
+    marginBottom: 16,
+    color: "#718096",
+  },
+  checkboxContainer: {
+    marginTop: 16,
+  },
+  modalFooter: {
+    flexDirection: "row",
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#E2E8F0",
+    justifyContent: "flex-end",
+  },
+  footerButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  confirmBtn: {
+    backgroundColor: appColorTheme.green_1 || "#48BB78",
+  },
+  closeBtn: {
+    backgroundColor: "#E2E8F0",
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+  buttonIcon: {
+    marginRight: 8,
+  },
+  buttonTextLight: {
+    color: "white",
+    fontWeight: "600",
+  },
+  buttonTextDark: {
+    color: "#1A202C",
+    fontWeight: "600",
+  },
+});

@@ -95,7 +95,7 @@ export default function CusGuaranteeOrderDetailPage() {
           <View style={styles.titleContainer}>
             <View style={styles.titleRow}>
               <Text style={styles.title}>
-                Chi tiết đơn #{order.guaranteeOrderId}
+                Chi tiết đơn sửa chữa / bảo hành #{order.guaranteeOrderId}
               </Text>
             </View>
 

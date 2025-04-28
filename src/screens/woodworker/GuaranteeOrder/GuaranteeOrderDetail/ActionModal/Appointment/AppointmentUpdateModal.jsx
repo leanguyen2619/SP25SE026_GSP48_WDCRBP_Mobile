@@ -1,25 +1,17 @@
+import React, { useRef, useState } from "react";
 import {
-  Box,
-  Button,
-  Grid,
-  GridItem,
-  Heading,
-  HStack,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  Spacer,
+  View,
   Text,
-  Textarea,
-  useDisclosure,
-  Select,
-} from "@chakra-ui/react";
-import { useRef, useState } from "react";
-import { FiCalendar, FiCheck, FiX } from "react-icons/fi";
+  TouchableOpacity,
+  Modal,
+  StyleSheet,
+  TextInput,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import Icon from "react-native-vector-icons/Feather";
 import { appColorTheme } from "../../../../../../config/appconfig.js";
 import { useAcceptGuaranteeOrderMutation } from "../../../../../../services/guaranteeOrderApi.js";
 import CheckboxList from "../../../../../../components/Utility/CheckboxList.jsx";
@@ -28,9 +20,24 @@ import { validateAppointment } from "../../../../../../validations";
 
 export default function AppointmentUpdateModal({ order, refetch }) {
   // Modal
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
   const initialRef = useRef(null);
   const notify = useNotify();
+
+  // Form state
+  const [form, setForm] = useState(order?.consultantAppointment?.form || "");
+  const [meetAddress, setMeetAddress] = useState(
+    order?.consultantAppointment?.meetAddress || ""
+  );
+  const [dateTime, setDateTime] = useState(
+    order?.consultantAppointment?.dateTime
+      ? new Date(order?.consultantAppointment?.dateTime)
+      : new Date()
+  );
+  const [description, setDescription] = useState(
+    order?.consultantAppointment?.content || ""
+  );
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // API mutation
   const [acceptServiceOrder, { isLoading }] = useAcceptGuaranteeOrderMutation();
@@ -38,15 +45,16 @@ export default function AppointmentUpdateModal({ order, refetch }) {
   // Button disable state for checkboxes
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const handleSubmit = async () => {
     try {
-      // Create FormData from form and convert to object
-      const formData = new FormData(e.target);
-      const formDataObj = Object.fromEntries(formData);
-
       // Prepare data for validation and API
+      const formDataObj = {
+        form,
+        meetAddress,
+        timeMeeting: dateTime.toISOString(),
+        desc: description,
+      };
+
       const apiData = {
         serviceOrderId: order.guaranteeOrderId,
         ...formDataObj,
@@ -68,7 +76,7 @@ export default function AppointmentUpdateModal({ order, refetch }) {
         "success"
       );
       refetch();
-      onClose();
+      setIsOpen(false);
     } catch (error) {
       notify(
         "Đã xảy ra lỗi",
@@ -85,143 +93,337 @@ export default function AppointmentUpdateModal({ order, refetch }) {
     },
   ];
 
-  // Get appointment data from order if available
-  const appointment = order?.consultantAppointment || {};
+  const formatDate = (date) => {
+    return (
+      date.toLocaleDateString() +
+      " " +
+      date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    );
+  };
+
+  const onDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || dateTime;
+    setShowDatePicker(false);
+    setDateTime(currentDate);
+  };
 
   return (
     <>
-      <Button
-        py={1}
-        px={2}
-        color={appColorTheme.blue_0}
-        bg="none"
-        border={`1px solid ${appColorTheme.blue_0}`}
-        _hover={{ bg: appColorTheme.blue_0, color: "white" }}
-        leftIcon={<FiCalendar />}
-        onClick={onOpen}
-      >
-        {order?.isGuarantee
-          ? "Cập nhật lịch hẹn tư vấn để xem xét lại chuyển sang sửa chữa"
-          : "Cập nhật lịch hẹn tư vấn về báo giá sửa chữa"}
-      </Button>
+      <TouchableOpacity style={styles.button} onPress={() => setIsOpen(true)}>
+        <Icon
+          name="calendar"
+          size={20}
+          color={appColorTheme.blue_0}
+          style={styles.icon}
+        />
+        <Text style={styles.buttonText}>
+          {order?.isGuarantee
+            ? "Cập nhật lịch hẹn tư vấn để xem xét lại chuyển sang sửa chữa"
+            : "Cập nhật lịch hẹn tư vấn về báo giá sửa chữa"}
+        </Text>
+      </TouchableOpacity>
 
       <Modal
-        size="5xl"
-        initialFocusRef={initialRef}
-        isOpen={isOpen}
-        closeOnOverlayClick={false}
-        closeOnEsc={false}
-        onClose={onClose}
+        visible={isOpen}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => !isLoading && setIsOpen(false)}
       >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Cập nhật lịch hẹn</ModalHeader>
-          {!isLoading && <ModalCloseButton />}
-          <ModalBody bgColor="app_grey.1" pb={6}>
-            <form onSubmit={handleSubmit}>
-              <Box>
-                <Heading
-                  fontWeight="bold"
-                  fontSize="20px"
-                  mb={6}
-                  textAlign="center"
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Cập nhật lịch hẹn</Text>
+              {!isLoading && (
+                <TouchableOpacity
+                  onPress={() => setIsOpen(false)}
+                  style={styles.closeButton}
                 >
-                  Thông tin lịch hẹn
-                </Heading>
+                  <Icon name="x" size={20} color="#000" />
+                </TouchableOpacity>
+              )}
+            </View>
 
-                <Box p={5} bgColor="white" boxShadow="md" borderRadius="10px">
-                  <Grid templateColumns="100px 1fr" gap={5}>
-                    <GridItem>
-                      <Text fontWeight="bold" mb={2}>
-                        Hình thức:
-                      </Text>
-                    </GridItem>
-                    <GridItem>
-                      <Select
-                        name="form"
-                        placeholder="Chọn hình thức"
-                        defaultValue={appointment.form || ""}
-                        required
+            <ScrollView style={styles.modalBody}>
+              <View style={styles.formContent}>
+                <Text style={styles.sectionTitle}>Thông tin lịch hẹn</Text>
+
+                <View style={styles.formBox}>
+                  <View style={styles.formRow}>
+                    <Text style={styles.formLabel}>Hình thức:</Text>
+                    <View style={styles.formInput}>
+                      <Picker
+                        selectedValue={form}
+                        onValueChange={(itemValue) => setForm(itemValue)}
+                        style={styles.picker}
                       >
-                        <option value="Online">Online</option>
-                        <option value="Offline">Offline</option>
-                      </Select>
-                    </GridItem>
+                        <Picker.Item label="Chọn hình thức" value="" />
+                        <Picker.Item label="Online" value="Online" />
+                        <Picker.Item label="Offline" value="Offline" />
+                      </Picker>
+                    </View>
+                  </View>
 
-                    <GridItem>
-                      <Text fontWeight="bold" mb={2}>
-                        Địa điểm:
-                      </Text>
-                    </GridItem>
-                    <GridItem>
-                      <Input
-                        name="meetAddress"
+                  <View style={styles.formRow}>
+                    <Text style={styles.formLabel}>Địa điểm:</Text>
+                    <View style={styles.formInput}>
+                      <TextInput
+                        style={styles.textInput}
                         placeholder="Địa điểm"
-                        defaultValue={appointment.meetAddress || ""}
-                        required
+                        value={meetAddress}
+                        onChangeText={setMeetAddress}
                       />
-                    </GridItem>
+                    </View>
+                  </View>
 
-                    <GridItem>
-                      <Text fontWeight="bold" mb={2}>
-                        Ngày hẹn:
-                      </Text>
-                    </GridItem>
-                    <GridItem>
-                      <Input
-                        type="datetime-local"
-                        name="timeMeeting"
-                        placeholder="Ngày hẹn"
-                        defaultValue={appointment.dateTime}
-                        required
-                      />
-                    </GridItem>
+                  <View style={styles.formRow}>
+                    <Text style={styles.formLabel}>Ngày hẹn:</Text>
+                    <View style={styles.formInput}>
+                      <TouchableOpacity
+                        style={styles.dateButton}
+                        onPress={() => setShowDatePicker(true)}
+                      >
+                        <Text>{formatDate(dateTime)}</Text>
+                        <Icon
+                          name="calendar"
+                          size={16}
+                          color={appColorTheme.blue_0}
+                        />
+                      </TouchableOpacity>
+                      {showDatePicker && (
+                        <DateTimePicker
+                          value={dateTime}
+                          mode="datetime"
+                          display="default"
+                          onChange={onDateChange}
+                        />
+                      )}
+                    </View>
+                  </View>
 
-                    <GridItem>
-                      <Text fontWeight="bold" mb={2}>
-                        Mô tả:
-                      </Text>
-                    </GridItem>
-                    <GridItem>
-                      <Textarea
-                        name="desc"
+                  <View style={styles.formRow}>
+                    <Text style={styles.formLabel}>Mô tả:</Text>
+                    <View style={styles.formInput}>
+                      <TextInput
+                        style={[styles.textInput, styles.textArea]}
                         placeholder="Mô tả"
-                        defaultValue={appointment.content || ""}
-                        required
+                        value={description}
+                        onChangeText={setDescription}
+                        multiline={true}
+                        numberOfLines={4}
                       />
-                    </GridItem>
-                  </Grid>
-                </Box>
-              </Box>
+                    </View>
+                  </View>
+                </View>
 
-              <Box mt={6}>
-                <CheckboxList
-                  items={confirmationItems}
-                  setButtonDisabled={setIsButtonDisabled}
+                <View style={styles.checkboxContainer}>
+                  <CheckboxList
+                    items={confirmationItems}
+                    setButtonDisabled={setIsButtonDisabled}
+                  />
+                </View>
+              </View>
+            </ScrollView>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={[
+                  styles.footerButton,
+                  styles.updateBtn,
+                  isButtonDisabled && styles.disabledButton,
+                ]}
+                onPress={handleSubmit}
+                disabled={isButtonDisabled || isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <>
+                    <Icon
+                      name="check"
+                      size={18}
+                      color="white"
+                      style={styles.buttonIcon}
+                    />
+                    <Text style={styles.buttonTextLight}>Cập nhật</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.footerButton, styles.closeBtn]}
+                onPress={() => setIsOpen(false)}
+                disabled={isLoading}
+              >
+                <Icon
+                  name="x"
+                  size={18}
+                  color="#000"
+                  style={styles.buttonIcon}
                 />
-              </Box>
-
-              <HStack mt={10}>
-                <Spacer />
-                <Button
-                  colorScheme="blue"
-                  mr={3}
-                  type="submit"
-                  isLoading={isLoading}
-                  loadingText="Đang lưu"
-                  leftIcon={<FiCheck />}
-                  isDisabled={isButtonDisabled}
-                >
-                  Cập nhật
-                </Button>
-                <Button onClick={onClose} leftIcon={<FiX />}>
-                  Đóng
-                </Button>
-              </HStack>
-            </form>
-          </ModalBody>
-        </ModalContent>
+                <Text style={styles.buttonTextDark}>Đóng</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       </Modal>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  button: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: appColorTheme.blue_0,
+    backgroundColor: "transparent",
+    marginVertical: 8,
+  },
+  buttonText: {
+    color: appColorTheme.blue_0,
+    fontWeight: "600",
+    flexShrink: 1,
+  },
+  icon: {
+    marginRight: 8,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalView: {
+    width: "95%",
+    maxHeight: "90%",
+    backgroundColor: "white",
+    borderRadius: 10,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  closeButton: {
+    padding: 4,
+  },
+  modalBody: {
+    backgroundColor: "#F7FAFC",
+  },
+  formContent: {
+    padding: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  formBox: {
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 3,
+  },
+  formRow: {
+    flexDirection: "row",
+    marginBottom: 16,
+    alignItems: "center",
+  },
+  formLabel: {
+    width: 100,
+    fontWeight: "bold",
+  },
+  formInput: {
+    flex: 1,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 4,
+    padding: 10,
+  },
+  textArea: {
+    textAlignVertical: "top",
+    minHeight: 100,
+  },
+  picker: {
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 4,
+  },
+  dateButton: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 4,
+    padding: 10,
+  },
+  checkboxContainer: {
+    marginTop: 24,
+  },
+  modalFooter: {
+    flexDirection: "row",
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#E2E8F0",
+    justifyContent: "flex-end",
+  },
+  footerButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  updateBtn: {
+    backgroundColor: appColorTheme.blue_0,
+  },
+  closeBtn: {
+    backgroundColor: "#E2E8F0",
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+  buttonIcon: {
+    marginRight: 8,
+  },
+  buttonTextLight: {
+    color: "white",
+    fontWeight: "600",
+  },
+  buttonTextDark: {
+    color: "#1A202C",
+    fontWeight: "600",
+  },
+});

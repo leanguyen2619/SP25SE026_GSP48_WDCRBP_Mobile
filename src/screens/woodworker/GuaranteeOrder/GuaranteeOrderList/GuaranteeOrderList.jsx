@@ -13,7 +13,6 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
-import { Feather } from "@expo/vector-icons";
 import {
   appColorTheme,
   guaranteeOrderStatusConstants,
@@ -68,8 +67,8 @@ export default function GuaranteeOrderList() {
     isLoading,
   } = useGetGuaranteeOrdersQuery(
     {
-      id: auth?.userId,
-      role: "Customer",
+      id: auth?.wwId,
+      role: "Woodworker",
     },
     {
       refetchOnMountOrArgChange: true,
@@ -115,7 +114,7 @@ export default function GuaranteeOrderList() {
   }, [statusFilter, sortOption, apiResponse]);
 
   const handleViewDetails = (orderId) => {
-    navigation.navigate("CustomerGuaranteeOrderDetail", { id: orderId });
+    navigation.navigate("WWGuaranteeOrderDetail", { id: orderId });
   };
 
   const handleApplyFilters = () => {

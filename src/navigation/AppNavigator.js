@@ -38,6 +38,12 @@ import PostManagementListPage from "../screens/woodworker/PostManagement/PostLis
 import ProductManagementListPage from "../screens/woodworker/ProductManagement/ProductList/ProductManagementListPage";
 import CusGuaranteeOrderListPage from "../screens/customer/GuaranteeOrder/GuaranteeOrderList/CusGuaranteeOrderListPage";
 import CusGuaranteeOrderDetailPage from "../screens/customer/GuaranteeOrder/GuaranteeOrderDetail/MainPage/CusGuaranteeOrderDetailPage";
+import WWGuaranteeOrderListPage from "../screens/woodworker/GuaranteeOrder/GuaranteeOrderList/WWGuaranteeOrderListPage";
+import WWGuaranteeOrderDetailPage from "../screens/woodworker/GuaranteeOrder/GuaranteeOrderDetail/MainPage/WWGuaranteeOrderDetailPage";
+import ReviewManagementListPage from "../screens/woodworker/ReviewManagement/ReviewList/ReviewManagementListPage";
+import ServiceConfiguration from "../screens/woodworker/ServiceConfiguration/ServiceConfiguration";
+import GuaranteeRequestPage from "../screens/customer/GuaranteeRequest/GuaranteeRequestPage";
+import CustomerComplaintPage from "../screens/customer/ComplaintManagement/ComplaintList/CustomerComplaintPage";
 
 const Stack = createNativeStackNavigator();
 
@@ -110,10 +116,10 @@ const AppNavigator = () => {
         name="PersonalizationRequest"
         component={PersonalizationRequestPage}
       />
-      {/* <Stack.Screen
+      <Stack.Screen
         name="CustomerComplaint"
         component={CustomerComplaintPage}
-      /> */}
+      />
       <Stack.Screen name="CustomerWallet" component={CustomerWalletPage} />
       <Stack.Screen
         name="CustomerServiceOrders"
@@ -123,7 +129,7 @@ const AppNavigator = () => {
         name="CustomerServiceOrderDetail"
         component={CusServiceOrderDetailPage}
       />
-      {/* <Stack.Screen name="GuaranteeRequest" component={GuaranteeRequestPage} /> */}
+      <Stack.Screen name="GuaranteeRequest" component={GuaranteeRequestPage} />
       <Stack.Screen
         name="CustomerGuaranteeOrders"
         component={CusGuaranteeOrderListPage}
@@ -148,15 +154,15 @@ const AppNavigator = () => {
         component={ProductManagementListPage}
       />
       <Stack.Screen name="PostManagement" component={PostManagementListPage} />
-      {/* <Stack.Screen name="ServiceConfig" component={ServiceConfiguration} /> */}
+      <Stack.Screen name="ServiceConfig" component={ServiceConfiguration} />
       {/* <Stack.Screen
         name="WWComplaintManagement"
         component={WWComplaintManagementPage}
       /> */}
-      {/* <Stack.Screen
+      <Stack.Screen
         name="ReviewManagement"
         component={ReviewManagementListPage}
-      /> */}
+      />
       <Stack.Screen name="WWWallet" component={WWWalletPage} />
       <Stack.Screen
         name="WoodworkerProfile"
@@ -167,14 +173,14 @@ const AppNavigator = () => {
         name="WWServiceOrderDetail"
         component={WWServiceOrderDetailPage}
       />
-      {/* <Stack.Screen
+      <Stack.Screen
         name="WWGuaranteeOrders"
         component={WWGuaranteeOrderListPage}
-      /> */}
-      {/* <Stack.Screen
+      />
+      <Stack.Screen
         name="WWGuaranteeOrderDetail"
         component={WWGuaranteeOrderDetailPage}
-      /> */}
+      />
 
       {/* Status Pages */}
       <Stack.Screen name="Success" component={SuccessPage} />
