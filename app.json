@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.woodworker.app",
@@ -33,7 +35,10 @@
             "scheme": "woodworker",
             "host": "payment-success"
           },
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         },
         {
           "action": "VIEW",
@@ -49,7 +54,10 @@
               "pathPrefix": "/payment-success"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         },
         {
           "action": "VIEW",
@@ -57,7 +65,10 @@
             "scheme": "woodworker",
             "host": "service-pack-success"
           },
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         },
         {
           "action": "VIEW",
@@ -65,7 +76,10 @@
             "scheme": "woodworker",
             "host": "wallet-topup-success"
           },
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         },
         {
           "action": "VIEW",
@@ -73,7 +87,10 @@
             "scheme": "woodworkcrafts",
             "host": "payment-success"
           },
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -82,7 +99,10 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "imgbbApiKey": "6baa7400e5d6030826c0332a84daea77"
+      "imgbbApiKey": "6baa7400e5d6030826c0332a84daea77",
+      "eas": {
+        "projectId": "990c1d79-af67-40d9-9a38-7c39b2effdcb"
+      }
     }
   }
 }
