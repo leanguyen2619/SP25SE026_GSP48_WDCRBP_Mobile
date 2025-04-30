@@ -241,7 +241,7 @@ export default function FinishUpdateModal({
           color={appColorTheme.blue_0}
           style={styles.icon}
         />
-        <Text style={styles.buttonText}>Hoàn thành sửa chữa</Text>
+        <Text style={styles.buttonText}>Xác nhận hoàn thành và trả hàng</Text>
       </TouchableOpacity>
 
       <Modal

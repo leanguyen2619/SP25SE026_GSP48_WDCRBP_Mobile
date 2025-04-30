@@ -15,7 +15,7 @@ export default function Footer() {
     { name: "Products", label: "Sản phẩm", icon: "shopping-bag" },
     { name: "Designs", label: "Thiết kế", icon: "grid" },
     { name: "Woodworkers", label: "Xưởng mộc", icon: "users" },
-    { name: "GuaranteeRequest", label: "Bảo hành", icon: "tool" },
+    { name: "GuaranteeRequest", label: "Sửa chữa / Bảo hành", icon: "tool" },
     { name: "Pricing", label: "Pricing", icon: "dollar-sign" },
   ];
 
