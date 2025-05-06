@@ -22,20 +22,19 @@ import CustomerLayout from "../../../../../layouts/CustomerLayout.jsx";
 export default function CusServiceOrderDetailPage() {
   const route = useRoute();
   const { orderId } = route.params;
-  const { data, isLoading, error, refetch } = useGetServiceOrderByIdQuery(
-    orderId,
-    {
+  const { data, isLoading, error, refetch, isFetching } =
+    useGetServiceOrderByIdQuery(orderId, {
       refetchOnMountOrArgChange: true,
       refetchOnFocus: true,
       refetchOnReconnect: true,
-    }
-  );
+    });
   const order = data?.data;
   const {
     data: depositsResponse,
     isLoading: isDepositsLoading,
     error: depositsError,
     refetch: refetchDeposit,
+    isFetching: isDepositsFetching,
   } = useGetAllOrderDepositByOrderIdQuery(orderId, {
     refetchOnMountOrArgChange: true,
     refetchOnFocus: true,
@@ -121,14 +120,16 @@ export default function CusServiceOrderDetailPage() {
           </View>
 
           <View style={styles.actionContainer}>
-            <ActionBar
-              deposits={deposits}
-              order={order}
-              refetch={refetch}
-              status={order?.status}
-              feedback={order?.feedback}
-              refetchDeposit={refetchDeposit}
-            />
+            {!isFetching && !isDepositsFetching && (
+              <ActionBar
+                deposits={deposits}
+                order={order}
+                refetch={refetch}
+                status={order?.status}
+                feedback={order?.feedback}
+                refetchDeposit={refetchDeposit}
+              />
+            )}
           </View>
         </View>
 

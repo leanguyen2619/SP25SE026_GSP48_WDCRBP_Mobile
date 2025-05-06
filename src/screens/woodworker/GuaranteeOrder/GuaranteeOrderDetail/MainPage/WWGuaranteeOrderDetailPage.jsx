@@ -21,20 +21,19 @@ import WoodworkerLayout from "../../../../../layouts/WoodworkerLayout.jsx";
 export default function WWGuaranteeOrderDetailPage() {
   const route = useRoute();
   const { id: orderId } = route.params;
-  const { data, isLoading, error, refetch } = useGetGuaranteeOrderByIdQuery(
-    orderId,
-    {
+  const { data, isLoading, error, refetch, isFetching } =
+    useGetGuaranteeOrderByIdQuery(orderId, {
       refetchOnMountOrArgChange: true,
       refetchOnFocus: true,
       refetchOnReconnect: true,
-    }
-  );
+    });
 
   const {
     data: depositsResponse,
     isLoading: isDepositsLoading,
     error: depositsError,
     refetch: refetchDeposit,
+    isFetching: isDepositsFetching,
   } = useGetAllOrderDepositByGuaranteeOrderIdQuery(orderId, {
     refetchOnMountOrArgChange: true,
     refetchOnFocus: true,
@@ -116,14 +115,16 @@ export default function WWGuaranteeOrderDetailPage() {
           </View>
 
           <View style={styles.actionContainer}>
-            <ActionBar
-              deposits={deposits}
-              order={order}
-              refetchDeposit={refetchDeposit}
-              refetch={refetch}
-              status={order?.status}
-              feedback={order?.feedback}
-            />
+            {!isFetching && !isDepositsFetching && (
+              <ActionBar
+                deposits={deposits}
+                order={order}
+                refetchDeposit={refetchDeposit}
+                refetch={refetch}
+                status={order?.status}
+                feedback={order?.feedback}
+              />
+            )}
           </View>
         </View>
 
