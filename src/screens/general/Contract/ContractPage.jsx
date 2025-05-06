@@ -225,14 +225,6 @@ export default function ContractPage() {
             </View>
           </View>
 
-          {/* Warranty */}
-          <Text style={styles.paragraph}>
-            Bên A sẽ chịu trách nhiệm bảo hành dịch vụ theo chính sách:
-          </Text>
-          <Text style={[styles.bold, styles.paragraph]}>
-            {contract.warrantyPolicy || "Không có"}
-          </Text>
-
           {/* Woodworker terms */}
           {contract.woodworkerTerms && (
             <View style={styles.section}>
@@ -240,6 +232,16 @@ export default function ContractPage() {
                 Điều khoản của bên A:
               </Text>
               <Text style={styles.paragraph}>{contract.woodworkerTerms}</Text>
+            </View>
+          )}
+
+          {/* Woodworker and customer agreement */}
+          {contract.agreement && (
+            <View style={styles.section}>
+              <Text style={[styles.bold, styles.sectionTitle]}>
+                Nội dung đã thống nhất giữa 2 bên:
+              </Text>
+              <Text style={styles.paragraph}>{contract.agreement}</Text>
             </View>
           )}
 

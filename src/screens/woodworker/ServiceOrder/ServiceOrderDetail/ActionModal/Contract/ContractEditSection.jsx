@@ -20,6 +20,7 @@ export default function ContractEditSection({
   savedSignature,
   order,
   isExistingContract,
+  isPersonalizationService,
 }) {
   const [contract, setContract] = useState({
     woodworkerTerms: "",
@@ -53,6 +54,7 @@ export default function ContractEditSection({
         requestedProductIds: productIds,
         warrantyDurations: durations,
         woodworkerSignature: initialContract.woodworkerSignature || "",
+        agreement: initialContract.agreement || "",
       }));
     } else if (order) {
       setContract((prev) => ({
@@ -135,6 +137,22 @@ export default function ContractEditSection({
             />
           </View>
 
+          {isPersonalizationService && (
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>
+                Nội dung đã thống nhất: <Text style={styles.required}>*</Text>
+              </Text>
+              <TextInput
+                style={styles.textarea}
+                multiline={true}
+                numberOfLines={6}
+                value={contract.agreement}
+                onChangeText={(value) => handleChange("agreement", value)}
+                placeholder="Nhập nội dung đã thống nhất"
+              />
+            </View>
+          )}
+
           {/* Product warranty durations table */}
           <View style={styles.formGroup}>
             <Text style={styles.label}>
@@ -211,7 +229,8 @@ export default function ContractEditSection({
           {/* Completion date */}
           <View style={styles.formGroup}>
             <Text style={styles.label}>
-              Ngày hoàn thành: <Text style={styles.required}>*</Text>
+              Ngày cam kết hoàn thành sản phẩm::{" "}
+              <Text style={styles.required}>*</Text>
             </Text>
             <TouchableOpacity
               style={styles.dateInput}

@@ -58,19 +58,13 @@ export default function Pricing({
             pack.productManagement
               ? "Quản lý sản phẩm & bán sản phẩm có sẵn"
               : "Quản lý sản phẩm & bán sản phẩm có sẵn",
-            pack.searchResultPriority === 100
-              ? "Ưu tiên cao nhất trong kết quả tìm kiếm"
-              : pack.searchResultPriority > 1
-              ? "Ưu tiên hiển thị trong kết quả tìm kiếm"
-              : "Ưu tiên hiển thị trong kết quả tìm kiếm",
             pack.personalization
               ? "Chức năng cung cấp dịch vụ cá nhân hóa"
               : "Chức năng cung cấp dịch vụ cá nhân hóa",
           ].filter(Boolean),
           unavailableFeatures: [
             !pack.productManagement && 5,
-            pack.searchResultPriority === 1 && 6,
-            !pack.personalization && 7,
+            !pack.personalization && 6,
           ].filter(Boolean),
         };
       }
@@ -94,112 +88,120 @@ export default function Pricing({
     );
   }
 
-  const renderPlanItem = ({ item: plan, index }) => (
-    <View style={styles.planCard}>
-      <View style={styles.planContent}>
-        <View style={styles.planHeader}>
-          <Text style={styles.planTitle}>{plan.name}</Text>
-          {servicePackId == plan.prices[selectedPeriod]?.servicePackId && (
-            <Text style={styles.purchasedLabel}>(Đã mua trước đó)</Text>
-          )}
-        </View>
-
-        <View style={styles.priceContainer}>
-          <Text style={styles.priceText}>
-            {plan.prices[selectedPeriod]?.price?.toLocaleString()}
-          </Text>
-          <Text style={styles.periodText}>
-            đồng/
-            {selectedPeriod === 12
-              ? "năm"
-              : selectedPeriod === 3
-              ? "quý"
-              : "tháng"}
-          </Text>
-        </View>
-
-        <TouchableOpacity
-          style={[
-            styles.actionButton,
-            (() => {
-              // Logic to determine if button should be disabled
-              if (!packName) return false; // No current package, enable all buttons
-
-              const currentPackRank = {
-                Bronze: 1,
-                Silver: 2,
-                Gold: 3,
-              };
-
-              const currentRank = currentPackRank[packName] || 0;
-              const optionRank =
-                currentPackRank[plan.prices[selectedPeriod]?.name] || 0;
-
-              // Disable if this would be a downgrade
-              return optionRank < currentRank ? styles.disabledButton : null;
-            })(),
-          ]}
-          disabled={(() => {
-            if (!packName) return false;
-
-            const currentPackRank = {
-              Bronze: 1,
-              Silver: 2,
-              Gold: 3,
-            };
-
-            const currentRank = currentPackRank[packName] || 0;
-            const optionRank =
-              currentPackRank[plan.prices[selectedPeriod]?.name] || 0;
-
-            return optionRank < currentRank;
-          })()}
-          onPress={() => {
-            handleButtonClick
-              ? handleButtonClick(plan.prices[selectedPeriod])
-              : navigation.navigate("WWRegister");
-          }}
-        >
-          <Text style={styles.buttonText}>
-            {packName == plan.prices[selectedPeriod]?.name
-              ? "Gia hạn thêm"
-              : label}
-          </Text>
-        </TouchableOpacity>
-
-        <View style={styles.featuresContainer}>
-          {plan.features.map((feature, featureIndex) => (
-            <View key={featureIndex} style={styles.featureRow}>
-              {plan.unavailableFeatures?.includes(featureIndex) ? (
-                <Ionicons
-                  name="close-circle"
-                  size={20}
-                  color="red"
-                  style={styles.featureIcon}
-                />
-              ) : (
-                <Ionicons
-                  name="checkmark-circle"
-                  size={20}
-                  color={appColorTheme.brown_1}
-                  style={styles.featureIcon}
-                />
+  const renderPlanItem = ({ item: plan, index }) => {
+    if (plan?.prices) {
+      return (
+        <View style={styles.planCard}>
+          <View style={styles.planContent}>
+            <View style={styles.planHeader}>
+              <Text style={styles.planTitle}>{plan.name}</Text>
+              {servicePackId == plan?.prices[selectedPeriod]?.servicePackId && (
+                <Text style={styles.purchasedLabel}>(Đã mua trước đó)</Text>
               )}
-              <Text
-                style={[
-                  styles.featureText,
-                  plan.unavailableFeatures?.includes(featureIndex) &&
-                    styles.unavailableText,
-                ]}
-              >
-                {feature}
+            </View>
+
+            <View style={styles.priceContainer}>
+              <Text style={styles.priceText}>
+                {plan.prices[selectedPeriod]?.price?.toLocaleString()}
+              </Text>
+              <Text style={styles.periodText}>
+                đồng/
+                {selectedPeriod === 12
+                  ? "năm"
+                  : selectedPeriod === 3
+                  ? "quý"
+                  : "tháng"}
               </Text>
             </View>
-          ))}
+
+            <TouchableOpacity
+              style={[
+                styles.actionButton,
+                (() => {
+                  // Logic to determine if button should be disabled
+                  if (!packName) return false; // No current package, enable all buttons
+
+                  const currentPackRank = {
+                    Bronze: 1,
+                    Silver: 2,
+                    Gold: 3,
+                  };
+
+                  const currentRank = currentPackRank[packName] || 0;
+                  const optionRank =
+                    currentPackRank[plan.prices[selectedPeriod]?.name] || 0;
+
+                  // Disable if this would be a downgrade
+                  return optionRank < currentRank
+                    ? styles.disabledButton
+                    : null;
+                })(),
+              ]}
+              disabled={(() => {
+                if (!packName) return false;
+
+                const currentPackRank = {
+                  Bronze: 1,
+                  Silver: 2,
+                  Gold: 3,
+                };
+
+                const currentRank = currentPackRank[packName] || 0;
+                const optionRank =
+                  currentPackRank[plan.prices[selectedPeriod]?.name] || 0;
+
+                return optionRank < currentRank;
+              })()}
+              onPress={() => {
+                handleButtonClick
+                  ? handleButtonClick(plan.prices[selectedPeriod])
+                  : navigation.navigate("WWRegister");
+              }}
+            >
+              <Text style={styles.buttonText}>
+                {packName == plan.prices[selectedPeriod]?.name
+                  ? "Gia hạn thêm"
+                  : label}
+              </Text>
+            </TouchableOpacity>
+
+            <View style={styles.featuresContainer}>
+              {plan.features.map((feature, featureIndex) => (
+                <View key={featureIndex} style={styles.featureRow}>
+                  {plan.unavailableFeatures?.includes(featureIndex) ? (
+                    <Ionicons
+                      name="close-circle"
+                      size={20}
+                      color="red"
+                      style={styles.featureIcon}
+                    />
+                  ) : (
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={20}
+                      color={appColorTheme.brown_1}
+                      style={styles.featureIcon}
+                    />
+                  )}
+                  <Text
+                    style={[
+                      styles.featureText,
+                      plan.unavailableFeatures?.includes(featureIndex) &&
+                        styles.unavailableText,
+                    ]}
+                  >
+                    {feature}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </View>
         </View>
-      </View>
-    </View>
-  );
+      );
+    } else {
+      return null;
+    }
+  };
 
   return (
     <ScrollView style={styles.container}>

@@ -13,6 +13,7 @@ import PackManagement from "../Pack/PackManagement.jsx";
 import PersonalInformationManagement from "../PersonalInformation/PersonalInformationManagement.jsx";
 import WoodworkerInformationManagement from "../WoodworkerInformation/WoodworkerInformationManagement.jsx";
 import WoodworkerLayout from "../../../../../layouts/WoodworkerLayout.jsx";
+import PublicProfileSwitch from "../../../../../components/Header/PublicProfileSwitch.jsx";
 
 export default function WoodworkerProfileManagementPage() {
   const { auth } = useAuth();
@@ -80,6 +81,10 @@ export default function WoodworkerProfileManagementPage() {
             woodworker={woodworker}
             refreshData={refetch}
           />
+
+          <View style={styles.switchContainer}>
+            <PublicProfileSwitch />
+          </View>
 
           <View style={styles.sectionDivider} />
 

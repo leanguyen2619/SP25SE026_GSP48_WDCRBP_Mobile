@@ -60,13 +60,13 @@ export default function ProductDetailPage() {
     (service) => service?.service?.serviceName === "Sale"
   );
 
-  const isSaleAvailable = saleService?.operatingStatus !== false;
+  const isSaleAvailable =
+    saleService?.operatingStatus !== false && saleService?.status !== false;
 
   // Check if service pack is valid (not expired, not BRONZE)
   const isServicePackValid =
     product?.servicePackEndDate &&
-    Date.now() <= new Date(product.servicePackEndDate).getTime() &&
-    product?.packType !== servicePackNameConstants.BRONZE;
+    Date.now() <= new Date(product.servicePackEndDate).getTime();
 
   const isWoodworkerProfilePublic = product?.isWoodworkerProfilePublic == true;
 
