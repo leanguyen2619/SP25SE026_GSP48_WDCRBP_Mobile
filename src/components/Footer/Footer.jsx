@@ -22,7 +22,8 @@ export default function Footer() {
   // apply same visibility rules as Header
   const filtered = links.filter((link) => {
     if (link.name === "Pricing" && auth?.role) return false;
-    if (link.name === "Guarantee" && auth?.role !== "Customer") return false;
+    if (link.name === "GuaranteeRequest" && auth?.role !== "Customer")
+      return false;
     return true;
   });
 

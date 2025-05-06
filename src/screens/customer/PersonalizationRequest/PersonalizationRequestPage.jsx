@@ -87,12 +87,12 @@ export default function PersonalizationRequestPage() {
   );
 
   const isPersonalizationAvailable =
-    personalizationService?.operatingStatus !== false;
+    personalizationService?.operatingStatus !== false &&
+    personalizationService?.status !== false;
 
   const isServicePackValid =
     woodworker?.servicePackEndDate &&
-    Date.now() <= new Date(woodworker.servicePackEndDate).getTime() &&
-    woodworker?.servicePack?.name === "Gold";
+    Date.now() <= new Date(woodworker.servicePackEndDate).getTime();
 
   const isServiceAvailable = isPersonalizationAvailable && isServicePackValid;
 

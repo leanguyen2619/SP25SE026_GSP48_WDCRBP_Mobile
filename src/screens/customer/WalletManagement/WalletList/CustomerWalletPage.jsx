@@ -109,6 +109,11 @@ export default function CustomerWalletPage() {
 
       <View style={styles.transactionDetails}>
         <View style={styles.detailRow}>
+          <Text style={styles.detailLabel}>Mục đích giao dịch:</Text>
+          <Text style={styles.detailValue}>{item.paymentFor}</Text>
+        </View>
+
+        <View style={styles.detailRow}>
           <Text style={styles.detailLabel}>Ngày tạo:</Text>
           <Text style={styles.detailValue}>
             {formatDateTimeString(item.createdAt)}
@@ -119,18 +124,6 @@ export default function CustomerWalletPage() {
           <Text style={styles.detailLabel}>Số tiền:</Text>
           <Text style={[styles.detailValue, getAmountStyle(item)]}>
             {getFormattedAmount(item)}
-          </Text>
-        </View>
-
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Trạng thái:</Text>
-          <Text
-            style={[
-              styles.detailValue,
-              { color: item.status ? "#38A169" : "#E53E3E" },
-            ]}
-          >
-            {item.status ? "Đã hoàn thành" : "Chưa hoàn thành"}
           </Text>
         </View>
       </View>

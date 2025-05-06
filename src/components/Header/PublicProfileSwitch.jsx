@@ -48,7 +48,11 @@ export default function PublicProfileSwitch() {
         "success"
       );
     } catch (error) {
-      notify("Lỗi cập nhật", "Không thể cập nhật trạng thái xưởng", "error");
+      notify(
+        "Lỗi cập nhật",
+        error?.data?.message || "Không thể cập nhật trạng thái xưởng",
+        "error"
+      );
     }
   };
 

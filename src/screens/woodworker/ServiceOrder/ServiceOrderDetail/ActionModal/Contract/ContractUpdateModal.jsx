@@ -135,6 +135,7 @@ export default function ContractUpdateModal({ order, refetch }) {
         serviceOrderId: parseInt(order.orderId),
         requestedProductIds: contractData.requestedProductIds,
         warrantyDurations: contractData.warrantyDurations,
+        agreement: contractData.agreement,
       };
 
       await createContractCustomize(postData).unwrap();
@@ -228,6 +229,7 @@ export default function ContractUpdateModal({ order, refetch }) {
                     contractResponse?.data ? (
                       <View style={styles.sectionContainer}>
                         <ContractEditSection
+                          isPersonalizationService={isPersonalizationService}
                           initialContract={contractResponse?.data || null}
                           onChange={handleContractDataChange}
                           onSaveSignature={handleSaveSignature}

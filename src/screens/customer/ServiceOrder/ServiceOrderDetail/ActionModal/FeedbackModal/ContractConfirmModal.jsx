@@ -199,7 +199,9 @@ export default function ContractConfirmModal({
                     </View>
 
                     <View style={styles.infoRow}>
-                      <Text style={styles.infoLabel}>Ngày hoàn thành:</Text>
+                      <Text style={styles.infoLabel}>
+                        Ngày cam kết hoàn thành sản phẩm::
+                      </Text>
                       <Text style={styles.infoValue}>
                         {formatDate(contract.completeDate)}
                       </Text>
@@ -366,7 +368,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  errorContainer: { 
+  errorContainer: {
     padding: 16,
     backgroundColor: "#FEE2E2",
     borderRadius: 8,

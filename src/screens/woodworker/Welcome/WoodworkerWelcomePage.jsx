@@ -13,6 +13,7 @@ import useAuth from "../../../hooks/useAuth";
 import { appColorTheme } from "../../../config/appconfig";
 import WoodworkerLayout from "../../../layouts/WoodworkerLayout";
 import PublicProfileSwitch from "../../../components/Header/PublicProfileSwitch";
+import PublicWWGuide from "../../general/Home/PublicWWGuide";
 
 const QuickActionCard = ({ icon, title, description, onPress, color }) => {
   return (
@@ -202,6 +203,8 @@ const WoodworkerWelcomePage = () => {
             />
           </>
         )}
+
+        <PublicWWGuide />
       </ScrollView>
     </WoodworkerLayout>
   );

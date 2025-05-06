@@ -83,14 +83,16 @@ export default function AvailableService({
               style={styles.serviceItem}
             >
               <Text style={styles.serviceTitle}>{serviceInfo.serviceName}</Text>
-              <View style={styles.descriptionContainer}>
-                <Text style={styles.descriptionLabel}>
-                  Mô tả dịch vụ của xưởng:
-                </Text>
-                <Text style={styles.descriptionText}>
-                  {availableService.description}
-                </Text>
-              </View>
+              {availableService?.description && (
+                <View style={styles.descriptionContainer}>
+                  <Text style={styles.descriptionLabel}>
+                    Mô tả dịch vụ của xưởng:
+                  </Text>
+                  <Text style={styles.descriptionText}>
+                    {availableService.description}
+                  </Text>
+                </View>
+              )}
               {auth?.role !== "Woodworker" && (
                 <TouchableOpacity
                   style={styles.serviceButton}

@@ -12,6 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import { appColorTheme } from "../../../config/appconfig";
 import useAuth from "../../../hooks/useAuth";
 import RootLayout from "../../../layouts/RootLayout.jsx";
+import PublicWWGuide from "./PublicWWGuide.jsx";
 
 const QuickActionCard = ({ icon, title, description, onPress, color }) => {
   // Simplified color mapping for React Native
@@ -111,17 +112,23 @@ export default function HomePage() {
             </TouchableOpacity>
           </View>
 
-          {/* Explore Section */}
-          <Text style={styles.sectionTitle}>Khám phá ngay</Text>
+          {auth?.role == "Woodworker" && <PublicWWGuide />}
 
-          {/* Quick Actions Grid */}
-          <View style={styles.grid}>
-            {quickActions.map((action, index) => (
-              <View style={styles.gridItem} key={index}>
-                <QuickActionCard {...action} />
+          {auth?.role != "Woodworker" && (
+            <View>
+              {/* Explore Section */}
+              <Text style={styles.sectionTitle}>Khám phá ngay</Text>
+
+              {/* Quick Actions Grid */}
+              <View style={styles.grid}>
+                {quickActions.map((action, index) => (
+                  <View style={styles.gridItem} key={index}>
+                    <QuickActionCard {...action} />
+                  </View>
+                ))}
               </View>
-            ))}
-          </View>
+            </View>
+          )}
         </View>
       </ScrollView>
     </RootLayout>

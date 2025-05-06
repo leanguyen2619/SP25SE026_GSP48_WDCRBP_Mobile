@@ -28,6 +28,12 @@ export const servicePackApi = createApi({
   endpoints: (builder) => ({
     getAllServicePacks: builder.query({
       query: () => ({
+        url: "/api/v1/service-pack/listActive",
+        method: "GET",
+      }),
+    }),
+    getAllServicePacksAdmin: builder.query({
+      query: () => ({
         url: "/api/v1/service-pack/list",
         method: "GET",
       }),
@@ -63,6 +69,7 @@ export const servicePackApi = createApi({
 
 export const {
   useGetAllServicePacksQuery,
+  useGetAllServicePacksAdminQuery,
   useGetServicePackDetailQuery,
   useCreateServicePackMutation,
   useUpdateServicePackMutation,
