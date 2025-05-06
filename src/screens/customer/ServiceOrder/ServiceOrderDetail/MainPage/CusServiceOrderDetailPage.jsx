@@ -120,7 +120,7 @@ export default function CusServiceOrderDetailPage() {
           </View>
 
           <View style={styles.actionContainer}>
-            {!isFetching && !isDepositsFetching && (
+            {!isFetching && !isDepositsFetching ? (
               <ActionBar
                 deposits={deposits}
                 order={order}
@@ -129,6 +129,10 @@ export default function CusServiceOrderDetailPage() {
                 feedback={order?.feedback}
                 refetchDeposit={refetchDeposit}
               />
+            ) : (
+              <View style={styles.loadingBarContainer}>
+                <ActivityIndicator size="small" color={appColorTheme.brown_2} />
+              </View>
             )}
           </View>
         </View>
@@ -301,5 +305,10 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 8,
     paddingHorizontal: 0,
+  },
+  loadingBarContainer: {
+    padding: 8,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
