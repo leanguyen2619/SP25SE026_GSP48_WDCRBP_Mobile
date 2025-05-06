@@ -55,21 +55,21 @@ export default function HomePage() {
       title: "Xưởng mộc",
       description: "Khám phá các xưởng mộc chất lượng",
       color: "blue",
-      onPress: () => navigation.navigate("Woodworker"),
+      onPress: () => navigation.navigate("Woodworkers"),
     },
     {
       icon: "edit-2",
       title: "Ý tưởng thiết kế",
       description: "Danh mục ý tưởng thiết kế đa dạng",
       color: "purple",
-      onPress: () => navigation.navigate("Design"),
+      onPress: () => navigation.navigate("Designs"),
     },
     {
       icon: "package",
       title: "Sản phẩm",
       description: "Danh mục các sản phẩm chất lượng",
       color: "green",
-      onPress: () => navigation.navigate("Product"),
+      onPress: () => navigation.navigate("Products"),
     },
   ];
 
