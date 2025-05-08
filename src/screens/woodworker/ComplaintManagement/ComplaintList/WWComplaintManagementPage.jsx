@@ -98,7 +98,6 @@ export default function WWComplaintManagementPage() {
       const sortedData = data.data
         .map((item) => ({
           ...item,
-          createdAt: new Date(item.createdAt),
         }))
         .sort((a, b) => b.complaintId - a.complaintId);
       setFilteredData(sortedData);
@@ -111,7 +110,6 @@ export default function WWComplaintManagementPage() {
 
     let filtered = data.data.map((item) => ({
       ...item,
-      createdAt: new Date(item.createdAt),
     }));
 
     // Apply status filter if selected

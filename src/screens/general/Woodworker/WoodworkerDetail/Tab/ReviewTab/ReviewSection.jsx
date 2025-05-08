@@ -16,6 +16,7 @@ import {
   getServiceTypeLabel,
   appColorTheme,
 } from "../../../../../../config/appconfig";
+import { formatDateTimeString } from "../../../../../../utils/utils";
 
 // Tạo component cho FilterPill
 const FilterPill = ({ label, isActive, onClick }) => (
@@ -46,11 +47,7 @@ const ReviewList = ({ data }) => {
             <View style={styles.reviewTimeContainer}>
               <Ionicons name="time-outline" size={12} color="#718096" />
               <Text style={styles.reviewTime}>
-                {new Date(review.createdAt).toLocaleDateString("vi-VN")}{" "}
-                {new Date(review.createdAt).toLocaleTimeString("vi-VN", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                {formatDateTimeString(review.createdAt)}
               </Text>
             </View>
             <View style={styles.reviewServiceContainer}>
@@ -77,11 +74,7 @@ const ReviewList = ({ data }) => {
                 {review.woodworkerResponse}
               </Text>
               <Text style={styles.responseTime}>
-                {new Date(review.responseAt).toLocaleDateString("vi-VN")}{" "}
-                {new Date(review.responseAt).toLocaleTimeString("vi-VN", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                {formatDateTimeString(review?.responseAt)}
               </Text>
             </View>
           )}
