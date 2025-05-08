@@ -73,18 +73,16 @@ export default function ActionBar({ status, feedback, order, refetch }) {
       }
     }
 
-    showCancelModal = false;
-
     return (
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+        {showCancelModal && (
+          <CancelModal serviceOrderId={order?.orderId} refetch={refetch} />
+        )}
         {showAppointmentModal && (
           <AppointmentUpdateModal refetch={refetch} order={order} />
         )}
         {showContractModal && (
           <ContractUpdateModal refetch={refetch} order={order} />
-        )}
-        {showCancelModal && (
-          <CancelModal serviceOrderId={order?.orderId} refetch={refetch} />
         )}
         {showDesignModal && (
           <DesignUpdateModal
