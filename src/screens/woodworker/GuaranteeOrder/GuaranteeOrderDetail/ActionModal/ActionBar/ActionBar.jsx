@@ -6,8 +6,49 @@ import QuotationUpdateModal from "../Quotation/QuotationUpdateModal.jsx";
 import ReceiveConfirmationModal from "./ReceiveConfirmationModal.jsx";
 import GuaranteeAcceptModal from "../Quotation/GuaranteeAcceptModal.jsx";
 import { View } from "react-native";
+import { useTrackOrderByCodeMutation } from "../../../../../../services/ghnApi.js";
+import { useGetShipmentsByGuaranteeOrderIdQuery } from "../../../../../../services/shipmentApi.js";
+import { useEffect, useState } from "react";
 
 export default function ActionBar({ status, feedback, order, refetch }) {
+  const [trackingData, setTrackingData] = useState({});
+
+  const { data: shipmentResponse } = useGetShipmentsByGuaranteeOrderIdQuery(
+    order?.guaranteeOrderId
+  );
+
+  const shipmentOrderCode = shipmentResponse?.data?.[0]?.orderCode;
+
+  const [trackOrderByCode] = useTrackOrderByCodeMutation();
+
+  // Fetch tracking information when shipment data is available
+  useEffect(() => {
+    const fetchTrackingData = async () => {
+      if (shipmentResponse?.data && !order?.install) {
+        for (const shipment of shipmentResponse.data) {
+          if (shipment.orderCode && shipment.orderCode !== "string") {
+            try {
+              const response = await trackOrderByCode({
+                order_code: shipment.orderCode,
+              }).unwrap();
+
+              setTrackingData((prev) => ({
+                ...prev,
+                [shipment.orderCode]: response.data.data,
+              }));
+            } catch (error) {
+              console.error("Error fetching tracking data:", error);
+            }
+          }
+        }
+      }
+    };
+
+    if (shipmentResponse?.data) {
+      fetchTrackingData();
+    }
+  }, [shipmentResponse, trackOrderByCode]);
+
   const renderActionButtons = () => {
     let showAppointmentModal = false;
     let showCancelModal = false;
@@ -50,7 +91,13 @@ export default function ActionBar({ status, feedback, order, refetch }) {
           break;
 
         case guaranteeOrderStatusConstants.DANG_CHO_NHAN_HANG:
-          showConfirmReceiveModal = true;
+          if (
+            shipmentOrderCode &&
+            trackingData[shipmentOrderCode] &&
+            trackingData[shipmentOrderCode]?.status == "delivered"
+          ) {
+            showConfirmReceiveModal = true;
+          }
 
           break;
 

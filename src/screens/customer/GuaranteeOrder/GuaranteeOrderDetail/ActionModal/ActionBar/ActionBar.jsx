@@ -7,6 +7,9 @@ import PaymentModal from "../FeedbackModal/PaymentModal.jsx";
 import useAuth from "../../../../../../hooks/useAuth.js";
 import ReviewModal from "../FeedbackModal/ReviewModal.jsx";
 import QuotationConfirmModal from "../FeedbackModal/QuotationConfirmModal.jsx";
+import { useTrackOrderByCodeMutation } from "../../../../../../services/ghnApi.js";
+import { useGetShipmentsByGuaranteeOrderIdQuery } from "../../../../../../services/shipmentApi.js";
+import { useEffect, useState } from "react";
 
 export default function ActionBar({
   status,
@@ -17,6 +20,44 @@ export default function ActionBar({
   deposits,
 }) {
   const { auth } = useAuth();
+
+  const [trackingData, setTrackingData] = useState({});
+
+  const { data: shipmentResponse } = useGetShipmentsByGuaranteeOrderIdQuery(
+    order?.guaranteeOrderId
+  );
+
+  const shipmentOrderCode = shipmentResponse?.data?.[1]?.orderCode;
+
+  const [trackOrderByCode] = useTrackOrderByCodeMutation();
+
+  // Fetch tracking information when shipment data is available
+  useEffect(() => {
+    const fetchTrackingData = async () => {
+      if (shipmentResponse?.data && !order?.install) {
+        for (const shipment of shipmentResponse.data) {
+          if (shipment.orderCode && shipment.orderCode !== "string") {
+            try {
+              const response = await trackOrderByCode({
+                order_code: shipment.orderCode,
+              }).unwrap();
+
+              setTrackingData((prev) => ({
+                ...prev,
+                [shipment.orderCode]: response.data.data,
+              }));
+            } catch (error) {
+              console.error("Error fetching tracking data:", error);
+            }
+          }
+        }
+      }
+    };
+
+    if (shipmentResponse?.data) {
+      fetchTrackingData();
+    }
+  }, [shipmentResponse, trackOrderByCode]);
 
   const renderActionButtons = () => {
     let showFeedbackButton = false;
@@ -95,8 +136,18 @@ export default function ActionBar({
 
         case guaranteeOrderStatusConstants.DANG_GIAO_HANG_LAP_DAT:
           if (unpaidDeposit) {
-            showPaymentButton = true;
-            paymentButtonText = "Thanh toán và xác nhận đơn hàng";
+            if (
+              !order?.install &&
+              shipmentOrderCode &&
+              trackingData[shipmentOrderCode] &&
+              trackingData[shipmentOrderCode]?.status == "delivered"
+            ) {
+              showPaymentButton = true;
+              paymentButtonText = "Thanh toán và xác nhận đơn hàng";
+            } else if (order?.install) {
+              showPaymentButton = true;
+              paymentButtonText = "Thanh toán và xác nhận đơn hàng";
+            }
           }
 
           break;
