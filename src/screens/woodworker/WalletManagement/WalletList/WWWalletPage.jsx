@@ -43,7 +43,6 @@ export default function WWWalletPage() {
     return [...response.data]
       .map((transaction) => ({
         ...transaction,
-        createdAt: new Date(transaction.createdAt),
       }))
       .sort((a, b) => b.transactionId - a.transactionId); // Sắp xếp giảm dần theo ID
   }, [response]);

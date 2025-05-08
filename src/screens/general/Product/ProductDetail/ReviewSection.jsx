@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useGetProductReviewsQuery } from "../../../../services/reviewApi.js";
 import { useRoute } from "@react-navigation/native";
 import { appColorTheme } from "../../../../config/appconfig.js";
+import { formatDateTimeString } from "../../../../utils/utils.js";
 
 // Component to render review items (will be passed to Pagination)
 const ReviewList = ({ data }) => {
@@ -27,11 +28,7 @@ const ReviewList = ({ data }) => {
               <View style={styles.timeContainer}>
                 <Ionicons name="time-outline" size={14} color="#718096" />
                 <Text style={styles.timeText}>
-                  {new Date(review.createdAt).toLocaleDateString("vi-VN")}{" "}
-                  {new Date(review.createdAt).toLocaleTimeString("vi-VN", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {formatDateTimeString(review.createdAt)}
                 </Text>
               </View>
             </View>
@@ -54,11 +51,7 @@ const ReviewList = ({ data }) => {
                   {review.woodworkerResponse}
                 </Text>
                 <Text style={styles.responseTime}>
-                  {new Date(review.responseAt).toLocaleDateString("vi-VN")}{" "}
-                  {new Date(review.responseAt).toLocaleTimeString("vi-VN", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {formatDateTimeString(review?.responseAt)}
                 </Text>
               </View>
             )}
