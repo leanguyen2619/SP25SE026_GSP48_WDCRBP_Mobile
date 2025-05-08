@@ -5,10 +5,7 @@ import {
   appColorTheme,
   getServiceOrderStatusColor,
 } from "../../../../config/appconfig";
-import {
-  formatPrice,
-  formatDateTimeToVietnamese,
-} from "../../../../utils/utils";
+import { formatPrice, formatDateTimeString } from "../../../../utils/utils";
 
 // Reverse lookup for display names
 const getServiceTypeDisplayName = (apiValue) => {
@@ -85,7 +82,7 @@ const ServiceOrderCard = ({ order, onViewDetails }) => {
         <View style={styles.infoRow}>
           <Text style={styles.label}>Ngày tạo:</Text>
           <Text style={styles.value}>
-            {formatDateTimeToVietnamese(order.createdAt)}
+            {formatDateTimeString(order.createdAt)}
           </Text>
         </View>
       </View>
@@ -93,10 +90,12 @@ const ServiceOrderCard = ({ order, onViewDetails }) => {
       <View style={styles.divider} />
 
       <View style={styles.cardFooter}>
-        {order.totalAmount && (
+        {order.totalAmount ? (
           <Text style={styles.totalAmount}>
             {formatPrice(order.totalAmount)}
           </Text>
+        ) : (
+          <Text style={styles.totalAmount}>Chưa cập nhật thành tiền</Text>
         )}
 
         <TouchableOpacity

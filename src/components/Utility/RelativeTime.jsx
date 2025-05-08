@@ -30,7 +30,7 @@ const RelativeTime = ({ dateString, style }) => {
       <Text style={[styles.dateText, style]}>
         Đăng vào:{" "}
         {showFullDate
-          ? formatDateTimeString(new Date(dateString))
+          ? formatDateTimeString(dateString)
           : getRelativeTime(dateString)}
       </Text>
     </TouchableOpacity>

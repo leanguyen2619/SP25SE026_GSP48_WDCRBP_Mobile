@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { appColorTheme } from "../../../config/appconfig";
 import { useGetContractByServiceOrderIdQuery } from "../../../services/contractApi";
+import { useGetByServiceOrderMutation } from "../../../services/quotationApi";
 import useAuth from "../../../hooks/useAuth";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { format } from "date-fns";
@@ -23,6 +24,8 @@ export default function ContractPage() {
   const navigation = useNavigation();
   const id = route.params?.id;
   const { auth } = useAuth();
+  const [quotationDetails, setQuotationDetails] = useState(null);
+  const [loadingQuotation, setLoadingQuotation] = useState(false);
 
   // Fetch contract data
   const {
@@ -30,6 +33,32 @@ export default function ContractPage() {
     isLoading,
     error,
   } = useGetContractByServiceOrderIdQuery(id);
+
+  // API mutation for quotation details
+  const [getQuotationDetails] = useGetByServiceOrderMutation();
+
+  // Fetch quotation details
+  useEffect(() => {
+    const fetchQuotationDetails = async () => {
+      if (id) {
+        try {
+          setLoadingQuotation(true);
+          const response = await getQuotationDetails({
+            serviceOrderId: id,
+          });
+          if (response.data?.data) {
+            setQuotationDetails(response.data.data);
+          }
+        } catch (err) {
+          console.error("Error fetching quotation details:", err);
+        } finally {
+          setLoadingQuotation(false);
+        }
+      }
+    };
+
+    fetchQuotationDetails();
+  }, [id]);
 
   // Handle loading state
   if (isLoading) {
@@ -185,7 +214,7 @@ export default function ContractPage() {
               {/* Table header */}
               <View style={styles.tableHeader}>
                 <Text style={[styles.tableHeaderCell, { flex: 3 }]}>
-                  Sản phẩm
+                  Loại sản phẩm
                 </Text>
                 <Text style={[styles.tableHeaderCell, { flex: 1 }]}>
                   Số lượng
@@ -224,6 +253,69 @@ export default function ContractPage() {
               ))}
             </View>
           </View>
+
+          {/* Quotation details */}
+          {quotationDetails?.[0]?.quotationDetails?.length > 0 && (
+            <>
+              <View style={styles.section}>
+                <Text style={[styles.bold, styles.sectionTitle]}>
+                  Báo giá chi tiết từng sản phẩm:
+                </Text>
+                {loadingQuotation ? (
+                  <ActivityIndicator
+                    size="small"
+                    color={appColorTheme.brown_2}
+                  />
+                ) : quotationDetails && quotationDetails.length > 0 ? (
+                  quotationDetails.map((item, index) => (
+                    <View key={index} style={styles.quotationSection}>
+                      <Text style={[styles.bold, styles.quotationProductTitle]}>
+                        {item.requestedProduct.category} - Số lượng:{" "}
+                        {item.requestedProduct.quantity}
+                      </Text>
+
+                      <View style={styles.tableContainer}>
+                        <View style={styles.tableHeader}>
+                          <Text style={[styles.tableHeaderCell, { flex: 3 }]}>
+                            Hạng mục chi phí
+                          </Text>
+                          <Text style={[styles.tableHeaderCell, { flex: 2 }]}>
+                            Số lượng cần dùng
+                          </Text>
+                          <Text style={[styles.tableHeaderCell, { flex: 2 }]}>
+                            Thành tiền
+                          </Text>
+                        </View>
+
+                        {item.quotationDetails.map((detail, detailIndex) => (
+                          <View key={detailIndex} style={styles.tableRow}>
+                            <Text style={[styles.tableCell, { flex: 3 }]}>
+                              {detail.costType}
+                            </Text>
+                            <Text style={[styles.tableCell, { flex: 2 }]}>
+                              {detail.quantityRequired}
+                            </Text>
+                            <Text
+                              style={[
+                                styles.tableCell,
+                                { flex: 2, textAlign: "right" },
+                              ]}
+                            >
+                              {formatCurrency(detail.costAmount)}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  ))
+                ) : (
+                  <Text style={styles.noDataText}>
+                    Không có dữ liệu báo giá chi tiết
+                  </Text>
+                )}
+              </View>
+            </>
+          )}
 
           {/* Woodworker terms */}
           {contract.woodworkerTerms && (
@@ -416,5 +508,17 @@ const styles = StyleSheet.create({
     width: 150,
     height: 80,
     marginTop: 10,
+  },
+  quotationSection: {
+    marginBottom: 16,
+  },
+  quotationProductTitle: {
+    fontSize: 16,
+    marginVertical: 8,
+  },
+  noDataText: {
+    fontStyle: "italic",
+    marginTop: 8,
+    color: "#666",
   },
 });

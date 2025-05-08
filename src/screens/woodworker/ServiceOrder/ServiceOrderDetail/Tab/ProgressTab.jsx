@@ -24,6 +24,7 @@ import {
   formatDateString,
 } from "../../../../../utils/utils.js";
 import ghnLogo from "../../../../../assets/images/ghnLogo.webp";
+import GHNProgress from "./GHNProgress.jsx";
 
 export default function ProgressTab({ order, activeTabIndex, isActive }) {
   const route = useRoute();
@@ -181,7 +182,7 @@ export default function ProgressTab({ order, activeTabIndex, isActive }) {
                 <View style={styles.timelineContent}>
                   <Text style={styles.timelineTitle}>{progress.status}</Text>
                   <Text style={styles.timelineDate}>
-                    {formatDateTimeString(new Date(progress.createdTime))}
+                    {formatDateTimeString(progress.createdTime)}
                   </Text>
                 </View>
               </View>
@@ -231,7 +232,7 @@ export default function ProgressTab({ order, activeTabIndex, isActive }) {
                     </Text>
                     {progress && (
                       <Text style={styles.timelineDate}>
-                        {formatDateTimeString(new Date(progress.createdTime))}
+                        {formatDateTimeString(progress.createdTime)}
                       </Text>
                     )}
                   </View>
@@ -297,53 +298,10 @@ export default function ProgressTab({ order, activeTabIndex, isActive }) {
                 )}
 
                 {shipment.orderCode && shipment.orderCode !== "string" && (
-                  <View style={styles.shipmentTrackingContainer}>
-                    <View style={styles.shipmentInfoRow}>
-                      <Text style={styles.shipmentInfoLabel}>Mã vận đơn:</Text>
-                      <Text style={styles.shipmentInfoValue}>
-                        {shipment.orderCode}
-                      </Text>
-                    </View>
-
-                    <TouchableOpacity
-                      style={styles.trackingLink}
-                      onPress={() =>
-                        Linking.openURL(
-                          `https://donhang.ghn.vn/?order_code=${shipment.orderCode}`
-                        )
-                      }
-                    >
-                      <Text style={styles.trackingLinkText}>Tra cứu</Text>
-                    </TouchableOpacity>
-
-                    <View style={styles.shipmentInfoRow}>
-                      <Text style={styles.shipmentInfoLabel}>
-                        Ngày giao dự kiến:
-                      </Text>
-                      <Text style={styles.shipmentInfoValue}>
-                        {trackingData[shipment.orderCode]?.leadtime
-                          ? formatDateString(
-                              new Date(
-                                trackingData[shipment.orderCode].leadtime
-                              )
-                            )
-                          : "Không có thông tin"}
-                      </Text>
-                    </View>
-
-                    <View style={styles.shipmentInfoRow}>
-                      <Text style={styles.shipmentInfoLabel}>
-                        Trạng thái vận chuyển:
-                      </Text>
-                      <Text style={styles.shipmentInfoValue}>
-                        {trackingData[shipment.orderCode]?.status
-                          ? translateShippingStatus(
-                              trackingData[shipment.orderCode].status
-                            )
-                          : "Không có thông tin"}
-                      </Text>
-                    </View>
-                  </View>
+                  <GHNProgress
+                    shipment={shipment}
+                    trackingData={trackingData}
+                  />
                 )}
               </View>
             ))}

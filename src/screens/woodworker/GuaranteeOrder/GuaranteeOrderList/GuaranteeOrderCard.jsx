@@ -11,10 +11,7 @@ import {
   appColorTheme,
   getGuaranteeOrderStatusColor,
 } from "../../../../config/appconfig";
-import {
-  formatPrice,
-  formatDateTimeToVietnamese,
-} from "../../../../utils/utils";
+import { formatPrice, formatDateTimeString } from "../../../../utils/utils";
 
 const GuaranteeOrderCard = ({ order, onViewDetails }) => {
   // Chuyển đổi màu status từ Chakra UI sang React Native
@@ -93,7 +90,7 @@ const GuaranteeOrderCard = ({ order, onViewDetails }) => {
           <View style={styles.row}>
             <Text style={styles.label}>Ngày tạo:</Text>
             <Text style={styles.value}>
-              {formatDateTimeToVietnamese(order.createdAt)}
+              {formatDateTimeString(order.createdAt)}
             </Text>
           </View>
 
@@ -112,7 +109,7 @@ const GuaranteeOrderCard = ({ order, onViewDetails }) => {
         {order.totalAmount ? (
           <Text style={styles.priceText}>{formatPrice(order.totalAmount)}</Text>
         ) : (
-          <Text style={styles.pendingText}>Chưa cập nhật</Text>
+          <Text style={styles.pendingText}>Chưa cập nhật thành tiền</Text>
         )}
 
         <TouchableOpacity

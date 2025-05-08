@@ -3,7 +3,7 @@ import {
   appColorTheme,
   complaintStatusConstants,
 } from "../../../../config/appconfig";
-import { formatDateTimeToVietnamese } from "../../../../utils/utils";
+import { formatDateTimeString } from "../../../../utils/utils";
 import ComplaintDetailModal from "../ActionModal/ComplaintDetailModal";
 
 const ComplaintCard = ({ complaint, refetch }) => {
@@ -69,7 +69,7 @@ const ComplaintCard = ({ complaint, refetch }) => {
             <View style={styles.infoRow}>
               <Text style={styles.label}>Ngày tạo:</Text>
               <Text style={styles.value}>
-                {formatDateTimeToVietnamese(complaint.createdAt)}
+                {formatDateTimeString(complaint.createdAt)}
               </Text>
             </View>
           </View>
