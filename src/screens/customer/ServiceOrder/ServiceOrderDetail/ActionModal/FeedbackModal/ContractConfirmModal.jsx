@@ -22,7 +22,7 @@ import {
 } from "../../../../../../services/contractApi";
 import SignatureComponent from "../../../../../../components/Common/SignatureComponent";
 import { useImageUpload } from "../../../../../../hooks/useImageUpload";
-
+import { useNavigation } from "@react-navigation/native";
 export default function ContractConfirmModal({
   serviceOrderId,
   buttonText = "Xác nhận hợp đồng",
@@ -35,6 +35,7 @@ export default function ContractConfirmModal({
   const [isCheckboxDisabled, setIsCheckboxDisabled] = useState(true);
   const { uploadImage } = useImageUpload();
   const [submitLoading, setSubmitLoading] = useState(false);
+  const navigate = useNavigation();
 
   // Signature state
   const [savedSignature, setSavedSignature] = useState(false);
@@ -191,7 +192,9 @@ export default function ContractConfirmModal({
                     <View style={styles.infoRow}>
                       <TouchableOpacity
                         onPress={() =>
-                          Linking.openURL(`/contract/${serviceOrderId}`)
+                          navigate.navigate("Contract", {
+                            id: serviceOrderId,
+                          })
                         }
                       >
                         <Text style={styles.linkText}>Xem chi tiết</Text>
