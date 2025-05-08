@@ -21,7 +21,7 @@ export default function DesignList({ designs = [] }) {
   if (!designs.length) {
     return (
       <View style={styles.centerContainer}>
-        <Text>Không tìm thấy thiết kế nào</Text>
+        <Text>Đang tải danh sách thiết kế</Text>
       </View>
     );
   }

@@ -71,7 +71,7 @@ export default function GeneralInformationTab({ order, isActive }) {
               <Text style={styles.infoLabel}>Ngày đặt:</Text>
               <Text style={styles.infoValue}>
                 {order?.createdAt
-                  ? formatDateTimeString(new Date(order.createdAt))
+                  ? formatDateTimeString(order.createdAt)
                   : "Chưa cập nhật"}
               </Text>
             </View>

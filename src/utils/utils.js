@@ -6,17 +6,11 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 export const formatDateString = (timestamp) => {
-  return dayjs
-    .utc(timestamp) // parse as UTC
-    .tz("Asia/Ho_Chi_Minh") // convert to HCMC time
-    .format("DD/MM/YYYY");
+  return dayjs.utc(timestamp).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY");
 };
 
 export const formatDateTimeString = (timestamp) => {
-  return dayjs
-    .utc(timestamp) // parse as UTC
-    .tz("Asia/Ho_Chi_Minh") // convert to HCMC time
-    .format("DD/MM/YYYY HH:mm");
+  return dayjs.utc(timestamp).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm");
 };
 
 export const formatDateToVietnamese = (dateString) => {

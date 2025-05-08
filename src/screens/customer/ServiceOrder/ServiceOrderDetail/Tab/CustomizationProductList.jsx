@@ -174,9 +174,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     color: appColorTheme.brown_2,
   },
-  productList: {
-    maxHeight: 500,
-  },
+  productList: {},
   accordionItem: {
     borderWidth: 1,
     borderColor: "#E2E8F0",

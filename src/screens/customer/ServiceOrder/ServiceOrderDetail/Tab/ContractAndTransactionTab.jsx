@@ -63,7 +63,7 @@ const TransactionItem = ({ deposit }) => (
       label="Ngày tạo:"
       value={
         deposit.createdAt
-          ? formatDateTimeString(new Date(deposit.createdAt))
+          ? formatDateTimeString(deposit.createdAt)
           : "Chưa cập nhật"
       }
     />
@@ -72,7 +72,7 @@ const TransactionItem = ({ deposit }) => (
       label="Ngày thanh toán:"
       value={
         deposit.updatedAt
-          ? formatDateTimeString(new Date(deposit.updatedAt))
+          ? formatDateTimeString(deposit.updatedAt)
           : "Chưa cập nhật"
       }
     />
@@ -231,7 +231,7 @@ export default function ContractAndTransactionTab({
                   label="Thời hạn bảo hành:"
                   value={
                     contract.warrantyPeriod
-                      ? formatDateTimeString(new Date(contract.warrantyPeriod))
+                      ? formatDateTimeString(contract.warrantyPeriod)
                       : null
                   }
                 />

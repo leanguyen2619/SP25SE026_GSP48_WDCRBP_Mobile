@@ -122,7 +122,7 @@ export default function Transaction({ order }) {
                     <Text style={styles.boldText}>Ngày tạo:</Text>
                     <Text>
                       {deposit.createdAt
-                        ? formatDateTimeString(new Date(deposit.createdAt))
+                        ? formatDateTimeString(deposit.createdAt)
                         : "Chưa cập nhật"}
                     </Text>
                   </View>
@@ -131,7 +131,7 @@ export default function Transaction({ order }) {
                     <Text style={styles.boldText}>Ngày thanh toán:</Text>
                     <Text>
                       {deposit.updatedAt
-                        ? formatDateTimeString(new Date(deposit.updatedAt))
+                        ? formatDateTimeString(deposit.updatedAt)
                         : "Chưa cập nhật"}
                     </Text>
                   </View>

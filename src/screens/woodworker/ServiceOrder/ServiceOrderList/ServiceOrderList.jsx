@@ -131,7 +131,6 @@ export default function ServiceOrderList() {
   };
 
   const renderItem = ({ item }) => {
-    const needsResponse = item?.role === "Woodworker";
     const serviceName = item.service?.service?.serviceName || "N/A";
     const displayServiceName = getServiceTypeDisplayName(serviceName);
 
@@ -177,18 +176,6 @@ export default function ServiceOrderList() {
         </View>
 
         <View style={styles.row}>
-          <View style={styles.cell}>
-            <Text style={styles.cellLabel}>Cần phản hồi?:</Text>
-            <Text
-              style={[
-                needsResponse ? styles.responseNeeded : styles.responseWaiting,
-              ]}
-            >
-              {needsResponse
-                ? "Cần bạn phản hồi"
-                : "Chờ phản hồi từ khách hàng"}
-            </Text>
-          </View>
           <View style={styles.cell}>
             <TouchableOpacity
               style={styles.viewButton}

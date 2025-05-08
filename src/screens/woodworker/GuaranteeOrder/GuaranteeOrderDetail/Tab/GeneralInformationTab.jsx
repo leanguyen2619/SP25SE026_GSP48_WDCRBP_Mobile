@@ -45,8 +45,8 @@ export default function GeneralInformationTab({
   const serviceOrder = order?.serviceOrderDetail;
 
   const handleViewServiceOrder = () => {
-    navigation.navigate("ServiceOrderDetail", {
-      id: order?.serviceOrderDetail?.orderId,
+    navigation.navigate("WWServiceOrderDetail", {
+      orderId: order?.serviceOrderDetail?.orderId,
     });
   };
 
@@ -123,7 +123,7 @@ export default function GeneralInformationTab({
               <Text style={styles.label}>Ngày đặt:</Text>
               <Text>
                 {order?.createdAt
-                  ? formatDateTimeString(new Date(order?.createdAt))
+                  ? formatDateTimeString(order?.createdAt)
                   : "Chưa cập nhật"}
               </Text>
             </View>
@@ -219,7 +219,7 @@ export default function GeneralInformationTab({
                     <View style={styles.infoRow}>
                       <Text style={styles.label}>Ngày đăng:</Text>
                       <Text>
-                        {formatDateTimeString(new Date(order.review.createdAt))}
+                        {formatDateTimeString(order.review.createdAt)}
                       </Text>
                     </View>
                   </View>

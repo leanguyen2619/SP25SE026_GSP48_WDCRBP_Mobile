@@ -110,7 +110,7 @@ export default function GeneralInformationTab({ order }) {
               <Text style={styles.label}>Ngày đặt:</Text>
               <Text>
                 {order?.createdAt
-                  ? formatDateTimeString(new Date(order?.createdAt))
+                  ? formatDateTimeString(order?.createdAt)
                   : "Chưa cập nhật"}
               </Text>
             </View>
@@ -208,7 +208,7 @@ export default function GeneralInformationTab({ order }) {
                     <View style={styles.infoRow}>
                       <Text style={styles.label}>Ngày đăng:</Text>
                       <Text>
-                        {formatDateTimeString(new Date(order.review.createdAt))}
+                        {formatDateTimeString(order.review.createdAt)}
                       </Text>
                     </View>
                   </View>

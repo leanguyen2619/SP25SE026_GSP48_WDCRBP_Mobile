@@ -53,7 +53,7 @@ const ComplaintListItems = ({ data, refetch }) => {
               <Text style={styles.value}>{complaint.complaintType}</Text>
               <Text style={styles.label}>Ngày tạo:</Text>
               <Text style={styles.value}>
-                {formatDateTimeString(new Date(complaint.createdAt))}
+                {formatDateTimeString(complaint.createdAt)}
               </Text>
             </View>
             <View style={styles.cardFooter}>
