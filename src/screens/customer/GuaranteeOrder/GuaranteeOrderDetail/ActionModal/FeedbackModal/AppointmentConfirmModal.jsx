@@ -101,16 +101,16 @@ export default function AppointmentConfirmModal({
                     </Text>
                   </View>
 
-                  <View style={styles.detailRow}>
+                  <View style={styles.detailColumn}>
                     <Text style={styles.detailLabel}>Địa điểm:</Text>
-                    <Text style={styles.detailValue}>
+                    <Text style={styles.detailFullValue}>
                       {appointment.meetAddress || "Không có"}
                     </Text>
                   </View>
 
-                  <View style={styles.detailRow}>
+                  <View style={styles.detailColumn}>
                     <Text style={styles.detailLabel}>Mô tả:</Text>
-                    <Text style={styles.detailValue}>
+                    <Text style={styles.detailFullValue}>
                       {appointment.content || "Không có"}
                     </Text>
                   </View>
@@ -217,13 +217,24 @@ const styles = StyleSheet.create({
   detailRow: {
     flexDirection: "row",
     marginBottom: 8,
+    flexWrap: "wrap",
   },
   detailLabel: {
     fontWeight: "600",
     width: 100,
+    marginBottom: 4,
   },
   detailValue: {
     flex: 1,
+    flexWrap: "wrap",
+  },
+  detailColumn: {
+    flexDirection: "column",
+    marginBottom: 8,
+  },
+  detailFullValue: {
+    marginTop: 4,
+    flexWrap: "wrap",
   },
   divider: {
     height: 1,

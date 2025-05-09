@@ -5,13 +5,11 @@ import timezone from "dayjs/plugin/timezone";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-export const formatDateString = (timestamp) => {
-  return dayjs.utc(timestamp).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY");
-};
+export const formatDateString = (timestamp) =>
+  dayjs.utc(timestamp).add(7, "hour").format("DD/MM/YYYY");
 
-export const formatDateTimeString = (timestamp) => {
-  return dayjs.utc(timestamp).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm");
-};
+export const formatDateTimeString = (timestamp) =>
+  dayjs.utc(timestamp).add(7, "hour").format("DD/MM/YYYY HH:mm");
 
 export const formatDateToVietnamese = (dateString) => {
   if (!dateString) return "Chưa đăng ký";
