@@ -115,16 +115,16 @@ export default function AppointmentConfirmModal({
                     </Text>
                   </View>
 
-                  <View style={styles.appointmentRow}>
+                  <View style={styles.appointmentColumn}>
                     <Text style={styles.appointmentLabel}>Địa điểm:</Text>
-                    <Text style={styles.appointmentValue}>
+                    <Text style={styles.appointmentFullValue}>
                       {appointment.meetAddress || "Không có"}
                     </Text>
                   </View>
 
-                  <View style={styles.appointmentRow}>
+                  <View style={styles.appointmentColumn}>
                     <Text style={styles.appointmentLabel}>Mô tả:</Text>
-                    <Text style={styles.appointmentValue}>
+                    <Text style={styles.appointmentFullValue}>
                       {appointment.content || "Không có"}
                     </Text>
                   </View>
@@ -132,7 +132,7 @@ export default function AppointmentConfirmModal({
               )}
 
               <View style={styles.divider} />
-              
+
               <View style={styles.checkboxContainer}>
                 <CustomCheckbox
                   label="Tôi đã kiểm tra thông tin và xác nhận thao tác"
@@ -154,9 +154,9 @@ export default function AppointmentConfirmModal({
 
               <TouchableOpacity
                 style={[
-                  styles.footerButton, 
+                  styles.footerButton,
                   styles.submitButton,
-                  !isChecked && styles.disabledButton
+                  !isChecked && styles.disabledButton,
                 ]}
                 onPress={handleSubmit}
                 disabled={isLoading || !isChecked}
@@ -235,13 +235,24 @@ const styles = StyleSheet.create({
   appointmentRow: {
     flexDirection: "row",
     marginBottom: 10,
+    flexWrap: "wrap",
+  },
+  appointmentColumn: {
+    flexDirection: "column",
+    marginBottom: 10,
   },
   appointmentLabel: {
     fontWeight: "600",
     width: 100,
+    marginBottom: 4,
   },
   appointmentValue: {
     flex: 1,
+    flexWrap: "wrap",
+  },
+  appointmentFullValue: {
+    marginTop: 4,
+    flexWrap: "wrap",
   },
   divider: {
     height: 1,
